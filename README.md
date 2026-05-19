@@ -490,5 +490,3 @@ Full-stack JavaScript developer building practical Node.js apps with Express, Mo
 <div align="center">
   <sub>Built with ❤️ by <a href="https://github.com/OmkarP">Omkar P</a> · If this helped you, consider giving it a ⭐</sub>
 </div>
-#   b a l a j i S t o r e  
- 
