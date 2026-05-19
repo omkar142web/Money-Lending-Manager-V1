@@ -1,0 +1,1809 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Share Info — Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <!-- <link rel="stylesheet" href="css/home.css" /> -->
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=JetBrains+Mono:wght@400;500&display=swap");
+
+    /* ============================================================
+   Design System — Share Info Dashboard
+   Dark Glassmorphism · Masonry Wall · Linear/Vercel aesthetic
+   ============================================================ */
+
+    :root {
+      /* Core palette */
+      --bg: #0d1628;
+      /* was #080d1a  — slightly lifted dark navy */
+      --surface-0: #111e35;
+      /* was #0c1220 */
+      --surface-1: rgba(22,
+          34,
+          58,
+          0.82);
+      /* was rgba(16,24,40,0.80) — more visible card surface */
+      --surface-2: rgba(30, 46, 74, 0.65);
+      /* was rgba(22,34,58,0.55) */
+      --surface-hover: rgba(36, 54, 88, 0.75);
+      /* was rgba(30,48,80,0.70) */
+
+      /* Cyan accent system */
+      --cyan: #38bdf8;
+      --cyan-dim: #0ea5e9;
+      --cyan-faint: rgba(56, 189, 248, 0.12);
+      --cyan-glow: rgba(56, 189, 248, 0.22);
+      --cyan-border: rgba(56, 189, 248, 0.25);
+
+      /* Semantic */
+      --success: #34d399;
+      --success-faint: rgba(52, 211, 153, 0.1);
+      --success-border: rgba(52, 211, 153, 0.22);
+      --danger: #fb7185;
+      --danger-faint: rgba(251, 113, 133, 0.1);
+      --danger-border: rgba(251, 113, 133, 0.22);
+
+      /* Text */
+      --text: #f0f6ff;
+      --text-2: #a8bdd4;
+      /* was #94a3b8 — slightly brighter muted text */
+      --text-3: #607a96;
+      /* was #4d6480 — more readable subtle text */
+
+      /* Borders */
+      --border: rgba(255, 255, 255, 0.09);
+      /* was 0.06 */
+      --border-md: rgba(255, 255, 255, 0.13);
+      /* was 0.10 */
+      --border-hi: rgba(255, 255, 255, 0.2);
+      /* was 0.14 */
+
+      /* Shadows */
+      --shadow-card:
+        0 0 0 1px var(--border), 0 8px 40px rgba(0, 0, 0, 0.55),
+        0 2px 8px rgba(0, 0, 0, 0.3);
+      --shadow-hover:
+        0 0 0 1px var(--cyan-border), 0 16px 60px rgba(0, 0, 0, 0.65),
+        0 0 40px var(--cyan-glow);
+      --shadow-modal: 0 0 0 1px var(--border-hi), 0 40px 100px rgba(0, 0, 0, 0.8);
+
+      /* Type */
+      --font-display: "Sora", system-ui, sans-serif;
+      --font-body: "DM Sans", system-ui, sans-serif;
+      --font-mono: "JetBrains Mono", monospace;
+
+      /* Spacing */
+      --header-h: 68px;
+      --gap: 18px;
+      --radius: 16px;
+      --radius-sm: 10px;
+    }
+
+    /* ── Reset ─────────────────────────────────────── */
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: var(--font-body);
+      background-color: var(--bg);
+      min-height: 100dvh;
+      color: var(--text);
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* ── Ambient background orbs ────────────────────── */
+    .bg-orbs {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0;
+      animation: orb-fade-in 1.8s ease forwards;
+    }
+
+    @keyframes orb-fade-in {
+      to {
+        opacity: 1;
+      }
+    }
+
+    .orb-1 {
+      width: 600px;
+      height: 600px;
+      top: -200px;
+      left: -150px;
+      background: radial-gradient(circle,
+          rgba(56, 189, 248, 0.08) 0%,
+          transparent 70%);
+      animation-delay: 0.2s;
+    }
+
+    .orb-2 {
+      width: 500px;
+      height: 500px;
+      top: 30%;
+      right: -180px;
+      background: radial-gradient(circle,
+          rgba(14, 165, 233, 0.06) 0%,
+          transparent 70%);
+      animation-delay: 0.5s;
+    }
+
+    .orb-3 {
+      width: 400px;
+      height: 400px;
+      bottom: -100px;
+      left: 30%;
+      background: radial-gradient(circle,
+          rgba(56, 189, 248, 0.05) 0%,
+          transparent 70%);
+      animation-delay: 0.8s;
+    }
+
+    /* ── Grid texture overlay ───────────────────────── */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(255, 255, 255, 0.018) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── Header ─────────────────────────────────────── */
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      height: var(--header-h);
+      background: rgba(8, 13, 26, 0.82);
+      border-bottom: 1px solid var(--border-md);
+      backdrop-filter: blur(24px) saturate(1.4);
+      -webkit-backdrop-filter: blur(24px) saturate(1.4);
+    }
+
+    .header-inner {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 28px;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    /* Brand */
+    .header-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      user-select: none;
+    }
+
+    .brand-pulse {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--cyan);
+      box-shadow:
+        0 0 10px var(--cyan),
+        0 0 20px var(--cyan-glow);
+      animation: pulse 2.4s ease-in-out infinite;
+      flex-shrink: 0;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+
+      50% {
+        opacity: 0.5;
+        transform: scale(0.7);
+      }
+    }
+
+    .brand-title {
+      font-family: var(--font-display);
+      font-size: 1.2rem;
+      font-weight: 800;
+      /* letter-spacing: -0.04em; */
+      color: var(--text);
+      cursor: pointer;
+    }
+
+    .brand-title em {
+      font-style: normal;
+      color: var(--cyan);
+    }
+
+    .card-count-badge {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 500;
+      color: var(--cyan);
+      background: var(--cyan-faint);
+      border: 1px solid var(--cyan-border);
+      border-radius: 100px;
+      padding: 2px 8px;
+      letter-spacing: 0.05em;
+    }
+
+    /* Header actions */
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* ── Buttons ─────────────────────────────────────── */
+    .btn-primary {
+      font-family: var(--font-body);
+      font-size: 13px;
+      font-weight: 600;
+      padding: 9px 18px;
+      background: var(--cyan);
+      color: #040b18;
+      border: none;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      letter-spacing: 0.01em;
+      transition:
+        background 0.15s,
+        transform 0.12s,
+        box-shadow 0.15s;
+      white-space: nowrap;
+    }
+
+    @media (hover: hover) {
+      .btn-primary:hover {
+        background: #7dd3fc;
+        transform: translateY(-1px);
+        box-shadow: 0 6px 24px var(--cyan-glow);
+      }
+    }
+
+    .btn-primary:active {
+      transform: scale(0.96);
+    }
+
+    .btn-ghost {
+      font-family: var(--font-body);
+      font-size: 13px;
+      font-weight: 500;
+      padding: 8px 15px;
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text-2);
+      border: 1px solid var(--border-md);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition:
+        background 0.15s,
+        color 0.15s,
+        border-color 0.15s,
+        transform 0.12s;
+      white-space: nowrap;
+    }
+
+    @media (hover: hover) {
+      .btn-ghost:hover {
+        background: rgba(255, 255, 255, 0.08);
+        color: var(--text);
+        border-color: var(--border-hi);
+        transform: translateY(-1px);
+      }
+    }
+
+    .btn-ghost:active {
+      transform: scale(0.96);
+    }
+
+    /* ── Main layout ─────────────────────────────────── */
+    .main-content {
+      position: relative;
+      z-index: 1;
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 40px 28px 80px;
+    }
+
+    /* ── Masonry wall (grid — row-wise fill) ─────────── */
+    .masonry-wall {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: var(--gap);
+      align-items: start;
+      /* cards keep natural height; no row stretching */
+    }
+
+    /* ── Info card base ──────────────────────────────── */
+    .info-card {
+      width: 100%;
+      background: var(--surface-1);
+      border: 1px solid var(--border-md);
+      border-radius: var(--radius);
+      padding: 0;
+      overflow: hidden;
+      position: relative;
+      cursor: default;
+      box-shadow: var(--shadow-card);
+      backdrop-filter: blur(20px) saturate(1.3);
+      -webkit-backdrop-filter: blur(20px) saturate(1.3);
+
+      /* entrance animation */
+      opacity: 0;
+      transform: translateY(18px);
+      animation: card-in 0.5s ease forwards;
+
+      /* ADD THIS */
+      transition:
+        transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1),
+        box-shadow 0.22s ease,
+        border-color 0.22s ease;
+    }
+
+    @keyframes card-in {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Top glow line */
+    .info-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+      opacity: 0.4;
+      transition: opacity 0.25s;
+    }
+
+    /* Card types get subtle tint variants */
+    .card-long {
+      cursor: pointer;
+      border-color: rgba(139, 92, 246, 0.12);
+    }
+
+    .card-long::before {
+      background: linear-gradient(90deg, transparent, #a78bfa, transparent);
+    }
+
+    .card-plain {
+      /* default */
+    }
+
+    /* Hover */
+    @media (hover: hover) {
+      .info-card:hover::before {
+        opacity: 0.9;
+      }
+
+      .info-card:hover {
+        box-shadow: var(--shadow-hover);
+        transform: translateY(-3px);
+        border-color: var(--border-hi);
+        transition:
+          transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1),
+          box-shadow 0.22s ease,
+          border-color 0.22s ease;
+      }
+
+      .card-long:hover {
+        box-shadow:
+          0 0 0 1px rgba(139, 92, 246, 0.3),
+          0 16px 60px rgba(0, 0, 0, 0.65),
+          0 0 40px rgba(139, 92, 246, 0.2);
+      }
+    }
+
+    /* ── Card type strip (badge) ─────────────────────── */
+    .card-type-strip {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-family: var(--font-mono);
+      font-size: 9.5px;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-3);
+      padding: 10px 16px 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .card-long .card-type-strip {
+      color: #a78bfa;
+    }
+
+    .card-plain .card-type-strip {
+      color: var(--text-3);
+    }
+
+    /* ── Card header ─────────────────────────────────── */
+    .card-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 11px;
+      padding: 12px 16px 10px;
+    }
+
+    .card-avatar {
+      flex-shrink: 0;
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: linear-gradient(135deg,
+          var(--surface-2),
+          rgba(56, 189, 248, 0.15));
+      border: 1px solid var(--border-hi);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-display);
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--cyan);
+      letter-spacing: -0.02em;
+    }
+
+    .card-meta {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .card-name {
+      font-family: var(--font-display);
+      font-size: 14.5px;
+      font-weight: 600;
+      color: var(--text);
+      letter-spacing: -0.03em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      line-height: 1.2;
+    }
+
+    .card-email {
+      font-size: 11.5px;
+      color: var(--text-3);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-weight: 400;
+    }
+
+    .card-index-badge {
+      flex-shrink: 0;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--text-3);
+      letter-spacing: 0.04em;
+      margin-top: 2px;
+    }
+
+    /* ── Card body ───────────────────────────────────── */
+    .card-body {
+      padding: 4px 16px 14px;
+    }
+
+    /* Text content */
+    .card-text {
+      font-size: 13.5px;
+      line-height: 1.65;
+      color: var(--text-2);
+      word-break: break-word;
+      white-space: pre-wrap;
+    }
+
+    /* Snippet for long cards */
+    .card-text-snippet {
+      display: -webkit-box;
+      -webkit-line-clamp: 5;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .ellipsis-fade {
+      color: var(--text-3);
+    }
+
+    /* View more button */
+    .view-more-btn {
+      margin-top: 12px;
+      font-family: var(--font-body);
+      font-size: 11.5px;
+      font-weight: 600;
+      color: #a78bfa;
+      background: rgba(139, 92, 246, 0.1);
+      border: 1px solid rgba(139, 92, 246, 0.2);
+      border-radius: 8px;
+      padding: 6px 13px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition:
+        background 0.15s,
+        color 0.15s,
+        transform 0.12s,
+        box-shadow 0.15s;
+      letter-spacing: 0.01em;
+    }
+
+    @media (hover: hover) {
+      .view-more-btn:hover {
+        background: rgba(139, 92, 246, 0.18);
+        color: #c4b5fd;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 16px rgba(139, 92, 246, 0.2);
+      }
+    }
+
+    .inline-link {
+      color: #67d8ff;
+      font-weight: 500;
+      text-decoration: none;
+      overflow-wrap: anywhere;
+      text-shadow: 0 0 14px rgba(56, 189, 248, 0.18);
+      background-image: linear-gradient(var(--cyan-glow), var(--cyan-glow));
+      background-repeat: no-repeat;
+      background-size: 100% 1px;
+      background-position: 0 100%;
+      transition:
+        color 0.18s ease,
+        text-shadow 0.18s ease,
+        background-size 0.18s ease,
+        background-color 0.18s ease;
+    }
+
+    @media (hover: hover) {
+      .inline-link:hover {
+        color: #bae6fd;
+        text-shadow: 0 0 18px rgba(56, 189, 248, 0.36);
+        background-size: 100% 2px;
+        background-color: rgba(56, 189, 248, 0.06);
+      }
+    }
+
+    .inline-link:focus-visible {
+      outline: 2px solid var(--cyan-border);
+      outline-offset: 2px;
+      border-radius: 3px;
+    }
+
+    /* ── Card footer (actions) ───────────────────────── */
+    .card-footer {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px 14px;
+      border-top: 1px solid var(--border);
+    }
+
+    .action-btn {
+      font-family: var(--font-body);
+      font-size: 11.5px;
+      font-weight: 600;
+      padding: 6px 13px;
+      border-radius: 7px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition:
+        background 0.14s,
+        color 0.14s,
+        border-color 0.14s,
+        transform 0.1s,
+        box-shadow 0.14s;
+      border: 1px solid transparent;
+      letter-spacing: 0.01em;
+    }
+
+    .action-edit {
+      background: var(--success-faint);
+      color: var(--success);
+      border-color: var(--success-border);
+    }
+
+    .action-delete {
+      background: var(--danger-faint);
+      color: var(--danger);
+      border-color: var(--danger-border);
+    }
+
+    @media (hover: hover) {
+      .action-edit:hover {
+        background: var(--success);
+        color: #04200f;
+        border-color: var(--success);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 14px rgba(52, 211, 153, 0.28);
+      }
+
+      .action-delete:hover {
+        background: var(--danger);
+        color: #240410;
+        border-color: var(--danger);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 14px rgba(251, 113, 133, 0.28);
+      }
+    }
+
+    .action-btn:active {
+      transform: scale(0.94) !important;
+      transition-duration: 0.06s;
+    }
+
+    /* ── Empty state ─────────────────────────────────── */
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 100px 24px;
+      text-align: center;
+      gap: 20px;
+    }
+
+    .empty-glyph {
+      width: 96px;
+      height: 96px;
+      border-radius: 28px;
+      background: var(--surface-1);
+      border: 1px solid var(--border-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-3);
+      backdrop-filter: blur(12px);
+    }
+
+    .empty-title {
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.04em;
+    }
+
+    .empty-desc {
+      max-width: 340px;
+      font-size: 14px;
+      color: var(--text-2);
+      line-height: 1.65;
+    }
+
+    /* ── Modal overlay ───────────────────────────────── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 200;
+      background: rgba(4, 8, 20, 0.75);
+      backdrop-filter: blur(12px) saturate(1.2);
+      -webkit-backdrop-filter: blur(12px) saturate(1.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      opacity: 0;
+      transition: opacity 0.25s ease;
+    }
+
+    .modal-overlay.is-open {
+      opacity: 1;
+    }
+
+    .modal-overlay[hidden] {
+      display: none;
+    }
+
+    .modal-glass {
+      width: 100%;
+      max-width: 620px;
+      max-height: 88dvh;
+      background: rgba(14, 22, 40, 0.9);
+      border: 1px solid var(--border-hi);
+      border-radius: 22px;
+      box-shadow: var(--shadow-modal);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+
+      /* entrance */
+      transform: translateY(24px) scale(0.97);
+      transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    /* Top accent bar on modal */
+    .modal-glass::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg,
+          transparent,
+          #a78bfa 40%,
+          var(--cyan) 60%,
+          transparent);
+      opacity: 0.7;
+    }
+
+    .modal-overlay.is-open .modal-glass {
+      transform: translateY(0) scale(1);
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 22px 24px 18px;
+    }
+
+    .modal-title-group {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      min-width: 0;
+    }
+
+    .modal-avatar {
+      flex-shrink: 0;
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: linear-gradient(135deg,
+          var(--surface-2),
+          rgba(139, 92, 246, 0.2));
+      border: 1px solid rgba(139, 92, 246, 0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-weight: 700;
+      color: #a78bfa;
+    }
+
+    .modal-name {
+      font-family: var(--font-display);
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.04em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .modal-email {
+      font-size: 12px;
+      color: var(--text-3);
+      display: block;
+      margin-top: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .modal-actions {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .modal-copy {
+      height: 34px;
+      border-radius: 8px;
+      padding: 0 11px;
+      background: rgba(56, 189, 248, 0.08);
+      border: 1px solid var(--cyan-border);
+      color: var(--cyan);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      font-family: var(--font-body);
+      font-size: 12px;
+      font-weight: 600;
+      transition:
+        background 0.14s,
+        color 0.14s,
+        border-color 0.14s,
+        transform 0.12s;
+    }
+
+    .modal-close {
+      flex-shrink: 0;
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-md);
+      color: var(--text-2);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition:
+        background 0.14s,
+        color 0.14s,
+        transform 0.12s;
+    }
+
+    @media (hover: hover) {
+      .modal-copy:hover {
+        background: rgba(56, 189, 248, 0.16);
+        color: #bae6fd;
+        border-color: rgba(56, 189, 248, 0.45);
+        transform: translateY(-1px);
+      }
+
+      .modal-close:hover {
+        background: var(--danger-faint);
+        color: var(--danger);
+        border-color: var(--danger-border);
+        transform: rotate(90deg) scale(1.05);
+      }
+    }
+
+    .modal-copy.is-copied {
+      background: var(--success-faint);
+      color: var(--success);
+      border-color: var(--success-border);
+    }
+
+    .modal-divider {
+      height: 1px;
+      background: var(--border);
+      flex-shrink: 0;
+    }
+
+    .modal-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px;
+      overscroll-behavior: contain;
+    }
+
+    .modal-body p {
+      font-size: 14.5px;
+      line-height: 1.75;
+      color: var(--text-2);
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .modal-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 24px;
+      border-top: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .modal-char-count {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-3);
+      letter-spacing: 0.04em;
+    }
+
+    /* ── Scrollbar (global) ──────────────────────────── */
+    @media (min-width: 480px) {
+      ::-webkit-scrollbar {
+        width: 10px;
+      }
+
+      ::-webkit-scrollbar-track {
+        background: rgba(8, 13, 26, 0.9);
+      }
+
+      ::-webkit-scrollbar-thumb {
+        background: linear-gradient(180deg,
+            rgba(56, 189, 248, 0.6),
+            rgba(14, 165, 233, 0.4));
+        border-radius: 100px;
+        border: 2px solid rgba(8, 13, 26, 0.9);
+      }
+
+      @media (hover: hover) {
+        ::-webkit-scrollbar-thumb:hover {
+          background: linear-gradient(180deg,
+              rgba(125, 211, 252, 0.8),
+              rgba(56, 189, 248, 0.6));
+        }
+      }
+
+      /* html {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(56, 189, 248, 0.5) rgba(8, 13, 26, 0.9);
+  } */
+
+      /* Modal scrollbar */
+      .modal-body::-webkit-scrollbar {
+        width: 8px;
+      }
+
+      .modal-body::-webkit-scrollbar-track {
+        background: transparent;
+      }
+
+      .modal-body::-webkit-scrollbar-thumb {
+        background: rgba(56, 189, 248, 0.25);
+        border-radius: 100px;
+      }
+
+      @media (hover: hover) {
+        .modal-body::-webkit-scrollbar-thumb:hover {
+          background: rgba(56, 189, 248, 0.45);
+        }
+      }
+    }
+
+    /* ── Responsive ──────────────────────────────────── */
+
+    /* Tablet */
+    @media (max-width: 900px) {
+      .masonry-wall {
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      }
+    }
+
+    /* Large mobile */
+    @media (max-width: 680px) {
+      :root {
+        --gap: 14px;
+      }
+
+      .main-content {
+        padding: 28px 16px 64px;
+      }
+
+      .header-inner {
+        padding: 0 16px;
+      }
+
+      .header-actions .btn-ghost span {
+        display: none;
+      }
+
+      .header-actions .btn-ghost {
+        padding: 8px 10px;
+      }
+
+      .masonry-wall {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .card-name {
+        font-size: 13.5px;
+      }
+
+      .card-avatar {
+        width: 30px;
+        height: 30px;
+        font-size: 12px;
+      }
+
+      .modal-glass {
+        max-height: 92dvh;
+        border-radius: 18px;
+      }
+
+      .modal-header {
+        padding: 18px 18px 14px;
+      }
+
+      .modal-body {
+        padding: 18px;
+      }
+
+      .modal-footer {
+        padding: 12px 18px;
+      }
+    }
+
+    /* Small mobile */
+    @media (max-width: 420px) {
+      .masonry-wall {
+        grid-template-columns: 1fr;
+      }
+
+      .brand-title {
+        font-size: 1.05rem;
+      }
+
+      .card-footer {
+        flex-direction: row;
+      }
+
+      .action-btn {
+        flex: 1;
+        justify-content: center;
+      }
+    }
+
+    /* ── Focus styles (accessibility) ───────────────── */
+    :focus-visible {
+      outline: 2px solid var(--cyan);
+      outline-offset: 2px;
+      border-radius: 4px;
+    }
+
+    .info-card[role="button"]:focus-visible {
+      outline: 2px solid #a78bfa;
+      outline-offset: 3px;
+    }
+
+    /* ── Confirmation Modal ── */
+    .confirm-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 500;
+      background: rgba(4, 8, 20, 0.4);
+      backdrop-filter: blur(12px) saturate(1.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .confirm-overlay.is-active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .confirm-modal {
+      background: linear-gradient(135deg, rgba(22, 34, 58, 0.95), rgba(13, 22, 40, 0.98));
+      border: 1px solid var(--border-hi);
+      border-radius: 24px;
+      padding: 32px;
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+      box-shadow: 0 40px 100px rgba(0, 0, 0, 0.6), 0 0 0 1px var(--border-md);
+      transform: scale(0.9) translateY(20px);
+      transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .confirm-overlay.is-active .confirm-modal {
+      transform: scale(1) translateY(0);
+    }
+
+    .confirm-icon {
+      width: 64px;
+      height: 64px;
+      background: var(--danger-faint);
+      color: var(--danger);
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+      border: 1px solid var(--danger-border);
+      box-shadow: 0 8px 24px rgba(251, 113, 133, 0.15);
+    }
+
+    .confirm-title {
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--text);
+      letter-spacing: -0.02em;
+      margin-bottom: 12px;
+    }
+
+    .confirm-desc {
+      font-size: 14.5px;
+      color: var(--text-2);
+      line-height: 1.6;
+      margin-bottom: 32px;
+    }
+
+    .confirm-btns {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .btn-confirm-delete {
+      background: var(--danger) !important;
+      color: #fff !important;
+      border: none !important;
+    }
+
+    .btn-confirm-delete:hover {
+      background: #ff5f78 !important;
+      box-shadow: 0 8px 24px rgba(251, 113, 133, 0.3) !important;
+    }
+
+    .confirm-btns button {
+      justify-content : center;
+    }
+
+    /* ── Toasts ── */
+    .toast-container {
+      position: fixed;
+      bottom: 32px;
+      right: 32px;
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .toast {
+      background: rgba(17, 24, 39, 0.9);
+      border: 1px solid var(--border-md);
+      border-radius: 16px;
+      padding: 14px 20px;
+      min-width: 300px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+      transform: translateX(120%);
+      transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+      backdrop-filter: blur(16px);
+    }
+
+    .toast.is-active {
+      transform: translateX(0);
+    }
+
+    .toast-success {
+      border-left: 4px solid var(--success);
+    }
+
+    .toast-error {
+      border-left: 4px solid var(--danger);
+    }
+
+    .toast-icon {
+      flex-shrink: 0;
+      width: 24px;
+      height: 24px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .toast-success .toast-icon {
+      background: var(--success-faint);
+      color: var(--success);
+    }
+
+    .toast-error .toast-icon {
+      background: var(--danger-faint);
+      color: var(--danger);
+    }
+
+    .toast-msg {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    /* ── Loading Spinner ── */
+    .spinner {
+      animation: rotate 1s linear infinite;
+    }
+
+    @keyframes rotate {
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 480px) {
+      .confirm-modal {
+        padding: 24px;
+      }
+
+      .toast {
+        min-width: auto;
+        width: calc(100vw - 32px);
+        right: 16px;
+        bottom: 16px;
+      }
+
+      .toast-container {
+        right: 16px;
+        bottom: 16px;
+        left: 16px;
+      }
+    }
+
+    div:has(> .modal-name) {
+      width: calc(100% - 45px);
+    }
+  </style>
+</head>
+
+<% if (typeof isMaster !== "undefined" && isMaster) { %>
+
+<body data-type="master">
+  <% } else { %>
+
+  <body>
+    <% } %>
+
+    <!-- ── Ambient background orbs ── -->
+    <div class="bg-orbs" aria-hidden="true">
+      <div class="orb orb-1"></div>
+      <div class="orb orb-2"></div>
+      <div class="orb orb-3"></div>
+    </div>
+
+    <!-- ── Header ── -->
+    <header class="site-header">
+      <div class="header-inner">
+        <div class="header-brand">
+          <span class="brand-pulse" aria-hidden="true"></span>
+          <span class="brand-title" onclick="window.location.reload()">Share<em>Info</em></span>
+          <% if (typeof data !== 'undefined' && data.length > 0) { %>
+          <!-- <span class="card-count-badge"><%= data.length %></span> -->
+          <% } %>
+        </div>
+
+        <nav class="header-actions">
+          <button class="btn-ghost logout-btn" onclick="window.location.href='/logout'">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+              <polyline points="16 17 21 12 16 7" />
+              <line x1="21" y1="12" x2="9" y2="12" />
+            </svg>
+            <span>Logout</span>
+          </button>
+          <button class="btn-primary add-btn" onclick="window.location.href='add'">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+            <span>Add Data</span>
+          </button>
+        </nav>
+      </div>
+    </header>
+
+    <!-- ── Main content ── -->
+    <main class="main-content">
+
+      <!-- ── Empty state ── -->
+      <% if (typeof data === 'undefined' || data.length === 0) { %>
+      <div class="empty-state">
+        <div class="empty-glyph" aria-hidden="true">
+          <svg xmlns="http://www.w3.org/2000/svg" width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+            <polyline points="14 2 14 8 20 8" />
+            <line x1="12" y1="18" x2="12" y2="12" />
+            <line x1="9" y1="15" x2="15" y2="15" />
+          </svg>
+        </div>
+        <h2 class="empty-title">Your wall is empty</h2>
+        <p class="empty-desc">Start building your personal info wall. Add links, notes, and data you want to keep.</p>
+        <button class="btn-primary" onclick="window.location.href='add'">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19" />
+            <line x1="5" y1="12" x2="19" y2="12" />
+          </svg>
+          Add your first entry
+        </button>
+      </div>
+      <% } %>
+
+      <!-- ── Masonry wall ── -->
+      <% if (typeof data !== 'undefined' && data.length > 0) { %>
+      <%
+      const escapeHTML = (value = '') => String(value).replace(/[&<>"']/g, (char) => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;'
+      }[char]));
+
+      const trimUrlPunctuation = (value) => {
+        let url = value;
+        let trailing = '';
+
+        while (/[.,!?;:)\]]$/.test(url)) {
+          trailing = url.slice(-1) + trailing;
+          url = url.slice(0, -1);
+        }
+
+        return { url, trailing };
+      };
+
+      const isExternalUrl = (value) => {
+        const clean = value.replace(/^https?:\/\//i, '');
+        const host = clean.split(/[/?#]/)[0].replace(/^www\./i, '');
+        const tld = host.split('.').pop();
+
+        return /^[a-z0-9-]+(\.[a-z0-9-]+)+$/i.test(host) && /^[a-z]{2,}$/i.test(tld);
+      };
+
+      const shouldIgnoreUrl = (rawText, value) => {
+        const clean = value.replace(/^https?:\/\//i, '');
+
+        return (
+          /<[^>]+>/.test(rawText) ||
+          /^\s*(?:import|export)\b/m.test(rawText) ||
+          /\.(?:css|js|json|html|ejs)(?:[?#].*)?$/i.test(clean) ||
+          /^(?:\.{1,2}\/|[a-z]:\\|\\\\|\/(?!\/))/i.test(value) ||
+          /\\/.test(value) ||
+          !isExternalUrl(value)
+        );
+      };
+
+      const parseContent = (text = '') => {
+        const rawText = String(text);
+
+        if (/<[^>]+>/.test(rawText) || /^\s*(?:import|export)\b/m.test(rawText)) {
+          return escapeHTML(rawText);
+        }
+
+        const urlPattern = /(^|[\s(])((?:https?:\/\/)?(?:www\.)?[a-z0-9][a-z0-9-]*(?:\.[a-z0-9][a-z0-9-]*)+(?:\/[^\s<>"']*)?)/gi;
+        let parsed = '';
+        let lastIndex = 0;
+        let match;
+
+        while ((match = urlPattern.exec(rawText)) !== null) {
+          const [fullMatch, prefix, candidate] = match;
+          const { url, trailing } = trimUrlPunctuation(candidate);
+          const urlStart = match.index + prefix.length;
+
+          parsed += escapeHTML(rawText.slice(lastIndex, urlStart));
+
+          if (!url || shouldIgnoreUrl(rawText, url)) {
+            parsed += escapeHTML(candidate);
+            lastIndex = urlStart + candidate.length;
+            continue;
+          }
+
+          const href = /^https?:\/\//i.test(url) ? url : `https://${url}`;
+          parsed += `<a class="inline-link" href="${escapeHTML(href)}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()">${escapeHTML(url)}</a>${escapeHTML(trailing)}`;
+          lastIndex = match.index + fullMatch.length;
+        }
+
+        return parsed + escapeHTML(rawText.slice(lastIndex));
+      };
+    %>
+      <div class="masonry-wall" id="masonryWall">
+
+        <% data.forEach((person, index) => {
+        const isLong = person.info && person.info.length > 120;
+        const cardType = isLong ? 'long' : 'plain';
+        const snippet = isLong ? person.info.substring(0, 115) : person.info;
+        const safeInfo = (person.info || '').replace(/'/g, "\\'").replace(/\n/g, '\\n');
+        const safeName = (person.name || '').replace(/'/g, "\\'");
+        const safeEmail = (person.email || '').replace(/'/g, "\\'");
+        const safePassword = (person.password || '').replace(/'/g, "\\'");
+      %>
+
+        <!-- Card: <%= cardType %> -->
+        <article class="info-card card-<%= cardType %>" data-index="<%= index %>" style="--stagger: <%= index %>" <% if (isLong) { %> role="button" tabindex="0" aria-label="View full content for <%= person.name %>" onclick="openModal('<%= safeName %>', '<%= safeInfo %>', '<%= safeEmail %>', '<%= safePassword %>')" onkeydown="if(event.key==='Enter'||event.key===' '){openModal('<%= safeName %>','<%= safeInfo %>','<%= safeEmail %>','<%= safePassword %>')}" <% } %>>
+
+          <!-- Card type indicator -->
+          <div class="card-type-strip" aria-hidden="true">
+            <% if (cardType === 'long') { %>
+            <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="17" y1="10" x2="3" y2="10" />
+              <line x1="21" y1="6" x2="3" y2="6" />
+              <line x1="21" y1="14" x2="3" y2="14" />
+              <line x1="17" y1="18" x2="3" y2="18" />
+            </svg>
+            Note
+            <% } else { %>
+            <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+              <polyline points="14 2 14 8 20 8" />
+            </svg>
+            Data
+            <% } %>
+          </div>
+
+          <!-- Card header -->
+          <header class="card-header">
+            <div class="card-avatar" title="<%= person.password %>" aria-hidden="true">
+              <%= person.name ? person.name.charAt(0).toUpperCase() : '?' %>
+            </div>
+            <div class="card-meta">
+              <h3 class="card-name" title="<%= person.password %>"><%= person.name %></h3>
+              <% if (person.email) { %>
+              <span class="card-email"><%= person.email %></span>
+              <% } %>
+            </div>
+            <div class="card-index-badge" aria-hidden="true">#<%= String(data.length - index).padStart(2, '0') %></div>
+          </header>
+
+          <!-- Card body -->
+          <div class="card-body">
+            <% if (cardType === 'long') { %>
+            <!-- Long text card -->
+            <p class="card-text card-text-snippet"><%- parseContent(snippet) %><span class="ellipsis-fade">…</span></p>
+            <button class="view-more-btn" onclick="event.stopPropagation(); openModal('<%= safeName %>', '<%= safeInfo %>', '<%= safeEmail %>', '<%= safePassword %>')">
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+              </svg>
+              View full note
+            </button>
+
+            <% } else { %>
+            <!-- Plain text card -->
+            <p class="card-text"><%- parseContent(person.info) %></p>
+
+            <% } %>
+          </div>
+
+          <!-- Card footer with actions -->
+          <footer class="card-footer">
+            <% if (typeof isMaster == "undefined" || !isMaster) { %>
+            <button class="action-btn action-edit" onclick="event.stopPropagation(); window.location.href='update/<%= person._id %>'" title="Edit entry">
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+              </svg>
+              Edit
+            </button>
+            <% } %>
+            <button class="action-btn action-delete" onclick="event.stopPropagation(); DeleteFun('<%= person._id %>', this)" title="Delete entry">
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="3 6 5 6 21 6" />
+                <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+                <path d="M10 11v6" />
+                <path d="M14 11v6" />
+                <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
+              </svg>
+              Delete
+            </button>
+          </footer>
+
+        </article>
+
+        <% }) %>
+      </div>
+      <% } %>
+
+    </main>
+
+    <!-- ── View Modal overlay ── -->
+    <div class="modal-overlay" id="modalOverlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle" hidden>
+      <div class="modal-glass">
+
+        <div class="modal-header">
+          <div class="modal-title-group">
+            <span class="modal-avatar" id="modalAvatar" aria-hidden="true"></span>
+            <div>
+              <h2 class="modal-name" id="modalTitle"></h2>
+              <span class="modal-email" id="modalEmail"></span>
+            </div>
+          </div>
+          <button class="modal-close" id="modalClose" aria-label="Close modal" onclick="closeModal()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
+        </div>
+
+        <div class="modal-divider" aria-hidden="true"></div>
+
+        <div class="modal-body" id="modalBody">
+          <p id="modalContent"></p>
+        </div>
+
+        <div class="modal-footer">
+          <span class="modal-char-count" id="modalCharCount"></span>
+          <div class="modal-actions">
+            <button class="modal-copy" id="modalCopy" aria-label="Copy modal content" onclick="copyModalContent()">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+              </svg>
+              <span>Copy</span>
+            </button>
+            <button class="btn-ghost" onclick="closeModal()">Close</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── Delete Confirmation Modal ── -->
+    <div class="confirm-overlay" id="confirmOverlay" role="dialog" aria-modal="true" aria-labelledby="confirmTitle" hidden>
+      <div class="confirm-modal">
+        <div class="confirm-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+            <line x1="12" y1="9" x2="12" y2="13" />
+            <line x1="12" y1="17" x2="12.01" y2="17" />
+          </svg>
+        </div>
+        <h2 class="confirm-title" id="confirmTitle">Delete Item?</h2>
+        <p class="confirm-desc">This action is permanent and cannot be reversed. Are you sure you want to remove this entry?</p>
+        <div class="confirm-btns">
+          <button class="btn-ghost" onclick="closeConfirmModal()">Cancel</button>
+          <button class="btn-primary btn-confirm-delete" id="confirmDeleteBtn">
+            <span>Delete</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Toast Container ── -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script>
+      /* ── Modern Deletion & Feedback Logic ── */
+      let type = document.body.dataset.type;
+      let deleteTarget = {
+        id: null,
+        btn: null
+      };
+      const confirmOverlay = document.getElementById('confirmOverlay');
+      const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+      const toastContainer = document.getElementById('toastContainer');
+
+      function showToast(message, type = 'success') {
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${type}`;
+
+        const icon = type === 'success' ?
+          '<div class="toast-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div>' :
+          '<div class="toast-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg></div>';
+
+        toast.innerHTML = `${icon}<span class="toast-msg">${message}</span>`;
+        toastContainer.appendChild(toast);
+
+        // Entrance
+        requestAnimationFrame(() => {
+          toast.classList.add('is-active');
+        });
+
+        // Auto-remove
+        setTimeout(() => {
+          toast.classList.remove('is-active');
+          setTimeout(() => toast.remove(), 500);
+        }, 3500);
+      }
+
+      async function DeleteFun(id, btn) {
+        openConfirmModal(id, btn);
+      }
+
+      function openConfirmModal(id, btn) {
+        deleteTarget = {
+          id,
+          btn
+        };
+        confirmOverlay.hidden = false;
+        confirmOverlay.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+
+        // Trap focus to Delete button for accessibility
+        requestAnimationFrame(() => {
+          confirmOverlay.classList.add('is-active');
+          confirmDeleteBtn.focus();
+        });
+      }
+
+      function closeConfirmModal() {
+        confirmOverlay.classList.remove('is-active');
+        document.body.style.overflow = '';
+
+        setTimeout(() => {
+          confirmOverlay.hidden = true;
+          confirmOverlay.setAttribute('aria-hidden', 'true');
+          deleteTarget = {
+            id: null,
+            btn: null
+          };
+
+          // Reset button state
+          confirmDeleteBtn.disabled = false;
+          confirmDeleteBtn.innerHTML = '<span>Delete</span>';
+        }, 300);
+      }
+
+      confirmDeleteBtn.addEventListener('click', async () => {
+        if (!deleteTarget.id || confirmDeleteBtn.disabled) return;
+
+        try {
+          confirmDeleteBtn.disabled = true;
+          confirmDeleteBtn.innerHTML = `
+            <svg class="spinner" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 12a9 9 0 1 1-6.22-8.56"></path>
+            </svg>
+            <span>Deleting...</span>
+          `;
+
+          const deleteUrl = type === "master" ? `/user/${deleteTarget.id}` : `/${deleteTarget.id}`;
+          const response = await fetch(deleteUrl, {
+            method: "DELETE"
+          });
+
+          if (!response.ok) throw new Error('Network response was not ok');
+
+          // Improved card removal animation
+          const card = deleteTarget.btn.closest('.info-card');
+          card.style.pointerEvents = 'none';
+          card.style.zIndex = '50';
+          card.style.transition = 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
+          card.style.opacity = '0';
+          card.style.transform = 'scale(0.9) translateY(20px)';
+          card.style.filter = 'blur(8px)';
+
+          closeConfirmModal();
+          showToast('Entry removed successfully');
+
+          setTimeout(() => {
+            card.remove();
+            // If masonryWall becomes empty, show empty state
+            const wall = document.getElementById('masonryWall');
+            if (wall && wall.children.length === 0) {
+              window.location.reload(); // Simplest way to show empty state template
+            }
+          }, 600);
+
+        } catch (err) {
+          console.error(err);
+          showToast('Failed to delete entry', 'error');
+          closeConfirmModal();
+        }
+      });
+
+      /* ── View Modal logic ── */
+      const overlay = document.getElementById('modalOverlay');
+      const mTitle = document.getElementById('modalTitle');
+      const mEmail = document.getElementById('modalEmail');
+      const mAvatar = document.getElementById('modalAvatar');
+      const mContent = document.getElementById('modalContent');
+      const mCount = document.getElementById('modalCharCount');
+      const mCopy = document.getElementById('modalCopy');
+
+      function openModal(name, info, email, password) {
+        mTitle.textContent = name || '';
+        mEmail.textContent = email || '';
+        mAvatar.textContent = name ? name.charAt(0).toUpperCase() : '?';
+        mContent.textContent = (info || '').replace(/\\n/g, '\n');
+        mCount.textContent = `${(info || '').length} characters`;
+        resetCopyButton();
+
+        overlay.hidden = false;
+        overlay.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+
+        requestAnimationFrame(() => {
+          overlay.classList.add('is-open');
+        });
+      }
+
+      function closeModal() {
+        overlay.classList.remove('is-open');
+        setTimeout(() => {
+          overlay.hidden = true;
+          overlay.setAttribute('aria-hidden', 'true');
+          document.body.style.overflow = '';
+        }, 280);
+      }
+
+      function resetCopyButton() {
+        if (!mCopy) return;
+        const copyLabel = mCopy.querySelector('span');
+        mCopy.classList.remove('is-copied');
+        if (copyLabel) copyLabel.textContent = 'Copy';
+      }
+
+      async function copyModalContent() {
+        const text = mContent.textContent || '';
+        if (!text) return;
+
+        try {
+          if (navigator.clipboard && window.isSecureContext) {
+            await navigator.clipboard.writeText(text);
+          } else {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.setAttribute('readonly', '');
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            textarea.remove();
+          }
+
+          const copyLabel = mCopy.querySelector('span');
+          mCopy.classList.add('is-copied');
+          if (copyLabel) copyLabel.textContent = 'Copied';
+          setTimeout(resetCopyButton, 1400);
+        } catch (err) {
+          console.error(err);
+        }
+      }
+
+      /* Global Overlay Listeners */
+      [overlay, confirmOverlay].forEach(ov => {
+        ov.addEventListener('click', (e) => {
+          if (e.target === ov) {
+            if (ov.id === 'modalOverlay') closeModal();
+            else closeConfirmModal();
+          }
+        });
+      });
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          if (!overlay.hidden) closeModal();
+          if (!confirmOverlay.hidden) closeConfirmModal();
+        }
+      });
+
+      /* ── Stagger card entrance ── */
+      const cards = document.querySelectorAll('.info-card');
+      cards.forEach((card, i) => {
+        card.style.animationDelay = `${i * 60}ms`;
+      });
+    </script>
+
+  </body>
+
+</html>
