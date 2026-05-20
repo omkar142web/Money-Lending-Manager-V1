@@ -3,6 +3,7 @@ import {
   allowedPaymentStatuses,
   allowedRepairStatuses,
   filterablePaymentStatuses,
+  paymentMethods,
   filterableRepairStatuses,
   repairFlags,
   repairStatuses,
@@ -84,6 +85,8 @@ export function validateRepairCreate(body) {
     totalAmount,
     advanceAmount,
     paidAmount,
+    initialPaymentMethod: cleanString(body.initialPaymentMethod) || "Cash",
+    initialPaymentNote: cleanString(body.initialPaymentNote) || "Initial payment / advance",
     delivery: cleanString(body.delivery),
     repairStatus: cleanString(body.repairStatus || body.status) || "Pending Work",
     extraFlags: cleanFlags(body),
@@ -99,6 +102,7 @@ export function validateRepairCreate(body) {
   if (!Number.isFinite(value.advanceAmount) || value.advanceAmount < 0) errors.push({ field: "advanceAmount", message: "Advance amount cannot be negative." });
   if (value.paidAmount > value.totalAmount) errors.push({ field: "paidAmount", message: "Paid amount cannot be greater than total amount." });
   if (value.advanceAmount > value.paidAmount) errors.push({ field: "advanceAmount", message: "Advance amount cannot be greater than paid amount." });
+  if (value.paidAmount > 0 && !paymentMethods.includes(value.initialPaymentMethod)) errors.push({ field: "initialPaymentMethod", message: "Invalid payment method." });
   if (!value.delivery) errors.push({ field: "delivery", message: "Delivery is required." });
   if (body.repairStatus !== undefined && !repairStatuses.includes(value.repairStatus)) {
     errors.push({ field: "repairStatus", message: "Invalid repair status." });
@@ -140,6 +144,21 @@ export function validateRepairUpdate(body) {
   return { value, errors };
 }
 
+export function validateRepairPayment(body) {
+  const value = {
+    amount: cleanMoney(body.amount),
+    note: cleanString(body.note),
+    method: cleanString(body.method),
+  };
+  const errors = [];
+
+  if (!Number.isFinite(value.amount)) errors.push({ field: "amount", message: "Payment amount must be a valid number." });
+  if (value.amount <= 0) errors.push({ field: "amount", message: "Payment amount must be greater than 0." });
+  if (!paymentMethods.includes(value.method)) errors.push({ field: "method", message: "Invalid payment method." });
+
+  return { value, errors };
+}
+
 export const validateQuery = (validator) => (req, res, next) => {
   const result = validator(req.query, req);
 
@@ -167,7 +186,9 @@ export function validateRepairListQuery(query) {
     errors.push({ field: "repairStatus", message: "Invalid repair status filter." });
   }
 
-  if (paymentStatus && !filterablePaymentStatuses.includes(paymentStatus) && !allowedPaymentStatuses.has(paymentStatus)) {
+  if (query.paymentStatus !== undefined && paymentStatus && !filterablePaymentStatuses.includes(paymentStatus)) {
+    errors.push({ field: "paymentStatus", message: "Invalid payment status filter." });
+  } else if (query.paymentStatus === undefined && paymentStatus && !filterablePaymentStatuses.includes(paymentStatus) && !allowedPaymentStatuses.has(paymentStatus)) {
     errors.push({ field: "paymentStatus", message: "Invalid payment status filter." });
   }
 

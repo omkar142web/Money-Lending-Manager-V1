@@ -15,12 +15,14 @@ Balaji Store is an Express + MongoDB repair dashboard for Balaji Mobile Shop. Th
   - `GET /api/repairs?paymentStatus=Paid`
   - `GET /api/repairs?search=iphone`
   - `POST /api/repairs`
+  - `PATCH /api/repairs/:id/payment`
   - `PATCH /api/repairs/:id`
   - `DELETE /api/repairs/:id`
 - Added auth middleware, validation middleware, async error handling, centralized error responses, and response helpers.
 - Added backend-based filtering for repair workflow and payment status.
 - Added dashboard search by customer name, phone, and device.
 - Split repair workflow from payment state.
+- Added payment history tracking with partial-payment updates.
 - Moved MongoDB configuration to environment variables.
 - Replaced legacy password cookies with an HTTP-only session token cookie.
 
@@ -36,9 +38,16 @@ New repair records use separate workflow and payment fields:
   repairStatus,
   paymentStatus,
   totalAmount,
-  advanceAmount,
   paidAmount,
   remainingAmount,
+  paymentHistory: [
+    {
+      amount,
+      method,
+      note,
+      createdAt
+    }
+  ],
   whatsapp,
   delivery,
   extraFlags: {
@@ -64,7 +73,6 @@ New repair records use separate workflow and payment fields:
 ## Payment Statuses
 
 - Unpaid
-- Advance Paid
 - Partially Paid
 - Paid
 

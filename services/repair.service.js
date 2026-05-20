@@ -24,6 +24,31 @@ function clampMoney(value, max = Number.POSITIVE_INFINITY) {
   return Math.min(Math.max(numberOrZero(value), 0), max);
 }
 
+function calculateAmountFields(totalAmount, paidAmount) {
+  const safeTotalAmount = numberOrZero(totalAmount);
+  const safePaidAmount = clampMoney(paidAmount, safeTotalAmount);
+
+  return {
+    totalAmount: safeTotalAmount,
+    paidAmount: safePaidAmount,
+    remainingAmount: Math.max(safeTotalAmount - safePaidAmount, 0),
+    paymentStatus: calculatePaymentStatus(safeTotalAmount, safePaidAmount),
+  };
+}
+
+function normalizePaymentHistory(repair) {
+  const history = Array.isArray(repair.paymentHistory) ? repair.paymentHistory : [];
+
+  return history
+    .map((payment) => ({
+      amount: numberOrZero(payment.amount),
+      method: payment.method || "Cash",
+      note: payment.note || "",
+      createdAt: payment.createdAt,
+    }))
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+}
+
 function deriveAmounts(repair) {
   const totalAmount = numberOrZero(repair.totalAmount ?? repair.amount);
   const paidAmount = clampMoney(
@@ -31,15 +56,14 @@ function deriveAmounts(repair) {
     totalAmount,
   );
   const advanceAmount = clampMoney(repair.advanceAmount ?? (paidAmount > 0 ? paidAmount : 0), paidAmount);
-  const remainingAmount = Math.max(totalAmount - paidAmount, 0);
-  const paymentStatus = repair.paymentStatus || calculatePaymentStatus(totalAmount, paidAmount, advanceAmount);
+  const amountFields = calculateAmountFields(totalAmount, paidAmount);
 
   return {
-    totalAmount,
+    totalAmount: amountFields.totalAmount,
     advanceAmount,
-    paidAmount,
-    remainingAmount,
-    paymentStatus,
+    paidAmount: amountFields.paidAmount,
+    remainingAmount: amountFields.remainingAmount,
+    paymentStatus: amountFields.paymentStatus,
   };
 }
 
@@ -57,15 +81,15 @@ function normalizeRepairPayload(data, existingRepair = {}) {
   const totalAmount = numberOrZero(data.totalAmount ?? existingRepair.totalAmount ?? existingRepair.amount);
   const paidAmount = clampMoney(data.paidAmount ?? existingRepair.paidAmount ?? 0, totalAmount);
   const advanceAmount = clampMoney(data.advanceAmount ?? existingRepair.advanceAmount ?? (paidAmount > 0 ? paidAmount : 0), paidAmount);
-  const remainingAmount = Math.max(totalAmount - paidAmount, 0);
+  const amountFields = calculateAmountFields(totalAmount, paidAmount);
 
   return {
     repairStatus: normalizeRepairStatus(data.repairStatus ?? existingRepair.repairStatus ?? existingRepair.status),
-    totalAmount,
+    totalAmount: amountFields.totalAmount,
     advanceAmount,
-    paidAmount,
-    remainingAmount,
-    paymentStatus: calculatePaymentStatus(totalAmount, paidAmount, advanceAmount),
+    paidAmount: amountFields.paidAmount,
+    remainingAmount: amountFields.remainingAmount,
+    paymentStatus: amountFields.paymentStatus,
     extraFlags: {
       ...deriveFlags(existingRepair),
       ...(data.extraFlags || {}),
@@ -90,6 +114,7 @@ function serializeRepair(repair) {
     paidAmount: amountFields.paidAmount,
     remainingAmount: amountFields.remainingAmount,
     paymentStatus: amountFields.paymentStatus,
+    paymentHistory: normalizePaymentHistory(repair),
     amount: amountFields.totalAmount,
     delivery: repair.delivery,
     repairStatus,
@@ -183,6 +208,15 @@ export async function listRepairs(filters = {}) {
 export async function createRepair(data, user) {
   const now = new Date();
   const normalized = normalizeRepairPayload(data);
+  const paymentHistory = normalized.paidAmount > 0
+    ? [{
+        amount: normalized.paidAmount,
+        method: data.initialPaymentMethod || "Cash",
+        note: data.initialPaymentNote || "Initial payment / advance",
+        createdAt: now,
+      }]
+    : [];
+
   const result = await repairsCollection().insertOne({
     customerName: data.customerName,
     device: data.device,
@@ -190,6 +224,7 @@ export async function createRepair(data, user) {
     whatsapp: data.whatsapp,
     delivery: data.delivery,
     ...normalized,
+    paymentHistory,
     createdBy: user._id,
     createdAt: now,
     updatedAt: now,
@@ -220,6 +255,60 @@ export async function updateRepair(id, updateData) {
   const result = await repairsCollection().findOneAndUpdate(
     { _id },
     { $set: updates },
+    { returnDocument: "after" },
+  );
+
+  return serializeRepair(result.value || result);
+}
+
+export async function addRepairPayment(id, paymentData) {
+  const _id = toObjectId(id);
+  const existingRepair = await repairsCollection().findOne({ _id });
+
+  if (!existingRepair) {
+    throw new ApiError(404, "Repair job not found.");
+  }
+
+  const amountFields = deriveAmounts(existingRepair);
+  const paymentAmount = numberOrZero(paymentData.amount);
+
+  if (!Number.isFinite(paymentAmount) || paymentAmount <= 0) {
+    throw new ApiError(400, "Payment amount must be greater than 0.", [
+      { field: "amount", message: "Payment amount must be greater than 0." },
+    ]);
+  }
+
+  if (paymentAmount > amountFields.remainingAmount) {
+    throw new ApiError(400, "Payment cannot exceed remaining amount.", [
+      { field: "amount", message: "Payment cannot exceed remaining amount." },
+    ]);
+  }
+
+  const now = new Date();
+  const nextAmounts = calculateAmountFields(
+    amountFields.totalAmount,
+    amountFields.paidAmount + paymentAmount,
+  );
+  const paymentEntry = {
+    amount: paymentAmount,
+    method: paymentData.method,
+    note: paymentData.note,
+    createdAt: now,
+  };
+
+  const result = await repairsCollection().findOneAndUpdate(
+    { _id },
+    {
+      $set: {
+        paidAmount: nextAmounts.paidAmount,
+        remainingAmount: nextAmounts.remainingAmount,
+        paymentStatus: nextAmounts.paymentStatus,
+        updatedAt: now,
+      },
+      $push: {
+        paymentHistory: paymentEntry,
+      },
+    },
     { returnDocument: "after" },
   );
 

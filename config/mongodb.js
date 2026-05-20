@@ -42,6 +42,7 @@ async function createIndexes() {
   await repairsCollection.createIndex({ customerName: 1 });
   await repairsCollection.createIndex({ device: 1 });
   await repairsCollection.createIndex({ "extraFlags.urgent": 1 });
+  await repairsCollection.createIndex({ "paymentHistory.createdAt": -1 });
 }
 
 export function getDB() {

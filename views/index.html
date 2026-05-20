@@ -121,6 +121,36 @@
         box-shadow: var(--shadow-sm);
       }
 
+      .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 14px;
+        margin-bottom: 22px;
+      }
+
+      .summary-item {
+        background: white;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        padding: 14px 16px;
+        box-shadow: var(--shadow-sm);
+      }
+
+      .summary-label {
+        color: var(--text-muted);
+        font-size: 12px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+
+      .summary-value {
+        color: var(--text-dark);
+        font-size: 20px;
+        font-weight: 800;
+        margin-top: 4px;
+      }
+
       .filter-tabs {
         display: flex;
         gap: 8px;
@@ -167,6 +197,21 @@
         color: #2563eb;
         font-size: 12px;
         font-weight: 800;
+      }
+
+      .payment-status.status-unpaid {
+        background: #fee2e2;
+        color: #b91c1c;
+      }
+
+      .payment-status.status-partially-paid {
+        background: #ffedd5;
+        color: #c2410c;
+      }
+
+      .payment-status.status-paid {
+        background: #dcfce7;
+        color: #15803d;
       }
 
       .flag-badges {
@@ -310,6 +355,7 @@
 
       .buttons {
         display: flex;
+        flex-wrap: wrap;
         gap: 10px;
         margin-top: 14px;
       }
@@ -322,7 +368,7 @@
       }
 
       .whatsapp {
-        flex: 1;
+        flex: 1 1 100%;
         padding: 12px 16px;
         border-radius: var(--radius-sm);
         background: var(--primary);
@@ -546,6 +592,33 @@
         box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.12);
       }
 
+      .payment-action,
+      .history-action,
+      .secondary-btn {
+        flex: 1 1 0;
+        min-height: 42px;
+        border-radius: var(--radius-sm);
+        background: #ecfdf5;
+        color: var(--primary-hover);
+        font-size: 13px;
+        font-weight: 800;
+        border: 1px solid #a7f3d0;
+      }
+
+      .history-action,
+      .secondary-btn {
+        background: #f8fafc;
+        color: var(--text-dark);
+        border-color: var(--border);
+      }
+
+      .payment-action:hover,
+      .history-action:hover,
+      .secondary-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: var(--shadow-sm);
+      }
+
       .flag-grid {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -569,6 +642,64 @@
         width: 16px;
         height: 16px;
         accent-color: var(--primary);
+      }
+
+      .payment-snapshot {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+        margin-bottom: 16px;
+      }
+
+      .snapshot-item {
+        background: #f8fafc;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        padding: 10px 12px;
+      }
+
+      .snapshot-label {
+        color: var(--text-muted);
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      .snapshot-value {
+        color: var(--text-dark);
+        font-size: 14px;
+        font-weight: 800;
+        margin-top: 2px;
+      }
+
+      .modal-actions {
+        display: flex;
+        gap: 10px;
+      }
+
+      .history-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .history-item {
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        padding: 12px;
+        background: #f8fafc;
+      }
+
+      .history-main {
+        color: var(--text-dark);
+        font-size: 14px;
+        font-weight: 800;
+      }
+
+      .history-note,
+      .history-date {
+        color: var(--text-muted);
+        font-size: 13px;
+        margin-top: 4px;
       }
 
       /* select inside form resets the card select override */
@@ -614,6 +745,10 @@
 
         header h1 {
           font-size: 22px;
+        }
+
+        .summary-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
         }
 
         .workflow-bar {
@@ -666,6 +801,11 @@
           grid-template-columns: 1fr;
           gap: 16px;
         }
+
+        .payment-snapshot,
+        .flag-grid {
+          grid-template-columns: 1fr;
+        }
       }
     </style>
   </head>
@@ -675,6 +815,25 @@
         <h1>📱Balaji Mobile Shop Dashboard</h1>
         <p>Manage repairs, status updates, and customer payments</p>
       </header>
+
+      <section class="summary-grid" aria-label="Payment summary">
+        <article class="summary-item">
+          <div class="summary-label">Total Repairs</div>
+          <div class="summary-value" id="summaryRepairs">0</div>
+        </article>
+        <article class="summary-item">
+          <div class="summary-label">Total Revenue</div>
+          <div class="summary-value" id="summaryRevenue">₹0</div>
+        </article>
+        <article class="summary-item">
+          <div class="summary-label">Paid Revenue</div>
+          <div class="summary-value" id="summaryPaid">₹0</div>
+        </article>
+        <article class="summary-item">
+          <div class="summary-label">Pending Revenue</div>
+          <div class="summary-value" id="summaryPending">₹0</div>
+        </article>
+      </section>
 
       <section class="workflow-bar" aria-label="Repair filters">
         <div class="search-control">
@@ -686,7 +845,6 @@
           <select id="paymentStatusFilter" aria-label="Filter by payment status">
             <option value="All">All Payments</option>
             <option value="Unpaid">Unpaid</option>
-            <option value="Advance Paid">Advance Paid</option>
             <option value="Partially Paid">Partially Paid</option>
             <option value="Paid">Paid</option>
           </select>
@@ -795,11 +953,89 @@
       </div>
     </div>
 
+    <div class="modal-overlay" id="paymentModalOverlay" role="dialog" aria-modal="true" aria-labelledby="paymentModalTitle">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 id="paymentModalTitle">Update Payment</h2>
+          <button class="close-modal" id="closePaymentModalBtn" aria-label="Close">&times;</button>
+        </div>
+
+        <div class="payment-snapshot">
+          <div class="snapshot-item">
+            <div class="snapshot-label">Customer</div>
+            <div class="snapshot-value" id="paymentCustomerName">-</div>
+          </div>
+          <div class="snapshot-item">
+            <div class="snapshot-label">Device</div>
+            <div class="snapshot-value" id="paymentDevice">-</div>
+          </div>
+          <div class="snapshot-item">
+            <div class="snapshot-label">Total</div>
+            <div class="snapshot-value" id="paymentTotal">₹0</div>
+          </div>
+          <div class="snapshot-item">
+            <div class="snapshot-label">Already Paid</div>
+            <div class="snapshot-value" id="paymentPaid">₹0</div>
+          </div>
+          <div class="snapshot-item">
+            <div class="snapshot-label">Remaining</div>
+            <div class="snapshot-value" id="paymentRemaining">₹0</div>
+          </div>
+          <div class="snapshot-item">
+            <div class="snapshot-label">Status</div>
+            <div class="snapshot-value" id="paymentCurrentStatus">Unpaid</div>
+          </div>
+        </div>
+
+        <form id="paymentForm" novalidate>
+          <div class="form-group">
+            <label for="newPaymentAmount">New Payment Amount (₹)</label>
+            <input type="text" id="newPaymentAmount" placeholder="e.g. 1000" inputmode="numeric" />
+          </div>
+
+          <div class="form-group">
+            <label for="paymentMethod">Payment Method</label>
+            <select id="paymentMethod">
+              <option value="Cash">Cash</option>
+              <option value="UPI">UPI</option>
+              <option value="Card">Card</option>
+              <option value="Bank Transfer">Bank Transfer</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="paymentNote">Payment Note</label>
+            <input type="text" id="paymentNote" placeholder="e.g. Pickup payment" autocomplete="off" />
+          </div>
+
+          <div class="modal-actions">
+            <button type="button" class="secondary-btn" id="markFullyPaidBtn">Mark Fully Paid</button>
+            <button type="submit" class="submit-btn" id="savePaymentBtn">Save Payment</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="modal-overlay" id="historyModalOverlay" role="dialog" aria-modal="true" aria-labelledby="historyModalTitle">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 id="historyModalTitle">Payment History</h2>
+          <button class="close-modal" id="closeHistoryModalBtn" aria-label="Close">&times;</button>
+        </div>
+
+        <div class="history-list" id="paymentHistoryList"></div>
+      </div>
+    </div>
+
     <script>
       const cardsContainer = document.getElementById("cardsContainer");
       const statusFilterBar = document.getElementById("statusFilterBar");
       const paymentStatusFilter = document.getElementById("paymentStatusFilter");
       const repairSearch = document.getElementById("repairSearch");
+      const summaryRepairs = document.getElementById("summaryRepairs");
+      const summaryRevenue = document.getElementById("summaryRevenue");
+      const summaryPaid = document.getElementById("summaryPaid");
+      const summaryPending = document.getElementById("summaryPending");
 
       const repairStatuses = [
         "Pending Work",
@@ -809,12 +1045,15 @@
         "Delivered",
         "Cancelled",
       ];
-      const paymentStatuses = ["Unpaid", "Advance Paid", "Partially Paid", "Paid"];
+      const paymentStatuses = ["Unpaid", "Partially Paid", "Paid"];
       const filterStatuses = ["All", ...repairStatuses];
+      const repairsById = new Map();
+      let currentRepairs = [];
       let activeRepairStatus = "All";
       let activePaymentStatus = "All";
       let activeSearch = "";
       let searchTimer;
+      let activePaymentRepairId = null;
 
       const api = {
         async request(url, options = {}) {
@@ -858,6 +1097,35 @@
       function formatDate(date) {
         const parsed = date ? new Date(date) : new Date();
         return parsed.toLocaleDateString("en-IN", { day: "numeric", month: "short" });
+      }
+
+      function formatDateTime(date) {
+        const parsed = date ? new Date(date) : new Date();
+        return parsed.toLocaleString("en-IN", {
+          day: "numeric",
+          month: "short",
+          year: "numeric",
+          hour: "numeric",
+          minute: "2-digit",
+        });
+      }
+
+      function statusClass(status) {
+        return `status-${String(status || "Unpaid").toLowerCase().replace(/\s+/g, "-")}`;
+      }
+
+      function updatePaymentSummary(repairs = currentRepairs) {
+        const totals = repairs.reduce((acc, repair) => {
+          acc.total += Number(repair.totalAmount || 0);
+          acc.paid += Number(repair.paidAmount || 0);
+          acc.pending += Number(repair.remainingAmount || 0);
+          return acc;
+        }, { total: 0, paid: 0, pending: 0 });
+
+        summaryRepairs.textContent = String(repairs.length);
+        summaryRevenue.textContent = formatAmount(totals.total);
+        summaryPaid.textContent = formatAmount(totals.paid);
+        summaryPending.textContent = formatAmount(totals.pending);
       }
 
       function buildRepairUrl() {
@@ -990,6 +1258,7 @@
         card.dataset.repairStatus = repair.repairStatus || "Pending Work";
         card.dataset.paymentStatus = repair.paymentStatus || "Unpaid";
         card.style.animation = placement === "prepend" ? "none" : "";
+        repairsById.set(repair.id, repair);
 
         const safeStatus = escapeHtml(repair.repairStatus || "Pending Work");
 
@@ -1001,7 +1270,7 @@
           <div class="info"><strong>Device</strong> ${escapeHtml(repair.device)}</div>
           <div class="info"><strong>Issue</strong> ${escapeHtml(repair.issue)}</div>
           <div class="info"><strong>WhatsApp</strong> ${escapeHtml(repair.whatsapp)}</div>
-          <div class="info"><strong>Payment</strong><span class="payment-status">${escapeHtml(repair.paymentStatus || "Unpaid")}</span></div>
+          <div class="info"><strong>Payment</strong><span class="payment-status ${statusClass(repair.paymentStatus)}">${escapeHtml(repair.paymentStatus || "Unpaid")}</span></div>
           <div class="info"><strong>Paid</strong> ${formatAmount(repair.paidAmount)}</div>
           <div class="info"><strong>Remaining</strong> ${formatAmount(repair.remainingAmount)}</div>
           <div class="info"><strong>Pay Link</strong><a class="payment-link" target="_blank">Pay Now</a></div>
@@ -1015,6 +1284,8 @@
           </div>
           <div class="buttons">
             <button class="whatsapp" onclick="sendWhatsApp(this)"><span>WhatsApp</span></button>
+            <button class="payment-action" onclick="openPaymentModal('${repair.id}')">Update Payment</button>
+            <button class="history-action" onclick="openPaymentHistoryModal('${repair.id}')">View Payments</button>
             <button class="delete" onclick="deleteCard(this)" title="Delete Card">🗑</button>
           </div>
           <div class="footer-note">Thank you for trusting Balaji Mobile Shop 🙏</div>
@@ -1045,11 +1316,50 @@
           }
         });
 
+        if (placement === "return") {
+          return card;
+        }
+
         if (placement === "prepend") {
           cardsContainer.prepend(card);
         } else {
           cardsContainer.appendChild(card);
         }
+
+        return card;
+      }
+
+      function applyUpdatedRepair(updatedRepair) {
+        repairsById.set(updatedRepair.id, updatedRepair);
+        const existingCard = cardsContainer.querySelector(`[data-id="${updatedRepair.id}"]`);
+        const existingIndex = currentRepairs.findIndex((repair) => repair.id === updatedRepair.id);
+        const shouldShow = repairMatchesCurrentView(updatedRepair);
+
+        if (existingIndex >= 0) {
+          currentRepairs.splice(existingIndex, 1);
+        }
+
+        if (!shouldShow) {
+          existingCard?.remove();
+          updatePaymentSummary(currentRepairs);
+          if (!cardsContainer.querySelector(".card")) renderEmptyState();
+          return;
+        }
+
+        if (existingIndex >= 0) {
+          currentRepairs.splice(existingIndex, 0, updatedRepair);
+        } else {
+          currentRepairs.unshift(updatedRepair);
+        }
+
+        const nextCard = renderRepairCard(updatedRepair, "return");
+        if (existingCard) {
+          existingCard.replaceWith(nextCard);
+        } else {
+          cardsContainer.prepend(nextCard);
+        }
+
+        updatePaymentSummary(currentRepairs);
       }
 
       async function loadRepairs({ showLoading = true } = {}) {
@@ -1059,6 +1369,10 @@
           const repairs = await api.request(buildRepairUrl());
           cardsContainer.innerHTML = "";
           cardsContainer.classList.remove("is-loading");
+          currentRepairs = repairs || [];
+          repairsById.clear();
+          currentRepairs.forEach((repair) => repairsById.set(repair.id, repair));
+          updatePaymentSummary(currentRepairs);
 
           if (!repairs?.length) {
             renderEmptyState();
@@ -1068,6 +1382,7 @@
           repairs.forEach((repair) => renderRepairCard(repair));
         } catch (err) {
           cardsContainer.classList.remove("is-loading");
+          updatePaymentSummary([]);
           alert(err.message);
         }
       }
@@ -1145,6 +1460,17 @@
       const addBtn    = document.getElementById("addCustomerBtn");
       const closeBtn  = document.getElementById("closeModalBtn");
       const form      = document.getElementById("addCustomerForm");
+      const paymentModalOverlay = document.getElementById("paymentModalOverlay");
+      const closePaymentModalBtn = document.getElementById("closePaymentModalBtn");
+      const paymentForm = document.getElementById("paymentForm");
+      const newPaymentAmount = document.getElementById("newPaymentAmount");
+      const paymentMethod = document.getElementById("paymentMethod");
+      const paymentNote = document.getElementById("paymentNote");
+      const savePaymentBtn = document.getElementById("savePaymentBtn");
+      const markFullyPaidBtn = document.getElementById("markFullyPaidBtn");
+      const historyModalOverlay = document.getElementById("historyModalOverlay");
+      const closeHistoryModalBtn = document.getElementById("closeHistoryModalBtn");
+      const paymentHistoryList = document.getElementById("paymentHistoryList");
 
       statusFilterBar.addEventListener("click", (event) => {
         const button = event.target.closest(".filter-tab");
@@ -1169,6 +1495,106 @@
         }, 250);
       });
 
+      function fillPaymentSnapshot(repair) {
+        document.getElementById("paymentCustomerName").textContent = repair.customerName || "-";
+        document.getElementById("paymentDevice").textContent = repair.device || "-";
+        document.getElementById("paymentTotal").textContent = formatAmount(repair.totalAmount);
+        document.getElementById("paymentPaid").textContent = formatAmount(repair.paidAmount);
+        document.getElementById("paymentRemaining").textContent = formatAmount(repair.remainingAmount);
+        document.getElementById("paymentCurrentStatus").textContent = repair.paymentStatus || "Unpaid";
+      }
+
+      function openPaymentModal(repairId) {
+        const repair = repairsById.get(repairId);
+        if (!repair) return;
+
+        activePaymentRepairId = repairId;
+        fillPaymentSnapshot(repair);
+        paymentForm.reset();
+        paymentMethod.value = "Cash";
+        markFullyPaidBtn.disabled = Number(repair.remainingAmount || 0) <= 0;
+        paymentModalOverlay.classList.add("is-open");
+        document.body.classList.add("modal-open");
+        setTimeout(() => newPaymentAmount.focus(), 80);
+      }
+
+      function closePaymentModal() {
+        paymentModalOverlay.classList.remove("is-open");
+        document.body.classList.remove("modal-open");
+        activePaymentRepairId = null;
+        paymentForm.reset();
+      }
+
+      function openPaymentHistoryModal(repairId) {
+        const repair = repairsById.get(repairId);
+        if (!repair) return;
+
+        const history = Array.isArray(repair.paymentHistory) ? repair.paymentHistory : [];
+
+        paymentHistoryList.innerHTML = history.length
+          ? history.map((payment) => `
+              <div class="history-item">
+                <div class="history-main">${formatAmount(payment.amount)} • ${escapeHtml(payment.method || "Cash")} • ${escapeHtml(payment.note || "Payment received")}</div>
+                <div class="history-date">${formatDateTime(payment.createdAt)}</div>
+              </div>
+            `).join("")
+          : `
+              <div class="history-item">
+                <div class="history-main">No recorded payments yet</div>
+                <div class="history-note">Payments added from now on will appear here newest first.</div>
+              </div>
+            `;
+
+        historyModalOverlay.classList.add("is-open");
+        document.body.classList.add("modal-open");
+      }
+
+      function closeHistoryModal() {
+        historyModalOverlay.classList.remove("is-open");
+        document.body.classList.remove("modal-open");
+      }
+
+      async function savePayment(amountOverride) {
+        const repair = repairsById.get(activePaymentRepairId);
+        if (!repair || savePaymentBtn.disabled) return;
+
+        const amount = String(amountOverride ?? newPaymentAmount.value).replace(/\D/g, "");
+        const remainingAmount = Number(repair.remainingAmount || 0);
+
+        if (!amount || Number(amount) <= 0) {
+          alert("Payment amount must be greater than 0.");
+          return;
+        }
+
+        if (Number(amount) > remainingAmount) {
+          alert("Payment cannot exceed remaining amount.");
+          return;
+        }
+
+        savePaymentBtn.disabled = true;
+        markFullyPaidBtn.disabled = true;
+        savePaymentBtn.textContent = "Saving...";
+
+        try {
+          const updatedRepair = await api.request(`/api/repairs/${repair.id}/payment`, {
+            method: "PATCH",
+            body: JSON.stringify({
+              amount,
+              method: paymentMethod.value,
+              note: paymentNote.value.trim(),
+            }),
+          });
+
+          applyUpdatedRepair(updatedRepair);
+          closePaymentModal();
+        } catch (err) {
+          alert(err.message);
+        } finally {
+          savePaymentBtn.disabled = false;
+          savePaymentBtn.textContent = "Save Payment";
+        }
+      }
+
       function openModal() {
         overlay.classList.add("is-open");
         document.body.classList.add("modal-open");
@@ -1184,15 +1610,42 @@
 
       addBtn.addEventListener("click", openModal);
       closeBtn.addEventListener("click", closeModal);
+      closePaymentModalBtn.addEventListener("click", closePaymentModal);
+      closeHistoryModalBtn.addEventListener("click", closeHistoryModal);
 
       // Close on backdrop click (only when clicking the overlay itself)
       overlay.addEventListener("click", (e) => {
         if (e.target === overlay) closeModal();
       });
+      paymentModalOverlay.addEventListener("click", (e) => {
+        if (e.target === paymentModalOverlay) closePaymentModal();
+      });
+      historyModalOverlay.addEventListener("click", (e) => {
+        if (e.target === historyModalOverlay) closeHistoryModal();
+      });
 
       // Close on Escape
       document.addEventListener("keydown", (e) => {
-        if (e.key === "Escape" && overlay.classList.contains("is-open")) closeModal();
+        if (e.key !== "Escape") return;
+        if (overlay.classList.contains("is-open")) closeModal();
+        if (paymentModalOverlay.classList.contains("is-open")) closePaymentModal();
+        if (historyModalOverlay.classList.contains("is-open")) closeHistoryModal();
+      });
+
+      paymentForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        await savePayment();
+      });
+
+      markFullyPaidBtn.addEventListener("click", async () => {
+        const repair = repairsById.get(activePaymentRepairId);
+        if (!repair) return;
+
+        newPaymentAmount.value = String(repair.remainingAmount || 0);
+        if (!paymentNote.value.trim()) {
+          paymentNote.value = "Marked fully paid";
+        }
+        await savePayment(repair.remainingAmount);
       });
 
       /* ── FORM SUBMIT ── */

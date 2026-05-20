@@ -9,9 +9,17 @@ export const repairStatuses = [
 
 export const paymentStatuses = [
   "Unpaid",
-  "Advance Paid",
   "Partially Paid",
   "Paid",
+];
+
+export const legacyPaymentStatuses = ["Advance Paid"];
+
+export const paymentMethods = [
+  "Cash",
+  "UPI",
+  "Card",
+  "Bank Transfer",
 ];
 
 export const repairFlags = [
@@ -38,7 +46,10 @@ export const allowedRepairStatuses = new Set([
   ...legacyRepairStatuses,
 ]);
 
-export const allowedPaymentStatuses = new Set(paymentStatuses);
+export const allowedPaymentStatuses = new Set([
+  ...paymentStatuses,
+  ...legacyPaymentStatuses,
+]);
 
 export function normalizeRepairStatus(status = "Pending Work") {
   if (repairStatuses.includes(status)) return status;
@@ -58,9 +69,8 @@ export function flagsFromLegacyStatus(status) {
   };
 }
 
-export function calculatePaymentStatus(totalAmount, paidAmount, advanceAmount = 0) {
+export function calculatePaymentStatus(totalAmount, paidAmount) {
   if (!paidAmount || paidAmount <= 0) return "Unpaid";
   if (paidAmount >= totalAmount) return "Paid";
-  if (advanceAmount > 0 && paidAmount <= advanceAmount) return "Advance Paid";
   return "Partially Paid";
 }

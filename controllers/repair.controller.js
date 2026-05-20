@@ -1,5 +1,6 @@
 import { asyncHandler } from "../middleware/asyncHandler.js";
 import {
+  addRepairPayment,
   createRepair,
   deleteRepair,
   listRepairs,
@@ -20,6 +21,11 @@ export const postRepair = asyncHandler(async (req, res) => {
 export const patchRepair = asyncHandler(async (req, res) => {
   const repair = await updateRepair(req.params.id, req.validatedBody);
   return sendSuccess(res, repair, "Repair job updated.");
+});
+
+export const patchRepairPayment = asyncHandler(async (req, res) => {
+  const repair = await addRepairPayment(req.params.id, req.validatedBody);
+  return sendSuccess(res, repair, "Payment recorded.");
 });
 
 export const removeRepair = asyncHandler(async (req, res) => {
