@@ -519,66 +519,25 @@
       </header>
 
       <div class="cards" id="cardsContainer">
-        <!-- CARD 1 -->
         <div class="card">
           <div class="top">
-            <div class="customer-name">Omkar Pandule</div>
-            <div class="amount">₹2,500</div>
+            <div class="customer-name">Loading repair jobs</div>
+            <div class="amount">₹0</div>
           </div>
-          <div class="info"><strong>Phone</strong> Samsung M31</div>
-          <div class="info"><strong>Issue</strong> Display Replacement</div>
-          <div class="info"><strong>WhatsApp</strong> 918983071553</div>
+          <div class="info"><strong>Phone</strong> Please wait</div>
+          <div class="info"><strong>Issue</strong> Syncing dashboard</div>
+          <div class="info"><strong>WhatsApp</strong> -</div>
           <div class="info">
             <strong>Payment</strong>
-            <a class="payment-link" target="_blank">Pay Now</a>
+            <a class="payment-link">Pay Now</a>
           </div>
-          <div class="info"><strong>Date</strong> 14 May 7 PM</div>
-          <div class="info"><strong>Delivery</strong> Tomorrow Evening</div>
+          <div class="info"><strong>Date</strong> -</div>
+          <div class="info"><strong>Delivery</strong> -</div>
           <div class="status-box">
-            <select class="status-select">
-              <option value="Pending Work">Pending Work</option>
-              <option value="In Progress" selected>In Progress</option>
-              <option value="Done">Done</option>
+            <select class="status-select" disabled>
+              <option>Loading</option>
             </select>
           </div>
-          <div class="buttons">
-            <button class="whatsapp" onclick="sendWhatsApp(this)">
-              <span>WhatsApp</span>
-            </button>
-            <button class="delete" onclick="deleteCard(this)" title="Delete Card">🗑</button>
-          </div>
-          <div class="footer-note">Thank you for trusting Balaji Mobile Shop 🙏</div>
-        </div>
-
-        <!-- CARD 2 -->
-        <div class="card">
-          <div class="top">
-            <div class="customer-name">Priya Patil</div>
-            <div class="amount">₹1,200</div>
-          </div>
-          <div class="info"><strong>Phone</strong> iPhone 11</div>
-          <div class="info"><strong>Issue</strong> Battery Change</div>
-          <div class="info"><strong>WhatsApp</strong> 918983071553</div>
-          <div class="info">
-            <strong>Payment</strong>
-            <a class="payment-link" target="_blank">Pay Now</a>
-          </div>
-          <div class="info"><strong>Date</strong> 14 May 7 PM</div>
-          <div class="info"><strong>Delivery</strong> Today 7 PM</div>
-          <div class="status-box">
-            <select class="status-select">
-              <option value="Pending Work" selected>Pending Work</option>
-              <option value="In Progress">In Progress</option>
-              <option value="Done">Done</option>
-            </select>
-          </div>
-          <div class="buttons">
-            <button class="whatsapp" onclick="sendWhatsApp(this)">
-              <span>WhatsApp</span>
-            </button>
-            <button class="delete" onclick="deleteCard(this)" title="Delete Card">🗑</button>
-          </div>
-          <div class="footer-note">We appreciate your patience 🙌</div>
         </div>
       </div>
     </div>
@@ -642,6 +601,149 @@
     </div>
 
     <script>
+      const cardsContainer = document.getElementById("cardsContainer");
+
+      const api = {
+        async request(url, options = {}) {
+          const response = await fetch(url, {
+            headers: {
+              "Content-Type": "application/json",
+              ...(options.headers || {}),
+            },
+            ...options,
+          });
+
+          if (response.status === 401) {
+            window.location.href = "/login";
+            return null;
+          }
+
+          const payload = await response.json().catch(() => ({}));
+
+          if (!response.ok || payload.success === false) {
+            const firstError = payload.details?.[0]?.message;
+            throw new Error(firstError || payload.message || "Request failed.");
+          }
+
+          return payload.data;
+        },
+      };
+
+      function escapeHtml(value = "") {
+        return String(value)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#039;");
+      }
+
+      function formatAmount(amount) {
+        return "₹" + Number(amount || 0).toLocaleString("en-IN");
+      }
+
+      function formatDate(date) {
+        const parsed = date ? new Date(date) : new Date();
+        return parsed.toLocaleDateString("en-IN", { day: "numeric", month: "short" });
+      }
+
+      function renderEmptyState() {
+        cardsContainer.innerHTML = `
+          <div class="card">
+            <div class="top">
+              <div class="customer-name">No repair jobs yet</div>
+              <div class="amount">₹0</div>
+            </div>
+            <div class="info"><strong>Phone</strong> Add your first customer using the + button</div>
+            <div class="info"><strong>Issue</strong> Waiting for work</div>
+            <div class="info"><strong>WhatsApp</strong> -</div>
+            <div class="info"><strong>Payment</strong><a class="payment-link">Pay Now</a></div>
+            <div class="info"><strong>Date</strong> ${formatDate()}</div>
+            <div class="info"><strong>Delivery</strong> -</div>
+            <div class="status-box">
+              <select class="status-select" disabled>
+                <option>No Jobs</option>
+              </select>
+            </div>
+          </div>
+        `;
+      }
+
+      function renderRepairCard(repair, placement = "append") {
+        const card = document.createElement("div");
+        card.className = "card";
+        card.dataset.id = repair.id;
+        card.style.animation = placement === "prepend" ? "none" : "";
+
+        const safeStatus = escapeHtml(repair.status || "Pending Work");
+
+        card.innerHTML = `
+          <div class="top">
+            <div class="customer-name">${escapeHtml(repair.customerName)}</div>
+            <div class="amount">${formatAmount(repair.amount)}</div>
+          </div>
+          <div class="info"><strong>Phone</strong> ${escapeHtml(repair.device)}</div>
+          <div class="info"><strong>Issue</strong> ${escapeHtml(repair.issue)}</div>
+          <div class="info"><strong>WhatsApp</strong> ${escapeHtml(repair.whatsapp)}</div>
+          <div class="info"><strong>Payment</strong><a class="payment-link" target="_blank">Pay Now</a></div>
+          <div class="info"><strong>Date</strong> ${formatDate(repair.createdAt)}</div>
+          <div class="info"><strong>Delivery</strong> ${escapeHtml(repair.delivery)}</div>
+          <div class="status-box">
+            <select class="status-select" data-previous="${safeStatus}">
+              <option value="Pending Work" ${repair.status === "Pending Work" ? "selected" : ""}>Pending Work</option>
+              <option value="In Progress" ${repair.status === "In Progress" ? "selected" : ""}>In Progress</option>
+              <option value="Done" ${repair.status === "Done" ? "selected" : ""}>Done</option>
+            </select>
+          </div>
+          <div class="buttons">
+            <button class="whatsapp" onclick="sendWhatsApp(this)"><span>WhatsApp</span></button>
+            <button class="delete" onclick="deleteCard(this)" title="Delete Card">🗑</button>
+          </div>
+          <div class="footer-note">Thank you for trusting Balaji Mobile Shop 🙏</div>
+        `;
+
+        const statusSelect = card.querySelector(".status-select");
+        statusSelect.addEventListener("change", async () => {
+          const previous = statusSelect.dataset.previous;
+          statusSelect.disabled = true;
+
+          try {
+            await api.request(`/api/repairs/${repair.id}`, {
+              method: "PATCH",
+              body: JSON.stringify({ status: statusSelect.value }),
+            });
+            statusSelect.dataset.previous = statusSelect.value;
+          } catch (err) {
+            alert(err.message);
+            statusSelect.value = previous;
+          } finally {
+            statusSelect.disabled = false;
+          }
+        });
+
+        if (placement === "prepend") {
+          cardsContainer.prepend(card);
+        } else {
+          cardsContainer.appendChild(card);
+        }
+      }
+
+      async function loadRepairs() {
+        try {
+          const repairs = await api.request("/api/repairs");
+          cardsContainer.innerHTML = "";
+
+          if (!repairs?.length) {
+            renderEmptyState();
+            return;
+          }
+
+          repairs.forEach((repair) => renderRepairCard(repair));
+        } catch (err) {
+          alert(err.message);
+        }
+      }
+
       /* ── WHATSAPP ── */
       function sendWhatsApp(button) {
         const card = button.closest(".card");
@@ -683,9 +785,29 @@
       }
 
       /* ── DELETE ── */
-      function deleteCard(button) {
+      async function deleteCard(button) {
+        const card = button.closest(".card");
+        const repairId = card.dataset.id;
+
+        if (!repairId) return;
+
         if (confirm("Are you sure you want to delete this customer?")) {
-          button.closest(".card").remove();
+          button.disabled = true;
+
+          try {
+            await api.request(`/api/repairs/${repairId}`, {
+              method: "DELETE",
+            });
+
+            card.remove();
+
+            if (!cardsContainer.querySelector(".card")) {
+              renderEmptyState();
+            }
+          } catch (err) {
+            alert(err.message);
+            button.disabled = false;
+          }
         }
       }
 
@@ -722,7 +844,7 @@
       });
 
       /* ── FORM SUBMIT ── */
-      form.addEventListener("submit", (e) => {
+      form.addEventListener("submit", async (e) => {
         e.preventDefault();
 
         const name     = document.getElementById("name").value.trim();
@@ -742,40 +864,30 @@
           return;
         }
 
-        const formattedAmount = "₹" + Number(rawAmount).toLocaleString("en-IN");
-        const dateStr = new Date().toLocaleDateString("en-IN", { day: "numeric", month: "short" });
+        try {
+          const repair = await api.request("/api/repairs", {
+            method: "POST",
+            body: JSON.stringify({
+              customerName: name,
+              device,
+              issue,
+              whatsapp: phone,
+              amount: rawAmount,
+              delivery,
+              status,
+            }),
+          });
 
-        const card = document.createElement("div");
-        card.className = "card";
-        card.style.animation = "none"; // skip animation on programmatic insert for snappiness
-        card.innerHTML = `
-          <div class="top">
-            <div class="customer-name">${name}</div>
-            <div class="amount">${formattedAmount}</div>
-          </div>
-          <div class="info"><strong>Phone</strong> ${device}</div>
-          <div class="info"><strong>Issue</strong> ${issue}</div>
-          <div class="info"><strong>WhatsApp</strong> ${phone}</div>
-          <div class="info"><strong>Payment</strong><a class="payment-link" target="_blank">Pay Now</a></div>
-          <div class="info"><strong>Date</strong> ${dateStr}</div>
-          <div class="info"><strong>Delivery</strong> ${delivery}</div>
-          <div class="status-box">
-            <select class="status-select">
-              <option value="Pending Work" ${status === "Pending Work" ? "selected" : ""}>Pending Work</option>
-              <option value="In Progress"  ${status === "In Progress"  ? "selected" : ""}>In Progress</option>
-              <option value="Done"         ${status === "Done"         ? "selected" : ""}>Done</option>
-            </select>
-          </div>
-          <div class="buttons">
-            <button class="whatsapp" onclick="sendWhatsApp(this)"><span>WhatsApp</span></button>
-            <button class="delete" onclick="deleteCard(this)" title="Delete Card">🗑</button>
-          </div>
-          <div class="footer-note">Thank you for trusting Balaji Mobile Shop 🙏</div>
-        `;
-
-        document.getElementById("cardsContainer").prepend(card);
-        closeModal();
+          const emptyCard = cardsContainer.querySelector(".status-select[disabled]")?.closest(".card");
+          emptyCard?.remove();
+          renderRepairCard(repair, "prepend");
+          closeModal();
+        } catch (err) {
+          alert(err.message);
+        }
       });
+
+      loadRepairs();
     </script>
   </body>
 </html>

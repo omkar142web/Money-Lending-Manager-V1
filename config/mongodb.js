@@ -1,50 +1,64 @@
 import { MongoClient } from "mongodb";
+import { env } from "./env.js";
 
-const dbname = "balajiStore";
-const URI = "mongodb+srv://userNameOP:17102006om@cluster0.05uptec.mongodb.net/";
+export const collections = {
+  users: "usersBalaji",
+  repairs: "repairJobs",
+};
 
-if (!URI) {
-  throw new Error("MONGO_URI is missing..");
-}
+let client;
+let actualDB;
 
-let actuallDB;
 export async function connectDB() {
   try {
-    // Reuse existing connection
-    if (actuallDB) return actuallDB;
+    if (actualDB) return actualDB;
 
-    const client = new MongoClient(URI);
+    client = new MongoClient(env.mongoUri);
     console.log("Connecting to MongoDB...");
 
     await client.connect();
-    actuallDB = client.db(dbname);
+    actualDB = client.db(env.dbName);
 
-    console.log(`🍃 MongoDB is connected to database : ${dbname}`);
+    await createIndexes();
 
-    // // CREATE INDEXES HERE
-    // await createIndexes();
+    console.log(`MongoDB connected to database: ${env.dbName}`);
+    return actualDB;
   } catch (err) {
-    console.error("❌ MongoDB connection failed:", err);
+    console.error("MongoDB connection failed:", err);
     process.exit(1);
   }
 }
 
-// async function createIndexes() {
-//   const usersCollection = actuallDB.collection("users");
+async function createIndexes() {
+  const usersCollection = actualDB.collection(collections.users);
+  const repairsCollection = actualDB.collection(collections.repairs);
 
-//   // UNIQUE EMAIL INDEX
-//   await usersCollection.createIndex(
-//     { email: 1 },
-//     { unique: true }
-//   );
+  await usersCollection.createIndex({ email: 1 }, { unique: true });
+  await repairsCollection.createIndex({ createdAt: -1 });
+  await repairsCollection.createIndex({ status: 1, createdAt: -1 });
+  await repairsCollection.createIndex({ whatsapp: 1 });
+}
 
-//   console.log("✅ User indexes created");
-// }
-
-export function getCollection(collectionName = "usersBalaji") {
-  if (!actuallDB) {
+export function getDB() {
+  if (!actualDB) {
     throw new Error("Database not connected. Please call connectDB() first.");
   }
-  let actualCollection = actuallDB.collection(collectionName);
-  return actualCollection;
+
+  return actualDB;
+}
+
+export function getCollection(collectionName) {
+  if (!collectionName) {
+    throw new Error("Collection name is required.");
+  }
+
+  return getDB().collection(collectionName);
+}
+
+export async function closeDB() {
+  if (client) {
+    await client.close();
+    client = undefined;
+    actualDB = undefined;
+  }
 }
