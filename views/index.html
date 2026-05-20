@@ -3,111 +3,373 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Mobile Shop Customer Manager</title>
+    <title>Balaji Mobile Shop – Dashboard</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap"
       rel="stylesheet"
     />
     <style>
+      /* ═══════════════════════════════════════════════════
+         DESIGN TOKENS
+      ═══════════════════════════════════════════════════ */
       :root {
-        --primary: #10b981;
-        --primary-hover: #059669;
-        --bg: #f8fafc;
-        --text-dark: #1e293b;
-        --text-muted: #64748b;
-        --card-bg: #ffffff;
-        --danger: #ef4444;
-        --danger-hover: #dc2626;
-        --border: #e2e8f0;
-        --input-bg: #f8fafc;
-        --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.07);
-        --shadow-md: 0 4px 12px -2px rgb(0 0 0 / 0.08), 0 2px 6px -2px rgb(0 0 0 / 0.05);
-        --shadow-lg: 0 12px 28px -4px rgb(0 0 0 / 0.1), 0 4px 8px -4px rgb(0 0 0 / 0.06);
+        --bg: #080c14;
+        --bg-mesh:
+          radial-gradient(
+            ellipse 80% 60% at 50% -10%,
+            rgba(16, 208, 122, 0.08) 0%,
+            transparent 70%
+          ),
+          radial-gradient(
+            ellipse 55% 40% at 85% 80%,
+            rgba(99, 102, 241, 0.06) 0%,
+            transparent 60%
+          ),
+          radial-gradient(
+            ellipse 45% 35% at 10% 70%,
+            rgba(16, 208, 122, 0.04) 0%,
+            transparent 60%
+          );
+        --surf-1: #0d1117;
+        --surf-2: #131924;
+        --surf-3: #1a2133;
+        --surf-4: #1e2840;
+
+        --border: rgba(255, 255, 255, 0.07);
+        --border-md: rgba(255, 255, 255, 0.11);
+        --border-bright: rgba(255, 255, 255, 0.18);
+
+        --text-1: #e8edf6;
+        --text-2: #8b95a8;
+        --text-3: #525d6e;
+
+        --accent: #10d07a;
+        --accent-dim: rgba(16, 208, 122, 0.14);
+        --accent-glow: rgba(16, 208, 122, 0.3);
+        --accent-hover: #0ab865;
+
+        --red: #f43f5e;
+        --red-dim: rgba(244, 63, 94, 0.13);
+        --amber: #f59e0b;
+        --amber-dim: rgba(245, 158, 11, 0.13);
+        --blue: #6366f1;
+        --blue-dim: rgba(99, 102, 241, 0.14);
+        --sky: #38bdf8;
+        --sky-dim: rgba(56, 189, 248, 0.13);
+        --violet: #a78bfa;
+        --violet-dim: rgba(167, 139, 250, 0.13);
+        --slate: #64748b;
+        --slate-dim: rgba(100, 116, 139, 0.13);
+        --teal: #14b8a6;
+        --teal-dim: rgba(20, 184, 166, 0.13);
+
+        --radius-xs: 6px;
         --radius-sm: 10px;
         --radius-md: 14px;
         --radius-lg: 20px;
+        --radius-xl: 28px;
+
+        --shadow-xs: 0 1px 3px rgba(0, 0, 0, 0.4);
+        --shadow-sm:
+          0 2px 8px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.04);
+        --shadow-md:
+          0 4px 20px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.05);
+        --shadow-lg:
+          0 12px 40px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.06);
+        --shadow-xl:
+          0 24px 64px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(255, 255, 255, 0.07);
+
+        --font: "Plus Jakarta Sans", system-ui, sans-serif;
+        --mono: "DM Mono", "Fira Mono", monospace;
+
+        --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+        --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
       }
 
-      *, *::before, *::after {
+      /* ═══════════════════════════════════════════════════
+         RESET & BASE
+      ═══════════════════════════════════════════════════ */
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
         margin: 0;
         padding: 0;
-        box-sizing: border-box;
-        font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+      }
+
+      html {
+        -webkit-font-smoothing: antialiased;
       }
 
       body {
+        font-family: var(--font);
         background: var(--bg);
-        color: var(--text-dark);
-        line-height: 1.5;
-        padding: 36px 20px;
+        background-image: var(--bg-mesh);
+        background-attachment: fixed;
+        color: var(--text-1);
+        line-height: 1.55;
+        min-height: 100vh;
+        overflow-x: hidden;
       }
 
-      /* Prevent scroll when modal open */
       body.modal-open {
         overflow: hidden;
       }
 
-      .container {
-        max-width: 1200px;
-        margin: 0 auto;
+      /* ═══════════════════════════════════════════════════
+         SCROLLBAR
+      ═══════════════════════════════════════════════════ */
+      ::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+      }
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.12);
+        border-radius: 99px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.22);
       }
 
-      /* ── HEADER ── */
-      header {
-        position: relative;
-        text-align: center;
-        margin-bottom: 40px;
-        padding-inline: 112px;
+      /* ═══════════════════════════════════════════════════
+         TOPBAR / NAVBAR
+      ═══════════════════════════════════════════════════ */
+      .topbar {
+        position: sticky;
+        top: 0;
+        z-index: 90;
+        background: rgba(8, 12, 20, 0.82);
+        backdrop-filter: blur(20px) saturate(160%);
+        -webkit-backdrop-filter: blur(20px) saturate(160%);
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 28px;
+        height: 60px;
+        gap: 16px;
       }
 
-      header h1 {
-        font-size: 28px;
-        font-weight: 700;
-        color: var(--text-dark);
-        letter-spacing: -0.02em;
-        margin-bottom: 6px;
+      .topbar-brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-shrink: 0;
       }
 
-      header p {
-        color: var(--text-muted);
+      .brand-icon {
+        width: 34px;
+        height: 34px;
+        background: linear-gradient(135deg, var(--accent), #0ab865);
+        border-radius: var(--radius-sm);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 17px;
+        box-shadow: 0 0 18px var(--accent-glow);
+        flex-shrink: 0;
+      }
+
+      .brand-name {
         font-size: 15px;
+        font-weight: 700;
+        color: var(--text-1);
+        letter-spacing: -0.02em;
+        line-height: 1.2;
+      }
+
+      .brand-sub {
+        font-size: 11px;
+        color: var(--text-3);
+        font-weight: 500;
+        letter-spacing: 0.01em;
+      }
+
+      .topbar-right {
+        display: flex;
+        align-items: center;
+        gap: 10px;
       }
 
       .logout-btn {
-        position: absolute;
-        top: 0;
-        right: 0;
         display: inline-flex;
         align-items: center;
-        justify-content: center;
-        min-height: 38px;
+        gap: 6px;
+        height: 34px;
         padding: 0 14px;
         border-radius: var(--radius-sm);
-        background: white;
-        border: 1px solid var(--border);
-        color: var(--text-muted);
+        background: var(--surf-2);
+        border: 1px solid var(--border-md);
+        color: var(--text-2);
         font-size: 13px;
-        font-weight: 800;
+        font-weight: 600;
+        font-family: var(--font);
         text-decoration: none;
-        box-shadow: var(--shadow-sm);
-        transition: color 0.15s, border-color 0.15s, box-shadow 0.15s, transform 0.15s;
+        transition: all 0.18s ease;
+        cursor: pointer;
+        white-space: nowrap;
       }
 
       .logout-btn:hover {
-        color: var(--danger);
-        border-color: #fecaca;
-        box-shadow: var(--shadow-md);
+        background: var(--red-dim);
+        border-color: rgba(244, 63, 94, 0.3);
+        color: var(--red);
         transform: translateY(-1px);
       }
 
+      /* ═══════════════════════════════════════════════════
+         MAIN LAYOUT
+      ═══════════════════════════════════════════════════ */
+      .container {
+        max-width: 1280px;
+        margin: 0 auto;
+        padding: 32px 28px 80px;
+      }
+
+      /* ═══════════════════════════════════════════════════
+         PAGE HEADER
+      ═══════════════════════════════════════════════════ */
+      .page-header {
+        margin-bottom: 32px;
+        animation: fadeUp 0.5s var(--ease-out) both;
+      }
+
+      .page-header h1 {
+        font-size: 24px;
+        font-weight: 800;
+        color: var(--text-1);
+        letter-spacing: -0.03em;
+        margin-bottom: 4px;
+      }
+
+      .page-header p {
+        font-size: 14px;
+        color: var(--text-3);
+        font-weight: 500;
+      }
+
+      /* ═══════════════════════════════════════════════════
+         SUMMARY GRID
+      ═══════════════════════════════════════════════════ */
+      .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+        margin-bottom: 28px;
+        animation: fadeUp 0.5s var(--ease-out) 0.05s both;
+      }
+
+      .summary-item {
+        background: var(--surf-1);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 20px 22px;
+        position: relative;
+        overflow: hidden;
+        transition:
+          border-color 0.2s,
+          transform 0.2s;
+      }
+
+      .summary-item::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        opacity: 0;
+        transition: opacity 0.3s;
+      }
+
+      .summary-item:hover {
+        border-color: var(--border-md);
+        transform: translateY(-2px);
+      }
+      .summary-item:hover::before {
+        opacity: 1;
+      }
+
+      .summary-item:nth-child(1) {
+        border-top: 2px solid var(--blue);
+      }
+      .summary-item:nth-child(1) .summary-icon {
+        background: var(--blue-dim);
+        color: var(--blue);
+      }
+
+      .summary-item:nth-child(2) {
+        border-top: 2px solid var(--violet);
+      }
+      .summary-item:nth-child(2) .summary-icon {
+        background: var(--violet-dim);
+        color: var(--violet);
+      }
+
+      .summary-item:nth-child(3) {
+        border-top: 2px solid var(--accent);
+      }
+      .summary-item:nth-child(3) .summary-icon {
+        background: var(--accent-dim);
+        color: var(--accent);
+      }
+
+      .summary-item:nth-child(4) {
+        border-top: 2px solid var(--amber);
+      }
+      .summary-item:nth-child(4) .summary-icon {
+        background: var(--amber-dim);
+        color: var(--amber);
+      }
+
+      .summary-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 14px;
+      }
+
+      .summary-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: var(--radius-sm);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        flex-shrink: 0;
+      }
+
+      .summary-label {
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--text-3);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+
+      .summary-value {
+        font-size: 26px;
+        font-weight: 800;
+        color: var(--text-1);
+        letter-spacing: -0.03em;
+        font-family: var(--mono);
+        line-height: 1;
+      }
+
+      /* ═══════════════════════════════════════════════════
+         WORKFLOW BAR
+      ═══════════════════════════════════════════════════ */
       .workflow-bar {
         display: grid;
-        grid-template-columns: minmax(240px, 360px) minmax(180px, 220px) 1fr;
-        gap: 14px;
+        grid-template-columns: 1fr 200px;
+        gap: 12px;
         align-items: center;
-        margin-bottom: 24px;
+        margin-bottom: 16px;
+        animation: fadeUp 0.5s var(--ease-out) 0.1s both;
       }
 
       .search-control {
@@ -116,21 +378,29 @@
 
       .search-control input {
         width: 100%;
-        height: 44px;
-        border: 1px solid var(--border);
-        background: white;
-        color: var(--text-dark);
+        height: 42px;
+        background: var(--surf-1);
+        border: 1px solid var(--border-md);
+        color: var(--text-1);
         border-radius: var(--radius-md);
         padding: 0 14px 0 42px;
         font-size: 14px;
-        box-shadow: var(--shadow-sm);
-        transition: border-color 0.15s, box-shadow 0.15s;
+        font-family: var(--font);
+        transition:
+          border-color 0.15s,
+          box-shadow 0.15s,
+          background 0.15s;
+      }
+
+      .search-control input::placeholder {
+        color: var(--text-3);
       }
 
       .search-control input:focus {
         outline: none;
-        border-color: var(--primary);
-        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.12), var(--shadow-sm);
+        border-color: var(--accent);
+        background: var(--surf-2);
+        box-shadow: 0 0 0 3px var(--accent-dim);
       }
 
       .search-icon {
@@ -138,608 +408,989 @@
         left: 14px;
         top: 50%;
         transform: translateY(-50%);
-        color: var(--text-muted);
-        font-size: 15px;
+        color: var(--text-3);
+        font-size: 16px;
         pointer-events: none;
+        line-height: 1;
       }
 
       .payment-filter select {
         width: 100%;
-        height: 44px;
-        background-color: white;
-        box-shadow: var(--shadow-sm);
-      }
-
-      .summary-grid {
-        display: grid;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-        gap: 14px;
-        margin-bottom: 22px;
-      }
-
-      .summary-item {
-        background: white;
-        border: 1px solid var(--border);
+        height: 42px;
+        background: var(--surf-1);
+        border: 1px solid var(--border-md);
+        color: var(--text-2);
         border-radius: var(--radius-md);
-        padding: 14px 16px;
-        box-shadow: var(--shadow-sm);
+        padding: 0 34px 0 13px;
+        font-size: 13.5px;
+        font-family: var(--font);
+        font-weight: 600;
+        cursor: pointer;
+        transition:
+          border-color 0.15s,
+          box-shadow 0.15s;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%238b95a8'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 10px center;
+        background-size: 14px;
       }
 
-      .summary-label {
-        color: var(--text-muted);
-        font-size: 12px;
-        font-weight: 800;
-        text-transform: uppercase;
-        letter-spacing: 0.04em;
+      .payment-filter select option {
+        background: var(--surf-3);
       }
 
-      .summary-value {
-        color: var(--text-dark);
-        font-size: 20px;
-        font-weight: 800;
-        margin-top: 4px;
+      .payment-filter select:focus {
+        outline: none;
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px var(--accent-dim);
+      }
+
+      /* ═══════════════════════════════════════════════════
+         FILTER TABS
+      ═══════════════════════════════════════════════════ */
+      .filter-tabs-wrap {
+        margin-bottom: 24px;
+        animation: fadeUp 0.5s var(--ease-out) 0.12s both;
       }
 
       .filter-tabs {
         display: flex;
-        gap: 8px;
+        gap: 6px;
         overflow-x: auto;
-        padding: 2px 2px 8px;
-        scrollbar-width: thin;
-        scrollbar-color: #cbd5e1 transparent;
+        padding: 2px 2px 6px;
+        scrollbar-width: none;
+      }
+
+      .filter-tabs::-webkit-scrollbar {
+        display: none;
       }
 
       .filter-tab {
         flex: 0 0 auto;
-        min-height: 40px;
+        height: 34px;
         padding: 0 14px;
-        border-radius: 999px;
+        border-radius: 99px;
         border: 1px solid var(--border);
-        background: white;
-        color: var(--text-muted);
-        font-size: 13px;
+        background: transparent;
+        color: var(--text-3);
+        font-size: 12.5px;
         font-weight: 700;
-        box-shadow: var(--shadow-sm);
+        font-family: var(--font);
         white-space: nowrap;
+        cursor: pointer;
+        transition: all 0.18s ease;
+        letter-spacing: 0.01em;
       }
 
       .filter-tab:hover {
-        color: var(--primary-hover);
-        border-color: #a7f3d0;
-        transform: translateY(-1px);
+        color: var(--text-2);
+        border-color: var(--border-md);
+        background: var(--surf-2);
       }
 
       .filter-tab.active {
-        background: var(--primary);
-        border-color: var(--primary);
-        color: white;
-        box-shadow: 0 8px 18px rgba(16, 185, 129, 0.22);
+        background: var(--accent-dim);
+        border-color: var(--accent);
+        color: var(--accent);
+        box-shadow: 0 0 14px var(--accent-dim);
       }
 
-      .payment-status {
-        display: inline-flex;
-        align-items: center;
-        width: fit-content;
-        padding: 4px 10px;
-        border-radius: 999px;
-        background: #eff6ff;
-        color: #2563eb;
-        font-size: 12px;
-        font-weight: 800;
-      }
-
-      .payment-status.status-unpaid {
-        background: #fee2e2;
-        color: #b91c1c;
-      }
-
-      .payment-status.status-partially-paid {
-        background: #ffedd5;
-        color: #c2410c;
-      }
-
-      .payment-status.status-paid {
-        background: #dcfce7;
-        color: #15803d;
-      }
-
-      .flag-badges {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 6px;
-        margin-top: 12px;
-      }
-
-      .flag-badge {
-        padding: 4px 8px;
-        border-radius: 999px;
-        background: #fef3c7;
-        color: #92400e;
-        font-size: 11px;
-        font-weight: 800;
-      }
-
-      .flag-badge.urgent {
-        background: #fee2e2;
-        color: #b91c1c;
-      }
-
-      /* ── CARDS GRID ── */
+      /* ═══════════════════════════════════════════════════
+         CARDS GRID
+      ═══════════════════════════════════════════════════ */
       .cards {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-        gap: 20px;
-        transition: opacity 0.18s ease;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 18px;
+        animation: fadeUp 0.5s var(--ease-out) 0.18s both;
       }
 
       .cards.is-loading {
-        opacity: 0.64;
+        pointer-events: none;
       }
 
+      /* ═══════════════════════════════════════════════════
+         REPAIR CARD
+      ═══════════════════════════════════════════════════ */
       .card {
-        background: var(--card-bg);
+        background: var(--surf-1);
+        border: 1px solid var(--border);
         border-radius: var(--radius-lg);
-        padding: 22px;
-        box-shadow: var(--shadow-md);
-        border: 1px solid #f1f5f9;
+        overflow: hidden;
         display: flex;
         flex-direction: column;
-        transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+        position: relative;
+        transition:
+          transform 0.22s var(--ease-out),
+          box-shadow 0.22s ease,
+          border-color 0.22s ease;
+        box-shadow: var(--shadow-sm);
+      }
+
+      .card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          var(--card-accent, var(--accent)),
+          transparent
+        );
+        opacity: 0;
+        transition: opacity 0.25s;
       }
 
       .card:hover {
         transform: translateY(-3px);
         box-shadow: var(--shadow-lg);
-        border-color: var(--primary);
+        border-color: var(--border-md);
       }
 
-      .top {
+      .card:hover::before {
+        opacity: 1;
+      }
+
+      /* Status-based accent colors */
+      .card[data-repair-status="Pending Work"] {
+        --card-accent: var(--amber);
+      }
+      .card[data-repair-status="In Progress"] {
+        --card-accent: var(--blue);
+      }
+      .card[data-repair-status="Waiting for Parts"] {
+        --card-accent: var(--violet);
+      }
+      .card[data-repair-status="Ready for Pickup"] {
+        --card-accent: var(--accent);
+      }
+      .card[data-repair-status="Delivered"] {
+        --card-accent: var(--teal);
+      }
+      .card[data-repair-status="Cancelled"] {
+        --card-accent: var(--red);
+      }
+
+      /* Card Header */
+      .card-head {
         display: flex;
-        justify-content: space-between;
         align-items: flex-start;
-        margin-bottom: 18px;
-        gap: 12px;
+        justify-content: space-between;
+        padding: 18px 18px 14px;
+        gap: 10px;
+        border-bottom: 1px solid var(--border);
       }
 
       .customer-name {
-        font-size: 19px;
+        font-size: 16px;
         font-weight: 700;
-        color: var(--text-dark);
-        line-height: 1.25;
+        color: var(--text-1);
+        letter-spacing: -0.02em;
+        line-height: 1.3;
       }
 
+      .customer-meta {
+        font-size: 12px;
+        color: var(--text-3);
+        font-weight: 500;
+        margin-top: 2px;
+      }
+
+      /* Amount Badge */
       .amount {
         display: inline-flex;
         align-items: center;
-        gap: 7px;
+        gap: 5px;
         padding: 5px 11px;
-        border-radius: 100px;
+        border-radius: 99px;
         white-space: nowrap;
         flex-shrink: 0;
+        font-family: var(--mono);
       }
 
       .amount-due {
-        background: #fff7ed;
-        color: #c2410c;
+        background: var(--red-dim);
+        border: 1px solid rgba(244, 63, 94, 0.2);
+        color: var(--red);
       }
 
       .amount-paid {
-        background: #ecfdf5;
-        color: #15803d;
+        background: var(--accent-dim);
+        border: 1px solid rgba(16, 208, 122, 0.2);
+        color: var(--accent);
       }
 
       .total-crossed {
-        color: var(--text-muted);
-        font-size: 12px;
-        font-weight: 600;
+        font-size: 11px;
+        font-weight: 500;
         text-decoration: line-through;
-        text-decoration-thickness: 1.5px;
+        opacity: 0.55;
       }
 
       .remaining-value {
-        font-size: 15px;
-        font-weight: 800;
+        font-size: 13px;
+        font-weight: 600;
         line-height: 1;
+      }
+
+      /* Card Body */
+      .card-body {
+        padding: 14px 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 1px;
+        flex: 1;
       }
 
       .info {
         display: flex;
         align-items: baseline;
-        gap: 8px;
-        font-size: 14px;
-        color: var(--text-muted);
+        gap: 10px;
         padding: 5px 0;
-        border-bottom: 1px solid #f8fafc;
-      }
-
-      .info:last-of-type {
-        border-bottom: none;
+        font-size: 13.5px;
       }
 
       .info strong {
-        color: var(--text-dark);
+        color: var(--text-3);
         font-weight: 600;
-        min-width: 76px;
+        font-size: 11.5px;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        min-width: 82px;
         flex-shrink: 0;
+      }
+
+      .info-value {
+        color: var(--text-2);
+        font-weight: 500;
+        line-height: 1.4;
+      }
+
+      .info-value.mono {
+        font-family: var(--mono);
         font-size: 13px;
       }
 
+      /* Payment link */
       .payment-link {
-        color: var(--primary);
+        color: var(--accent);
         text-decoration: none;
         font-weight: 600;
-        border-bottom: 1px dashed var(--primary);
-        transition: color 0.15s;
+        font-size: 13px;
+        transition: opacity 0.15s;
       }
-
       .payment-link:hover {
-        color: var(--primary-hover);
-        border-bottom-style: solid;
+        opacity: 0.75;
       }
 
+      /* Payment status badge */
+      .payment-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 3px 9px;
+        border-radius: 99px;
+        font-size: 11.5px;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+        line-height: 1;
+      }
+
+      .payment-status::before {
+        content: "";
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        flex-shrink: 0;
+      }
+
+      .status-unpaid {
+        background: var(--red-dim);
+        color: var(--red);
+        border: 1px solid rgba(244, 63, 94, 0.2);
+      }
+      .status-unpaid::before {
+        background: var(--red);
+      }
+
+      .status-partially-paid {
+        background: var(--amber-dim);
+        color: var(--amber);
+        border: 1px solid rgba(245, 158, 11, 0.2);
+      }
+      .status-partially-paid::before {
+        background: var(--amber);
+      }
+
+      .status-paid {
+        background: var(--accent-dim);
+        color: var(--accent);
+        border: 1px solid rgba(16, 208, 122, 0.2);
+      }
+      .status-paid::before {
+        background: var(--accent);
+        box-shadow: 0 0 6px var(--accent);
+      }
+
+      /* Flag Badges */
+      .flag-badges {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+        padding: 10px 0 4px;
+      }
+
+      .flag-badge {
+        padding: 3px 8px;
+        border-radius: 99px;
+        font-size: 10.5px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        background: var(--amber-dim);
+        color: var(--amber);
+        border: 1px solid rgba(245, 158, 11, 0.2);
+      }
+
+      .flag-badge.urgent {
+        background: var(--red-dim);
+        color: var(--red);
+        border-color: rgba(244, 63, 94, 0.22);
+      }
+
+      /* Status Select */
       .status-box {
-        margin: 16px 0 0;
+        padding: 0 18px 14px;
       }
 
       select {
         width: 100%;
-        padding: 10px 36px 10px 12px;
+        padding: 9px 34px 9px 12px;
         border-radius: var(--radius-sm);
-        border: 1px solid var(--border);
-        background-color: var(--input-bg);
-        font-size: 14px;
-        font-weight: 500;
-        color: var(--text-dark);
+        border: 1px solid var(--border-md);
+        background: var(--surf-2);
+        color: var(--text-2);
+        font-size: 13.5px;
+        font-weight: 600;
+        font-family: var(--font);
         cursor: pointer;
-        transition: border-color 0.15s, box-shadow 0.15s;
+        transition:
+          border-color 0.15s,
+          box-shadow 0.15s;
         appearance: none;
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%238b95a8'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
         background-repeat: no-repeat;
-        background-position: right 12px center;
-        background-size: 15px;
+        background-position: right 10px center;
+        background-size: 14px;
+      }
+
+      select option {
+        background: var(--surf-3);
+        color: var(--text-1);
       }
 
       select:focus {
         outline: none;
-        border-color: var(--primary);
-        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px var(--accent-dim);
       }
 
+      /* Card Buttons */
       .buttons {
         display: flex;
         flex-wrap: wrap;
-        gap: 10px;
-        margin-top: 14px;
+        gap: 8px;
+        padding: 0 18px 18px;
       }
 
       button {
         border: none;
         cursor: pointer;
-        font-family: inherit;
-        transition: background 0.15s, transform 0.15s, box-shadow 0.15s;
+        font-family: var(--font);
+        transition: all 0.18s ease;
       }
 
       .whatsapp {
         flex: 1 1 100%;
-        padding: 12px 16px;
+        padding: 11px 16px;
         border-radius: var(--radius-sm);
-        background: var(--primary);
-        color: white;
-        font-size: 14px;
-        font-weight: 600;
+        background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+        color: #fff;
+        font-size: 13.5px;
+        font-weight: 700;
         display: flex;
         align-items: center;
         justify-content: center;
         gap: 7px;
+        box-shadow: 0 4px 14px var(--accent-glow);
+        position: relative;
+        overflow: hidden;
+        letter-spacing: 0.01em;
+      }
+
+      .whatsapp::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          135deg,
+          rgba(255, 255, 255, 0.12),
+          transparent
+        );
+        opacity: 0;
+        transition: opacity 0.18s;
       }
 
       .whatsapp:hover {
-        background: var(--primary-hover);
-        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+        transform: translateY(-1px);
+        box-shadow: 0 6px 20px var(--accent-glow);
+      }
+      .whatsapp:hover::after {
+        opacity: 1;
+      }
+      .whatsapp:active {
+        transform: translateY(0);
       }
 
-      .delete {
-        width: 44px;
-        height: 44px;
+      .btn-icon {
+        width: 38px;
+        height: 38px;
         flex-shrink: 0;
         border-radius: var(--radius-sm);
-        background: #fee2e2;
-        color: var(--danger);
-        font-size: 16px;
         display: flex;
         align-items: center;
         justify-content: center;
+        font-size: 15px;
+        line-height: 1;
+        transition: all 0.18s ease;
       }
 
       .edit {
-        width: 44px;
-        height: 44px;
-        flex-shrink: 0;
-        border-radius: var(--radius-sm);
-        background: #dbeafe;
-        color: #2563eb;
-        font-size: 16px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        background: var(--blue-dim);
+        color: var(--blue);
+        border: 1px solid rgba(99, 102, 241, 0.2);
       }
 
       .edit:hover {
-        background: #2563eb;
-        color: white;
-        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.22);
+        background: var(--blue);
+        color: #fff;
+        border-color: var(--blue);
+      }
+
+      .delete {
+        background: var(--red-dim);
+        color: var(--red);
+        border: 1px solid rgba(244, 63, 94, 0.2);
       }
 
       .delete:hover {
-        background: var(--danger);
-        color: white;
-        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+        background: var(--red);
+        color: #fff;
+        border-color: var(--red);
+      }
+
+      .payment-action {
+        flex: 1;
+        min-height: 38px;
+        border-radius: var(--radius-sm);
+        background: var(--surf-3);
+        border: 1px solid var(--border-md);
+        color: var(--text-2);
+        font-size: 12.5px;
+        font-weight: 700;
+        letter-spacing: 0.01em;
+        transition: all 0.18s ease;
+      }
+
+      .payment-action:hover {
+        background: var(--accent-dim);
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+
+      .history-action {
+        flex: 1;
+        min-height: 38px;
+        border-radius: var(--radius-sm);
+        background: var(--surf-3);
+        border: 1px solid var(--border-md);
+        color: var(--text-2);
+        font-size: 12.5px;
+        font-weight: 700;
+        letter-spacing: 0.01em;
+        transition: all 0.18s ease;
+      }
+
+      .history-action:hover {
+        background: var(--surf-4);
+        border-color: var(--border-bright);
+        color: var(--text-1);
       }
 
       .footer-note {
-        margin-top: 16px;
-        font-size: 12.5px;
-        color: var(--text-muted);
+        padding: 10px 18px 14px;
+        font-size: 11.5px;
+        color: var(--text-3);
         text-align: center;
-        padding-top: 14px;
-        border-top: 1px solid #f1f5f9;
+        border-top: 1px solid var(--border);
         font-style: italic;
+        letter-spacing: 0.01em;
       }
 
-      /* ── FAB ── */
-      .fab {
-        position: fixed;
-        bottom: 32px;
-        right: 32px;
-        width: 56px;
-        height: 56px;
-        background: var(--primary);
-        color: white;
-        border-radius: 16px;
+      /* ═══════════════════════════════════════════════════
+         SKELETON LOADING
+      ═══════════════════════════════════════════════════ */
+      @keyframes shimmer {
+        0% {
+          background-position: -600px 0;
+        }
+        100% {
+          background-position: 600px 0;
+        }
+      }
+
+      .skeleton {
+        background: linear-gradient(
+          90deg,
+          var(--surf-2) 25%,
+          var(--surf-3) 50%,
+          var(--surf-2) 75%
+        );
+        background-size: 600px 100%;
+        animation: shimmer 1.6s infinite linear;
+        border-radius: 6px;
+      }
+
+      .card-skeleton {
+        background: var(--surf-1);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        pointer-events: none;
+      }
+
+      .skel-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+      }
+      .skel-h {
+        height: 14px;
+        border-radius: 6px;
+      }
+      .skel-lg {
+        width: 60%;
+      }
+      .skel-md {
+        width: 40%;
+      }
+      .skel-sm {
+        width: 25%;
+      }
+      .skel-xs {
+        width: 18%;
+      }
+      .skel-pill {
+        height: 22px;
+        width: 80px;
+        border-radius: 99px;
+      }
+      .skel-btn {
+        height: 38px;
+        border-radius: 8px;
+      }
+      .skel-lines {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      /* ═══════════════════════════════════════════════════
+         EMPTY STATE
+      ═══════════════════════════════════════════════════ */
+      .empty-state {
+        grid-column: 1/-1;
+        text-align: center;
+        padding: 64px 24px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .empty-icon {
+        width: 64px;
+        height: 64px;
+        background: var(--surf-2);
+        border: 1px solid var(--border-md);
+        border-radius: var(--radius-lg);
         display: flex;
         align-items: center;
         justify-content: center;
         font-size: 28px;
+        margin-bottom: 6px;
+      }
+
+      .empty-state h3 {
+        font-size: 17px;
+        font-weight: 700;
+        color: var(--text-2);
+      }
+      .empty-state p {
+        font-size: 13.5px;
+        color: var(--text-3);
+        max-width: 260px;
+      }
+
+      /* ═══════════════════════════════════════════════════
+         FAB
+      ═══════════════════════════════════════════════════ */
+      .fab {
+        position: fixed;
+        bottom: 28px;
+        right: 28px;
+        width: 54px;
+        height: 54px;
+        background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+        color: #fff;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 26px;
         font-weight: 300;
         line-height: 1;
-        box-shadow: 0 6px 20px rgba(16, 185, 129, 0.38);
+        box-shadow:
+          0 8px 24px var(--accent-glow),
+          0 0 0 1px rgba(16, 208, 122, 0.25);
         cursor: pointer;
-        transition: transform 0.3s ease, background 0.2s, box-shadow 0.2s;
         z-index: 1000;
         border: none;
+        transition:
+          transform 0.25s var(--ease-spring),
+          box-shadow 0.2s;
       }
 
       .fab:hover {
-        transform: scale(1.08) rotate(90deg);
-        background: var(--primary-hover);
-        box-shadow: 0 8px 24px rgba(16, 185, 129, 0.45);
+        transform: scale(1.1) rotate(90deg);
+        box-shadow: 0 12px 32px rgba(16, 208, 122, 0.45);
       }
 
-      /* ── MODAL OVERLAY ── */
-      /*
-        Strategy:
-        - Overlay is fixed, full viewport, scrollable
-        - It holds the modal centered with flex + auto margins
-        - Modal itself has max-height and its own internal scroll
-        - No double scrollbars: body scroll is locked, overlay scrolls
-      */
+      .fab:active {
+        transform: scale(0.97) rotate(45deg);
+      }
+
+      /* ═══════════════════════════════════════════════════
+         MODAL OVERLAY
+      ═══════════════════════════════════════════════════ */
       .modal-overlay {
         display: none;
         position: fixed;
         inset: 0;
-        background: rgba(15, 23, 42, 0.55);
-        backdrop-filter: blur(5px);
-        -webkit-backdrop-filter: blur(5px);
+        background: rgba(2, 5, 10, 0.75);
+        backdrop-filter: blur(12px) saturate(120%);
+        -webkit-backdrop-filter: blur(12px) saturate(120%);
         z-index: 2000;
-        /* Overlay itself scrolls on very short viewports */
         overflow-y: auto;
         overscroll-behavior: contain;
-        /* Flex so modal centers nicely */
-        padding: 24px 16px;
+        padding: 28px 16px;
       }
 
       .modal-overlay.is-open {
         display: block;
       }
 
-      /* ── MODAL BOX ── */
+      /* ═══════════════════════════════════════════════════
+         MODAL CONTENT
+      ═══════════════════════════════════════════════════ */
       .modal-content {
-        background: white;
+        background: var(--surf-1);
+        border: 1px solid var(--border-md);
         width: 100%;
-        max-width: 480px;
-        /* Center inside scrolling overlay */
+        max-width: 500px;
         margin: 0 auto;
-        /* On very short screens the modal can scroll within itself */
-        max-height: calc(100dvh - 48px); /* 48 = 2 × 24px padding */
+        max-height: calc(100dvh - 56px);
         overflow-y: auto;
         overscroll-behavior: contain;
-        border-radius: 20px;
-        box-shadow: var(--shadow-lg);
-        /* Subtle entrance */
-        animation: modalIn 0.22s ease both;
-        padding: 28px 28px 32px;
-        position: relative;
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-xl);
+        animation: modalIn 0.26s var(--ease-out) both;
+        padding: 0;
       }
 
       @keyframes modalIn {
-        from { opacity: 0; transform: translateY(12px) scale(0.99); }
-        to   { opacity: 1; transform: translateY(0)   scale(1); }
+        from {
+          opacity: 0;
+          transform: translateY(16px) scale(0.98);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
       }
 
-      /* ── MODAL HEADER ── */
       .modal-header {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        margin-bottom: 24px;
-        /* Stick header to top inside modal scroll */
-        position: sticky;
-        top: -28px;          /* matches modal padding-top */
-        background: white;
-        z-index: 1;
-        padding: 4px 0 12px;
+        padding: 22px 24px 18px;
         border-bottom: 1px solid var(--border);
-        margin-top: -4px;
+        position: sticky;
+        top: 0;
+        background: var(--surf-1);
+        z-index: 10;
+        border-radius: var(--radius-xl) var(--radius-xl) 0 0;
       }
 
       .modal-header h2 {
-        font-size: 18px;
-        font-weight: 700;
-        color: var(--text-dark);
-        letter-spacing: -0.015em;
+        font-size: 17px;
+        font-weight: 800;
+        color: var(--text-1);
+        letter-spacing: -0.025em;
       }
 
       .close-modal {
         display: flex;
         align-items: center;
         justify-content: center;
-        width: 32px;
-        height: 32px;
-        border-radius: 8px;
-        border: none;
-        background: #f1f5f9;
-        color: var(--text-muted);
+        width: 30px;
+        height: 30px;
+        border-radius: var(--radius-xs);
+        border: 1px solid var(--border);
+        background: var(--surf-2);
+        color: var(--text-3);
         font-size: 18px;
         line-height: 1;
         cursor: pointer;
         flex-shrink: 0;
-        transition: background 0.15s, color 0.15s;
+        transition: all 0.15s;
       }
 
       .close-modal:hover {
-        background: #e2e8f0;
-        color: var(--text-dark);
+        background: var(--surf-3);
+        color: var(--text-1);
+        border-color: var(--border-md);
       }
 
-      /* ── FORM ── */
+      /* ═══════════════════════════════════════════════════
+         FORM
+      ═══════════════════════════════════════════════════ */
       #addCustomerForm {
         display: flex;
         flex-direction: column;
-        gap: 16px;
+        gap: 18px;
+        padding: 22px 24px 24px;
       }
 
-      /* Two-column row for narrow fields */
       .form-row {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 12px;
+        gap: 14px;
       }
 
       .form-group {
         display: flex;
         flex-direction: column;
-        gap: 6px;
+        gap: 7px;
       }
 
       .form-group label {
-        font-size: 13px;
-        font-weight: 600;
-        color: var(--text-dark);
-        letter-spacing: 0.01em;
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--text-3);
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
       }
 
       .form-group input,
       .form-group select {
         width: 100%;
-        padding: 10px 13px;
-        border: 1px solid var(--border);
+        height: 42px;
+        padding: 0 13px;
+        border: 1px solid var(--border-md);
         border-radius: var(--radius-sm);
         font-size: 14px;
-        font-family: inherit;
-        color: var(--text-dark);
-        background: var(--input-bg);
-        transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+        font-family: var(--font);
+        color: var(--text-1);
+        background: var(--surf-2);
+        transition:
+          border-color 0.15s,
+          box-shadow 0.15s,
+          background 0.15s;
       }
 
       .form-group input::placeholder {
-        color: #a0aec0;
+        color: var(--text-3);
       }
 
       .form-group input:focus,
       .form-group select:focus {
-        background: white;
-        border-color: var(--primary);
         outline: none;
-        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.12);
+        border-color: var(--accent);
+        background: var(--surf-3);
+        box-shadow: 0 0 0 3px var(--accent-dim);
       }
 
-      .payment-action,
-      .history-action,
-      .secondary-btn {
-        flex: 1 1 0;
-        min-height: 42px;
-        border-radius: var(--radius-sm);
-        background: #ecfdf5;
-        color: var(--primary-hover);
-        font-size: 13px;
+      .form-group select {
+        padding-right: 34px;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%238b95a8'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 10px center;
+        background-size: 14px;
+        background-color: var(--surf-2);
+        cursor: pointer;
+        color: var(--text-2);
+      }
+
+      .form-group select option {
+        background: var(--surf-3);
+      }
+
+      .form-section-label {
+        font-size: 11px;
         font-weight: 800;
-        border: 1px solid #a7f3d0;
+        color: var(--text-3);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        padding-bottom: 4px;
+        border-bottom: 1px solid var(--border);
       }
 
-      .history-action,
-      .secondary-btn {
-        background: #f8fafc;
-        color: var(--text-dark);
-        border-color: var(--border);
-      }
-
-      .payment-action:hover,
-      .history-action:hover,
-      .secondary-btn:hover {
-        transform: translateY(-1px);
-        box-shadow: var(--shadow-sm);
-      }
-
+      /* Flags */
       .flag-grid {
         display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 10px;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
       }
 
       .flag-option {
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 9px;
         padding: 10px 12px;
         border: 1px solid var(--border);
         border-radius: var(--radius-sm);
-        background: var(--input-bg);
-        color: var(--text-dark);
+        background: var(--surf-2);
+        color: var(--text-2);
         font-size: 13px;
-        font-weight: 700;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.15s;
+        user-select: none;
+      }
+
+      .flag-option:hover {
+        border-color: var(--border-md);
+        background: var(--surf-3);
+        color: var(--text-1);
       }
 
       .flag-option input {
-        width: 16px;
-        height: 16px;
-        accent-color: var(--primary);
+        width: 15px !important;
+        height: 15px !important;
+        padding: 0 !important;
+        accent-color: var(--accent);
+        flex-shrink: 0;
       }
 
+      .flag-option input:focus {
+        box-shadow: none !important;
+        border: none !important;
+        outline: none !important;
+      }
+
+      /* Submit Button */
+      .submit-btn {
+        width: 100%;
+        height: 44px;
+        background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+        color: #fff;
+        border-radius: var(--radius-md);
+        font-size: 14.5px;
+        font-weight: 700;
+        border: none;
+        cursor: pointer;
+        margin-top: 4px;
+        transition: all 0.18s ease;
+        font-family: var(--font);
+        box-shadow: 0 4px 16px var(--accent-glow);
+        letter-spacing: 0.02em;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .submit-btn::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          135deg,
+          rgba(255, 255, 255, 0.1),
+          transparent
+        );
+        opacity: 0;
+        transition: opacity 0.18s;
+      }
+
+      .submit-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 8px 24px var(--accent-glow);
+      }
+      .submit-btn:hover::after {
+        opacity: 1;
+      }
+      .submit-btn:active {
+        transform: translateY(0);
+      }
+
+      /* ═══════════════════════════════════════════════════
+         PAYMENT MODAL
+      ═══════════════════════════════════════════════════ */
       .payment-snapshot {
         display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-columns: repeat(3, 1fr);
         gap: 10px;
-        margin-bottom: 16px;
+        padding: 20px 24px;
+        border-bottom: 1px solid var(--border);
       }
 
       .snapshot-item {
-        background: #f8fafc;
+        background: var(--surf-2);
         border: 1px solid var(--border);
         border-radius: var(--radius-sm);
         padding: 10px 12px;
       }
 
       .snapshot-label {
-        color: var(--text-muted);
-        font-size: 12px;
+        font-size: 10.5px;
         font-weight: 800;
+        color: var(--text-3);
+        text-transform: uppercase;
+        letter-spacing: 0.07em;
       }
 
       .snapshot-value {
-        color: var(--text-dark);
-        font-size: 14px;
-        font-weight: 800;
-        margin-top: 2px;
+        font-size: 13.5px;
+        font-weight: 700;
+        color: var(--text-1);
+        margin-top: 3px;
+        font-family: var(--mono);
+      }
+
+      #paymentForm {
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+        padding: 20px 24px 24px;
       }
 
       .modal-actions {
@@ -747,96 +1398,160 @@
         gap: 10px;
       }
 
+      .secondary-btn {
+        flex: 1;
+        height: 44px;
+        border-radius: var(--radius-md);
+        background: var(--surf-3);
+        color: var(--text-2);
+        font-size: 13.5px;
+        font-weight: 700;
+        border: 1px solid var(--border-md);
+        font-family: var(--font);
+        cursor: pointer;
+        transition: all 0.18s ease;
+        letter-spacing: 0.01em;
+      }
+
+      .secondary-btn:hover {
+        background: var(--surf-4);
+        border-color: var(--border-bright);
+        color: var(--text-1);
+      }
+
+      /* ═══════════════════════════════════════════════════
+         HISTORY MODAL
+      ═══════════════════════════════════════════════════ */
       .history-list {
         display: flex;
         flex-direction: column;
-        gap: 10px;
+        gap: 8px;
+        padding: 20px 24px 24px;
       }
 
       .history-item {
         border: 1px solid var(--border);
-        border-radius: var(--radius-sm);
-        padding: 12px;
-        background: #f8fafc;
+        border-radius: var(--radius-md);
+        padding: 14px 16px;
+        background: var(--surf-2);
+        position: relative;
+        overflow: hidden;
+        transition: border-color 0.15s;
+      }
+
+      .history-item::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 3px;
+        background: var(--accent);
+        border-radius: 0 3px 3px 0;
+      }
+
+      .history-item:hover {
+        border-color: var(--border-md);
       }
 
       .history-main {
-        color: var(--text-dark);
+        color: var(--text-1);
         font-size: 14px;
-        font-weight: 800;
+        font-weight: 700;
+        font-family: var(--mono);
       }
 
-      .history-note,
+      .history-note {
+        color: var(--text-2);
+        font-size: 12.5px;
+        margin-top: 4px;
+      }
       .history-date {
-        color: var(--text-muted);
-        font-size: 13px;
-        margin-top: 4px;
+        color: var(--text-3);
+        font-size: 11.5px;
+        margin-top: 3px;
       }
 
-      /* select inside form resets the card select override */
-      .form-group select {
-        appearance: none;
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
-        background-repeat: no-repeat;
-        background-position: right 12px center;
-        background-size: 15px;
-        padding-right: 36px;
-        cursor: pointer;
+      /* ═══════════════════════════════════════════════════
+         ANIMATIONS
+      ═══════════════════════════════════════════════════ */
+      @keyframes fadeUp {
+        from {
+          opacity: 0;
+          transform: translateY(12px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
       }
 
-      .submit-btn {
-        width: 100%;
-        background: var(--primary);
-        color: white;
-        padding: 13px 16px;
-        border-radius: var(--radius-md);
-        font-size: 15px;
-        font-weight: 600;
-        border: none;
-        cursor: pointer;
-        margin-top: 4px;
-        transition: background 0.15s, box-shadow 0.15s;
-        font-family: inherit;
+      @keyframes counterPop {
+        0% {
+          transform: scale(1);
+        }
+        40% {
+          transform: scale(1.12);
+        }
+        100% {
+          transform: scale(1);
+        }
       }
 
-      .submit-btn:hover {
-        background: var(--primary-hover);
-        box-shadow: 0 6px 18px rgba(16, 185, 129, 0.28);
+      .summary-value.pop {
+        animation: counterPop 0.35s var(--ease-spring);
       }
 
-      /* ── RESPONSIVE ── */
+      /* Ripple */
+      .ripple {
+        position: absolute;
+        border-radius: 50%;
+        transform: scale(0);
+        background: rgba(255, 255, 255, 0.18);
+        animation: rippleAnim 0.5s linear;
+        pointer-events: none;
+      }
+
+      @keyframes rippleAnim {
+        to {
+          transform: scale(3);
+          opacity: 0;
+        }
+      }
+
+      /* ═══════════════════════════════════════════════════
+         RESPONSIVE
+      ═══════════════════════════════════════════════════ */
+      @media (max-width: 900px) {
+        .summary-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+
       @media (max-width: 640px) {
-        body {
-          padding: 24px 14px;
+        .container {
+          padding: 20px 16px 80px;
         }
 
-        header {
-          margin-bottom: 28px;
-          padding-inline: 0;
+        .topbar {
+          padding: 0 16px;
         }
-
-        header h1 {
-          font-size: 22px;
-        }
-
-        .logout-btn {
-          position: static;
-          margin-top: 14px;
+        .brand-sub {
+          display: none;
         }
 
         .summary-grid {
-          grid-template-columns: repeat(2, minmax(0, 1fr));
+          grid-template-columns: repeat(2, 1fr);
+          gap: 10px;
+          margin-bottom: 20px;
+        }
+        .summary-value {
+          font-size: 20px;
         }
 
         .workflow-bar {
           grid-template-columns: 1fr;
-          gap: 12px;
-          margin-bottom: 18px;
-        }
-
-        .filter-tabs {
-          margin-inline: -2px;
-          padding-bottom: 6px;
+          gap: 10px;
         }
 
         .cards {
@@ -844,163 +1559,273 @@
           gap: 14px;
         }
 
-        .card {
-          padding: 18px;
-        }
-
         .fab {
           bottom: 20px;
           right: 20px;
           width: 50px;
           height: 50px;
-          font-size: 24px;
-          border-radius: 14px;
         }
 
-        /* On mobile, overlay padding is tighter */
         .modal-overlay {
           padding: 12px;
         }
 
         .modal-content {
           max-height: calc(100dvh - 24px);
-          border-radius: 16px;
-          padding: 20px 18px 24px;
+          border-radius: 18px;
         }
 
-        .modal-header {
-          top: -20px;
-          margin-bottom: 18px;
-        }
-
-        /* Stack two-column rows on mobile */
         .form-row {
           grid-template-columns: 1fr;
-          gap: 16px;
         }
 
-        .payment-snapshot,
+        .payment-snapshot {
+          grid-template-columns: repeat(2, 1fr);
+        }
         .flag-grid {
           grid-template-columns: 1fr;
+        }
+
+        #addCustomerForm {
+          padding: 18px;
+        }
+        #paymentForm {
+          padding: 16px 18px 20px;
+        }
+        .payment-snapshot {
+          padding: 16px 18px;
+        }
+        .history-list {
+          padding: 16px 18px 20px;
+        }
+        .modal-header {
+          padding: 18px 18px 14px;
+          border-radius: 18px 18px 0 0;
+        }
+      }
+
+      @media (max-width: 400px) {
+        .summary-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+        .summary-value {
+          font-size: 18px;
+        }
+        .summary-icon {
+          width: 30px;
+          height: 30px;
+          font-size: 14px;
         }
       }
     </style>
   </head>
   <body>
-    <div class="container">
-      <header>
-        <h1>📱Balaji Mobile Shop Dashboard</h1>
-        <p>Manage repairs, status updates, and customer payments</p>
-        <a class="logout-btn" href="/logout">Logout</a>
-      </header>
+    <!-- ── TOPBAR ── -->
+    <nav class="topbar">
+      <div class="topbar-brand">
+        <div class="brand-icon">📱</div>
+        <div>
+          <div class="brand-name">Balaji Mobile</div>
+          <div class="brand-sub">Repair Dashboard</div>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <a class="logout-btn" href="/logout">
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" />
+            <polyline points="16 17 21 12 16 7" />
+            <line x1="21" y1="12" x2="9" y2="12" />
+          </svg>
+          Logout
+        </a>
+      </div>
+    </nav>
 
+    <div class="container">
+      <!-- ── PAGE HEADER ── -->
+      <div class="page-header">
+        <h1>Repair Tracker</h1>
+        <p>Manage repairs, payments, and customer communications</p>
+      </div>
+
+      <!-- ── SUMMARY GRID ── -->
       <section class="summary-grid" aria-label="Payment summary">
         <article class="summary-item">
-          <div class="summary-label">Total Repairs</div>
+          <div class="summary-top">
+            <div class="summary-label">Total Repairs</div>
+            <div class="summary-icon">🔧</div>
+          </div>
           <div class="summary-value" id="summaryRepairs">0</div>
         </article>
         <article class="summary-item">
-          <div class="summary-label">Total Revenue</div>
+          <div class="summary-top">
+            <div class="summary-label">Total Revenue</div>
+            <div class="summary-icon">💰</div>
+          </div>
           <div class="summary-value" id="summaryRevenue">₹0</div>
         </article>
         <article class="summary-item">
-          <div class="summary-label">Paid Revenue</div>
+          <div class="summary-top">
+            <div class="summary-label">Paid Revenue</div>
+            <div class="summary-icon">✅</div>
+          </div>
           <div class="summary-value" id="summaryPaid">₹0</div>
         </article>
         <article class="summary-item">
-          <div class="summary-label">Pending Revenue</div>
+          <div class="summary-top">
+            <div class="summary-label">Pending Revenue</div>
+            <div class="summary-icon">⏳</div>
+          </div>
           <div class="summary-value" id="summaryPending">₹0</div>
         </article>
       </section>
 
-      <section class="workflow-bar" aria-label="Repair filters">
+      <!-- ── WORKFLOW BAR ── -->
+      <section class="workflow-bar" aria-label="Filters">
         <div class="search-control">
           <span class="search-icon">⌕</span>
-          <input id="repairSearch" type="search" placeholder="Search customer, phone, or device" autocomplete="off" />
+          <input
+            id="repairSearch"
+            type="search"
+            placeholder="Search customer, phone, or device…"
+            autocomplete="off"
+          />
         </div>
-
         <div class="payment-filter">
-          <select id="paymentStatusFilter" aria-label="Filter by payment status">
+          <select
+            id="paymentStatusFilter"
+            aria-label="Filter by payment status"
+          >
             <option value="All">All Payments</option>
             <option value="Unpaid">Unpaid</option>
             <option value="Partially Paid">Partially Paid</option>
             <option value="Paid">Paid</option>
           </select>
         </div>
-
-        <div class="filter-tabs" id="statusFilterBar" aria-label="Filter by repair status"></div>
       </section>
 
+      <!-- ── FILTER TABS ── -->
+      <div class="filter-tabs-wrap">
+        <div
+          class="filter-tabs"
+          id="statusFilterBar"
+          aria-label="Filter by repair status"
+        ></div>
+      </div>
+
+      <!-- ── CARDS ── -->
       <div class="cards" id="cardsContainer">
-        <div class="card">
-          <div class="top">
-            <div class="customer-name">Loading repair jobs</div>
-            <div class="amount">₹0</div>
-          </div>
-          <div class="info"><strong>Device</strong> Please wait</div>
-          <div class="info"><strong>Issue</strong> Syncing dashboard</div>
-          <div class="info"><strong>WhatsApp</strong> -</div>
-          <div class="info">
-            <strong>Payment</strong>
-            <a class="payment-link">Pay Now</a>
-          </div>
-          <div class="info"><strong>Date</strong> -</div>
-          <div class="info"><strong>Delivery</strong> -</div>
-          <div class="status-box">
-            <select class="status-select" disabled>
-              <option>Loading</option>
-            </select>
-          </div>
-        </div>
+        <!-- Skeleton cards rendered by JS -->
       </div>
     </div>
 
-    <!-- FAB -->
-    <button class="fab" id="addCustomerBtn" title="Add New Customer">+</button>
+    <!-- ── FAB ── -->
+    <button
+      class="fab"
+      id="addCustomerBtn"
+      title="Add New Customer"
+      aria-label="Add new customer"
+    >
+      +
+    </button>
 
-    <!-- MODAL -->
-    <div class="modal-overlay" id="modalOverlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <!-- ══════════════════════════
+         CUSTOMER MODAL
+    ══════════════════════════ -->
+    <div
+      class="modal-overlay"
+      id="modalOverlay"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="modalTitle"
+    >
       <div class="modal-content">
         <div class="modal-header">
           <h2 id="modalTitle">New Customer</h2>
-          <button class="close-modal" id="closeModalBtn" aria-label="Close">&times;</button>
+          <button class="close-modal" id="closeModalBtn" aria-label="Close">
+            &times;
+          </button>
         </div>
 
         <form id="addCustomerForm" novalidate>
           <div class="form-group">
             <label for="name">Customer Name</label>
-            <input type="text" id="name" placeholder="e.g. Omkar Pandule" autocomplete="off" />
+            <input
+              type="text"
+              id="name"
+              placeholder="e.g. Omkar Pandule"
+              autocomplete="off"
+            />
           </div>
 
           <div class="form-row">
             <div class="form-group">
               <label for="device">Device</label>
-              <input type="text" id="device" placeholder="e.g. iPhone 13" autocomplete="off" />
+              <input
+                type="text"
+                id="device"
+                placeholder="e.g. iPhone 13"
+                autocomplete="off"
+              />
             </div>
             <div class="form-group">
               <label for="totalAmount">Total Amount (₹)</label>
-              <input type="text" id="totalAmount" placeholder="e.g. 2500" inputmode="numeric" />
+              <input
+                type="text"
+                id="totalAmount"
+                placeholder="e.g. 2500"
+                inputmode="numeric"
+              />
             </div>
           </div>
 
           <div class="form-group">
-            <label for="paidAmount">Paid Amount / Advance (₹)</label>
-            <input type="text" id="paidAmount" placeholder="e.g. 500 or 0" inputmode="numeric" />
+            <label for="paidAmount">Paid / Advance (₹)</label>
+            <input
+              type="text"
+              id="paidAmount"
+              placeholder="e.g. 500 or 0"
+              inputmode="numeric"
+            />
           </div>
 
           <div class="form-group">
-            <label for="issue">Issue</label>
-            <input type="text" id="issue" placeholder="e.g. Screen Replacement" autocomplete="off" />
+            <label for="issue">Issue Description</label>
+            <input
+              type="text"
+              id="issue"
+              placeholder="e.g. Screen Replacement"
+              autocomplete="off"
+            />
           </div>
 
           <div class="form-row">
             <div class="form-group">
               <label for="phone">WhatsApp Number</label>
-              <input type="tel" id="phone" placeholder="919876543210" inputmode="numeric" />
+              <input
+                type="tel"
+                id="phone"
+                placeholder="919876543210"
+                inputmode="numeric"
+              />
             </div>
             <div class="form-group">
               <label for="delivery">Expected Delivery</label>
-              <input type="text" id="delivery" placeholder="e.g. Tomorrow 6 PM" autocomplete="off" />
+              <input
+                type="text"
+                id="delivery"
+                placeholder="e.g. Tomorrow 6 PM"
+                autocomplete="off"
+              />
             </div>
           </div>
 
@@ -1017,12 +1842,23 @@
           </div>
 
           <div class="form-group">
-            <label>Flags</label>
+            <div class="form-section-label" style="margin-bottom: 10px">
+              Flags
+            </div>
             <div class="flag-grid">
-              <label class="flag-option"><input type="checkbox" id="urgentFlag" /> Urgent</label>
-              <label class="flag-option"><input type="checkbox" id="warrantyFlag" /> Warranty</label>
-              <label class="flag-option"><input type="checkbox" id="returnedFlag" /> Returned</label>
-              <label class="flag-option"><input type="checkbox" id="loanerFlag" /> Loaner Given</label>
+              <label class="flag-option"
+                ><input type="checkbox" id="urgentFlag" /> 🚨 Urgent</label
+              >
+              <label class="flag-option"
+                ><input type="checkbox" id="warrantyFlag" /> 🛡 Warranty</label
+              >
+              <label class="flag-option"
+                ><input type="checkbox" id="returnedFlag" /> 🔄 Returned</label
+              >
+              <label class="flag-option"
+                ><input type="checkbox" id="loanerFlag" /> 📱 Loaner
+                Given</label
+              >
             </div>
           </div>
 
@@ -1031,21 +1867,48 @@
       </div>
     </div>
 
-    <div class="modal-overlay" id="paymentModalOverlay" role="dialog" aria-modal="true" aria-labelledby="paymentModalTitle">
+    <!-- ══════════════════════════
+         PAYMENT MODAL
+    ══════════════════════════ -->
+    <div
+      class="modal-overlay"
+      id="paymentModalOverlay"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="paymentModalTitle"
+    >
       <div class="modal-content">
         <div class="modal-header">
           <h2 id="paymentModalTitle">Update Payment</h2>
-          <button class="close-modal" id="closePaymentModalBtn" aria-label="Close">&times;</button>
+          <button
+            class="close-modal"
+            id="closePaymentModalBtn"
+            aria-label="Close"
+          >
+            &times;
+          </button>
         </div>
 
         <div class="payment-snapshot">
           <div class="snapshot-item">
             <div class="snapshot-label">Customer</div>
-            <div class="snapshot-value" id="paymentCustomerName">-</div>
+            <div
+              class="snapshot-value"
+              id="paymentCustomerName"
+              style="font-family: var(--font); font-size: 13px"
+            >
+              -
+            </div>
           </div>
           <div class="snapshot-item">
             <div class="snapshot-label">Device</div>
-            <div class="snapshot-value" id="paymentDevice">-</div>
+            <div
+              class="snapshot-value"
+              id="paymentDevice"
+              style="font-family: var(--font); font-size: 13px"
+            >
+              -
+            </div>
           </div>
           <div class="snapshot-item">
             <div class="snapshot-label">Total</div>
@@ -1057,18 +1920,39 @@
           </div>
           <div class="snapshot-item">
             <div class="snapshot-label">Remaining</div>
-            <div class="snapshot-value" id="paymentRemaining">₹0</div>
+            <div
+              class="snapshot-value"
+              id="paymentRemaining"
+              style="color: var(--red)"
+            >
+              ₹0
+            </div>
           </div>
           <div class="snapshot-item">
             <div class="snapshot-label">Status</div>
-            <div class="snapshot-value" id="paymentCurrentStatus">Unpaid</div>
+            <div
+              class="snapshot-value"
+              id="paymentCurrentStatus"
+              style="
+                font-family: var(--font);
+                font-size: 12px;
+                color: var(--text-2);
+              "
+            >
+              Unpaid
+            </div>
           </div>
         </div>
 
         <form id="paymentForm" novalidate>
           <div class="form-group">
             <label for="newPaymentAmount">New Payment Amount (₹)</label>
-            <input type="text" id="newPaymentAmount" placeholder="e.g. 1000" inputmode="numeric" />
+            <input
+              type="text"
+              id="newPaymentAmount"
+              placeholder="e.g. 1000"
+              inputmode="numeric"
+            />
           </div>
 
           <div class="form-group">
@@ -1083,32 +1967,66 @@
 
           <div class="form-group">
             <label for="paymentNote">Payment Note</label>
-            <input type="text" id="paymentNote" placeholder="e.g. Pickup payment" autocomplete="off" />
+            <input
+              type="text"
+              id="paymentNote"
+              placeholder="e.g. Pickup payment"
+              autocomplete="off"
+            />
           </div>
 
           <div class="modal-actions">
-            <button type="button" class="secondary-btn" id="markFullyPaidBtn">Mark Fully Paid</button>
-            <button type="submit" class="submit-btn" id="savePaymentBtn">Save Payment</button>
+            <button type="button" class="secondary-btn" id="markFullyPaidBtn">
+              Mark Fully Paid
+            </button>
+            <button
+              type="submit"
+              class="submit-btn"
+              id="savePaymentBtn"
+              style="flex: 1.6"
+            >
+              Save Payment
+            </button>
           </div>
         </form>
       </div>
     </div>
 
-    <div class="modal-overlay" id="historyModalOverlay" role="dialog" aria-modal="true" aria-labelledby="historyModalTitle">
+    <!-- ══════════════════════════
+         HISTORY MODAL
+    ══════════════════════════ -->
+    <div
+      class="modal-overlay"
+      id="historyModalOverlay"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="historyModalTitle"
+    >
       <div class="modal-content">
         <div class="modal-header">
           <h2 id="historyModalTitle">Payment History</h2>
-          <button class="close-modal" id="closeHistoryModalBtn" aria-label="Close">&times;</button>
+          <button
+            class="close-modal"
+            id="closeHistoryModalBtn"
+            aria-label="Close"
+          >
+            &times;
+          </button>
         </div>
-
         <div class="history-list" id="paymentHistoryList"></div>
       </div>
     </div>
 
+    <!-- ══════════════════════════════════════════════════
+         JAVASCRIPT  (all original logic preserved)
+    ══════════════════════════════════════════════════ -->
     <script>
+      /* ── DOM refs ── */
       const cardsContainer = document.getElementById("cardsContainer");
       const statusFilterBar = document.getElementById("statusFilterBar");
-      const paymentStatusFilter = document.getElementById("paymentStatusFilter");
+      const paymentStatusFilter = document.getElementById(
+        "paymentStatusFilter",
+      );
       const repairSearch = document.getElementById("repairSearch");
       const summaryRepairs = document.getElementById("summaryRepairs");
       const summaryRevenue = document.getElementById("summaryRevenue");
@@ -1123,7 +2041,6 @@
         "Delivered",
         "Cancelled",
       ];
-      const paymentStatuses = ["Unpaid", "Partially Paid", "Paid"];
       const filterStatuses = ["All", ...repairStatuses];
       const repairsById = new Map();
       let currentRepairs = [];
@@ -1134,6 +2051,7 @@
       let activePaymentRepairId = null;
       let editingRepairId = null;
 
+      /* ── API ── */
       const api = {
         async request(url, options = {}) {
           const response = await fetch(url, {
@@ -1143,23 +2061,20 @@
             },
             ...options,
           });
-
           if (response.status === 401) {
             window.location.href = "/login";
             return null;
           }
-
           const payload = await response.json().catch(() => ({}));
-
           if (!response.ok || payload.success === false) {
             const firstError = payload.details?.[0]?.message;
             throw new Error(firstError || payload.message || "Request failed.");
           }
-
           return payload.data;
         },
       };
 
+      /* ── Helpers ── */
       function escapeHtml(value = "") {
         return String(value)
           .replace(/&/g, "&amp;")
@@ -1175,7 +2090,10 @@
 
       function formatDate(date) {
         const parsed = date ? new Date(date) : new Date();
-        return parsed.toLocaleDateString("en-IN", { day: "numeric", month: "short" });
+        return parsed.toLocaleDateString("en-IN", {
+          day: "numeric",
+          month: "short",
+        });
       }
 
       function formatDateTime(date) {
@@ -1190,151 +2108,162 @@
       }
 
       function statusClass(status) {
-        return `status-${String(status || "Unpaid").toLowerCase().replace(/\s+/g, "-")}`;
+        return `status-${String(status || "Unpaid")
+          .toLowerCase()
+          .replace(/\s+/g, "-")}`;
+      }
+
+      /* ── Animated counter ── */
+      function animateSummaryValue(el, newText) {
+        if (el.textContent === newText) return;
+        el.textContent = newText;
+        el.classList.remove("pop");
+        void el.offsetWidth;
+        el.classList.add("pop");
       }
 
       function updatePaymentSummary(repairs = currentRepairs) {
-        const totals = repairs.reduce((acc, repair) => {
-          acc.total += Number(repair.totalAmount || 0);
-          acc.paid += Number(repair.paidAmount || 0);
-          acc.pending += Number(repair.remainingAmount || 0);
-          return acc;
-        }, { total: 0, paid: 0, pending: 0 });
+        const totals = repairs.reduce(
+          (acc, r) => {
+            acc.total += Number(r.totalAmount || 0);
+            acc.paid += Number(r.paidAmount || 0);
+            acc.pending += Number(r.remainingAmount || 0);
+            return acc;
+          },
+          { total: 0, paid: 0, pending: 0 },
+        );
 
-        summaryRepairs.textContent = String(repairs.length);
-        summaryRevenue.textContent = formatAmount(totals.total);
-        summaryPaid.textContent = formatAmount(totals.paid);
-        summaryPending.textContent = formatAmount(totals.pending);
+        animateSummaryValue(summaryRepairs, String(repairs.length));
+        animateSummaryValue(summaryRevenue, formatAmount(totals.total));
+        animateSummaryValue(summaryPaid, formatAmount(totals.paid));
+        animateSummaryValue(summaryPending, formatAmount(totals.pending));
       }
 
       function buildRepairUrl() {
         const params = new URLSearchParams();
-
-        if (activeRepairStatus !== "All") params.set("repairStatus", activeRepairStatus);
-        if (activePaymentStatus !== "All") params.set("paymentStatus", activePaymentStatus);
+        if (activeRepairStatus !== "All")
+          params.set("repairStatus", activeRepairStatus);
+        if (activePaymentStatus !== "All")
+          params.set("paymentStatus", activePaymentStatus);
         if (activeSearch) params.set("search", activeSearch);
-
         const query = params.toString();
         return query ? `/api/repairs?${query}` : "/api/repairs";
       }
 
+      /* ── Filter tabs ── */
       function renderFilterTabs() {
-        statusFilterBar.innerHTML = filterStatuses.map((status) => `
+        statusFilterBar.innerHTML = filterStatuses
+          .map(
+            (status) => `
           <button
             class="filter-tab ${status === activeRepairStatus ? "active" : ""}"
             type="button"
             data-status="${escapeHtml(status)}"
             aria-pressed="${status === activeRepairStatus}"
-          >
-            ${escapeHtml(status)}
-          </button>
-        `).join("");
+          >${escapeHtml(status)}</button>
+        `,
+          )
+          .join("");
       }
 
       function renderStatusOptions(currentStatus = "Pending Work") {
         const options = repairStatuses.includes(currentStatus)
           ? repairStatuses
           : [...repairStatuses, currentStatus];
-
-        return options.map((status) => `
-          <option value="${escapeHtml(status)}" ${status === currentStatus ? "selected" : ""}>
-            ${escapeHtml(status)}
-          </option>
-        `).join("");
+        return options
+          .map(
+            (s) =>
+              `<option value="${escapeHtml(s)}"${s === currentStatus ? " selected" : ""}>${escapeHtml(s)}</option>`,
+          )
+          .join("");
       }
 
       function renderFlagBadges(flags = {}) {
         const badges = [
-          flags.urgent && ["urgent", "Urgent"],
-          flags.warrantyClaim && ["", "Warranty"],
-          flags.returned && ["", "Returned"],
-          flags.loanerDeviceGiven && ["", "Loaner Given"],
+          flags.urgent && ["urgent", "🚨 Urgent"],
+          flags.warrantyClaim && ["", "🛡 Warranty"],
+          flags.returned && ["", "🔄 Returned"],
+          flags.loanerDeviceGiven && ["", "📱 Loaner Given"],
         ].filter(Boolean);
-
         if (!badges.length) return "";
-
-        return `
-          <div class="flag-badges">
-            ${badges.map(([className, label]) => `<span class="flag-badge ${className}">${label}</span>`).join("")}
-          </div>
-        `;
+        return `<div class="flag-badges">${badges.map(([c, l]) => `<span class="flag-badge ${c}">${l}</span>`).join("")}</div>`;
       }
 
       function renderAmountBadge(repair) {
-        const remainingAmount = Number(repair.remainingAmount || 0);
-        const isPaid = remainingAmount <= 0;
-
+        const remaining = Number(repair.remainingAmount || 0);
+        const isPaid = remaining <= 0;
         return `
           <div class="amount ${isPaid ? "amount-paid" : "amount-due"}">
             <span class="total-crossed">${formatAmount(repair.totalAmount)}</span>
-            <span class="remaining-value">${isPaid ? "Paid" : `${formatAmount(remainingAmount)} Due`}</span>
-          </div>
-        `;
+            <span class="remaining-value">${isPaid ? "Paid" : `${formatAmount(remaining)} Due`}</span>
+          </div>`;
       }
 
       function repairMatchesCurrentView(repair) {
-        const matchesRepairStatus = activeRepairStatus === "All" || repair.repairStatus === activeRepairStatus;
-        const matchesPaymentStatus = activePaymentStatus === "All" || repair.paymentStatus === activePaymentStatus;
-        const haystack = [
-          repair.customerName,
-          repair.whatsapp,
-          repair.device,
-        ].join(" ").toLowerCase();
-        const matchesSearch = !activeSearch || haystack.includes(activeSearch.toLowerCase());
-
-        return matchesRepairStatus && matchesPaymentStatus && matchesSearch;
+        const matchesRepair =
+          activeRepairStatus === "All" ||
+          repair.repairStatus === activeRepairStatus;
+        const matchesPayment =
+          activePaymentStatus === "All" ||
+          repair.paymentStatus === activePaymentStatus;
+        const haystack = [repair.customerName, repair.whatsapp, repair.device]
+          .join(" ")
+          .toLowerCase();
+        const matchesSearch =
+          !activeSearch || haystack.includes(activeSearch.toLowerCase());
+        return matchesRepair && matchesPayment && matchesSearch;
       }
 
-      function renderLoadingState() {
-        cardsContainer.classList.add("is-loading");
-        cardsContainer.innerHTML = `
-          <div class="card">
-            <div class="top">
-              <div class="customer-name">Loading repair jobs</div>
-              <div class="amount">₹0</div>
+      /* ── Skeleton loading ── */
+      function renderSkeletonCards(count = 6) {
+        cardsContainer.innerHTML = Array.from({ length: count })
+          .map(
+            () => `
+          <div class="card-skeleton">
+            <div class="skel-row">
+              <div class="skeleton skel-h skel-lg"></div>
+              <div class="skeleton skel-pill"></div>
             </div>
-            <div class="info"><strong>Device</strong> Please wait</div>
-            <div class="info"><strong>Issue</strong> Syncing dashboard</div>
-            <div class="info"><strong>WhatsApp</strong> -</div>
-            <div class="info"><strong>Payment</strong><a class="payment-link">Pay Now</a></div>
-            <div class="info"><strong>Date</strong> ${formatDate()}</div>
-            <div class="info"><strong>Delivery</strong> -</div>
-            <div class="status-box">
-              <select class="status-select" disabled>
-                <option>Loading</option>
-              </select>
+            <div class="skel-lines">
+              <div class="skeleton skel-h skel-md"></div>
+              <div class="skeleton skel-h skel-sm"></div>
+              <div class="skeleton skel-h skel-md"></div>
+              <div class="skeleton skel-h skel-xs"></div>
+            </div>
+            <div class="skeleton skel-btn"></div>
+            <div class="skel-row">
+              <div class="skeleton skel-btn" style="flex:1"></div>
+              <div class="skeleton skel-btn" style="flex:1"></div>
             </div>
           </div>
-        `;
+        `,
+          )
+          .join("");
       }
 
+      /* ── Empty state ── */
       function renderEmptyState() {
-        const repairLabel = activeRepairStatus === "All" ? "repair jobs" : activeRepairStatus.toLowerCase();
-        const paymentLabel = activePaymentStatus === "All" ? "" : ` with ${activePaymentStatus.toLowerCase()} payment`;
-        const searchText = activeSearch ? ` matching "${escapeHtml(activeSearch)}"` : "";
-
+        const repairLabel =
+          activeRepairStatus === "All"
+            ? "repair jobs"
+            : activeRepairStatus.toLowerCase();
+        const paymentLabel =
+          activePaymentStatus === "All"
+            ? ""
+            : ` with ${activePaymentStatus.toLowerCase()} payment`;
+        const searchText = activeSearch
+          ? ` matching "${escapeHtml(activeSearch)}"`
+          : "";
         cardsContainer.innerHTML = `
-          <div class="card">
-            <div class="top">
-              <div class="customer-name">No ${repairLabel}${paymentLabel}${searchText}</div>
-              <div class="amount">₹0</div>
-            </div>
-            <div class="info"><strong>Device</strong> Add your first customer using the + button</div>
-            <div class="info"><strong>Issue</strong> Waiting for work</div>
-            <div class="info"><strong>WhatsApp</strong> -</div>
-            <div class="info"><strong>Payment</strong><a class="payment-link">Pay Now</a></div>
-            <div class="info"><strong>Date</strong> ${formatDate()}</div>
-            <div class="info"><strong>Delivery</strong> -</div>
-            <div class="status-box">
-              <select class="status-select" disabled>
-                <option>No Jobs</option>
-              </select>
-            </div>
-          </div>
-        `;
+          <div class="empty-state">
+            <div class="empty-icon">🔍</div>
+            <h3>No ${repairLabel}${paymentLabel}${searchText}</h3>
+            <p>Add your first customer by tapping the <strong>+</strong> button below</p>
+          </div>`;
         cardsContainer.classList.remove("is-loading");
       }
 
+      /* ── Render card ── */
       function renderRepairCard(repair, placement = "append") {
         const card = document.createElement("div");
         card.className = "card";
@@ -1348,54 +2277,93 @@
         card.dataset.remainingAmount = repair.remainingAmount || 0;
         card.dataset.repairStatus = repair.repairStatus || "Pending Work";
         card.dataset.paymentStatus = repair.paymentStatus || "Unpaid";
-        card.style.animation = placement === "prepend" ? "none" : "";
+
+        if (placement === "prepend") card.style.animation = "none";
+
         repairsById.set(repair.id, repair);
 
         const safeStatus = escapeHtml(repair.repairStatus || "Pending Work");
 
         card.innerHTML = `
-          <div class="top">
-            <div class="customer-name">${escapeHtml(repair.customerName)}</div>
+          <div class="card-head">
+            <div>
+              <div class="customer-name">${escapeHtml(repair.customerName)}</div>
+              <div class="customer-meta">${formatDate(repair.createdAt)} · ${escapeHtml(repair.device)}</div>
+            </div>
             ${renderAmountBadge(repair)}
           </div>
-          <div class="info"><strong>Device</strong> ${escapeHtml(repair.device)}</div>
-          <div class="info"><strong>Issue</strong> ${escapeHtml(repair.issue)}</div>
-          <div class="info"><strong>WhatsApp</strong> ${escapeHtml(repair.whatsapp)}</div>
-          <div class="info"><strong>Payment</strong><span class="payment-status ${statusClass(repair.paymentStatus)}">${escapeHtml(repair.paymentStatus || "Unpaid")}</span></div>
-          <div class="info"><strong>Paid</strong> ${formatAmount(repair.paidAmount)}</div>
-          <div class="info"><strong>Remaining</strong> ${formatAmount(repair.remainingAmount)}</div>
-          <div class="info"><strong>Date</strong> ${formatDate(repair.createdAt)}</div>
-          <div class="info"><strong>Delivery</strong> ${escapeHtml(repair.delivery)}</div>
-          ${renderFlagBadges(repair.extraFlags)}
+
+          <div class="card-body">
+            <div class="info">
+              <strong>Issue</strong>
+              <span class="info-value">${escapeHtml(repair.issue)}</span>
+            </div>
+            <div class="info">
+              <strong>WhatsApp</strong>
+              <span class="info-value">${escapeHtml(repair.whatsapp)}</span>
+            </div>
+            <div class="info">
+              <strong>Payment</strong>
+              <span class="payment-status ${statusClass(repair.paymentStatus)}">${escapeHtml(repair.paymentStatus || "Unpaid")}</span>
+            </div>
+            <div class="info">
+              <strong>Paid</strong>
+              <span class="info-value mono">${formatAmount(repair.paidAmount)}</span>
+            </div>
+            <div class="info">
+              <strong>Remaining</strong>
+              <span class="info-value mono">${formatAmount(repair.remainingAmount)}</span>
+            </div>
+            <div class="info">
+              <strong>Pay Link</strong>
+              <a class="payment-link" href="#">Generate</a>
+            </div>
+            <div class="info">
+              <strong>Delivery</strong>
+              <span class="info-value">${escapeHtml(repair.delivery)}</span>
+            </div>
+            ${renderFlagBadges(repair.extraFlags)}
+          </div>
+
           <div class="status-box">
             <select class="status-select" data-previous="${safeStatus}">
               ${renderStatusOptions(repair.repairStatus || "Pending Work")}
             </select>
           </div>
+
           <div class="buttons">
-            <button class="whatsapp" onclick="sendWhatsApp(this)"><span>WhatsApp</span></button>
-            <button class="payment-action" onclick="openPaymentModal('${repair.id}')">Update Payment</button>
-            <button class="history-action" onclick="openPaymentHistoryModal('${repair.id}')">View Payments</button>
-            <button class="edit" onclick="openEditModal('${repair.id}')" title="Edit Customer">✏️</button>
-            <button class="delete" onclick="deleteCard(this)" title="Delete Card">🗑</button>
+            <button class="whatsapp" onclick="sendWhatsApp(this)">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.13 1.533 5.873L.057 23.88l6.211-1.46A11.945 11.945 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.89 0-3.663-.513-5.19-1.406l-.373-.22-3.87.91.965-3.773-.242-.387A9.944 9.944 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
+              Send WhatsApp
+            </button>
+            <button class="payment-action" onclick="openPaymentModal('${repair.id}')">💳 Payment</button>
+            <button class="history-action" onclick="openPaymentHistoryModal('${repair.id}')">🕐 History</button>
+            <button class="btn-icon edit" onclick="openEditModal('${repair.id}')" title="Edit">✏️</button>
+            <button class="btn-icon delete" onclick="deleteCard(this)" title="Delete">🗑</button>
           </div>
+
           <div class="footer-note">Thank you for trusting Balaji Mobile Shop 🙏</div>
         `;
 
+        /* Status change listener */
         const statusSelect = card.querySelector(".status-select");
         statusSelect.addEventListener("change", async () => {
           const previous = statusSelect.dataset.previous;
           statusSelect.disabled = true;
-
           try {
-            const updatedRepair = await api.request(`/api/repairs/${repair.id}`, {
-              method: "PATCH",
-              body: JSON.stringify({ repairStatus: statusSelect.value }),
-            });
+            const updatedRepair = await api.request(
+              `/api/repairs/${repair.id}`,
+              {
+                method: "PATCH",
+                body: JSON.stringify({ repairStatus: statusSelect.value }),
+              },
+            );
             statusSelect.dataset.previous = statusSelect.value;
             card.dataset.repairStatus = statusSelect.value;
-
-            if (activeRepairStatus !== "All" && updatedRepair.repairStatus !== activeRepairStatus) {
+            if (
+              activeRepairStatus !== "All" &&
+              updatedRepair.repairStatus !== activeRepairStatus
+            ) {
               card.remove();
               if (!cardsContainer.querySelector(".card")) renderEmptyState();
             }
@@ -1407,28 +2375,35 @@
           }
         });
 
-        if (placement === "return") {
-          return card;
-        }
+        /* Ripple on whatsapp btn */
+        const waBtn = card.querySelector(".whatsapp");
+        waBtn.addEventListener("click", function (e) {
+          const r = document.createElement("span");
+          r.className = "ripple";
+          const rect = this.getBoundingClientRect();
+          const size = Math.max(rect.width, rect.height);
+          r.style.cssText = `width:${size}px;height:${size}px;left:${e.clientX - rect.left - size / 2}px;top:${e.clientY - rect.top - size / 2}px`;
+          this.appendChild(r);
+          setTimeout(() => r.remove(), 600);
+        });
 
-        if (placement === "prepend") {
-          cardsContainer.prepend(card);
-        } else {
-          cardsContainer.appendChild(card);
-        }
-
+        if (placement === "return") return card;
+        if (placement === "prepend") cardsContainer.prepend(card);
+        else cardsContainer.appendChild(card);
         return card;
       }
 
       function applyUpdatedRepair(updatedRepair) {
         repairsById.set(updatedRepair.id, updatedRepair);
-        const existingCard = cardsContainer.querySelector(`[data-id="${updatedRepair.id}"]`);
-        const existingIndex = currentRepairs.findIndex((repair) => repair.id === updatedRepair.id);
+        const existingCard = cardsContainer.querySelector(
+          `[data-id="${updatedRepair.id}"]`,
+        );
+        const existingIndex = currentRepairs.findIndex(
+          (r) => r.id === updatedRepair.id,
+        );
         const shouldShow = repairMatchesCurrentView(updatedRepair);
 
-        if (existingIndex >= 0) {
-          currentRepairs.splice(existingIndex, 1);
-        }
+        if (existingIndex >= 0) currentRepairs.splice(existingIndex, 1);
 
         if (!shouldShow) {
           existingCard?.remove();
@@ -1437,26 +2412,24 @@
           return;
         }
 
-        if (existingIndex >= 0) {
+        if (existingIndex >= 0)
           currentRepairs.splice(existingIndex, 0, updatedRepair);
-        } else {
-          currentRepairs.unshift(updatedRepair);
-        }
+        else currentRepairs.unshift(updatedRepair);
 
         const nextCard = renderRepairCard(updatedRepair, "return");
-        if (existingCard) {
-          existingCard.replaceWith(nextCard);
-        } else {
-          cardsContainer.prepend(nextCard);
-        }
+        if (existingCard) existingCard.replaceWith(nextCard);
+        else cardsContainer.prepend(nextCard);
 
         updatePaymentSummary(currentRepairs);
       }
 
+      /* ── Form helpers ── */
       function getCustomerFormData() {
-        const totalAmount = document.getElementById("totalAmount").value.replace(/\D/g, "");
-        const paidAmount = document.getElementById("paidAmount").value.replace(/\D/g, "") || "0";
-
+        const totalAmount = document
+          .getElementById("totalAmount")
+          .value.replace(/\D/g, "");
+        const paidAmount =
+          document.getElementById("paidAmount").value.replace(/\D/g, "") || "0";
         return {
           name: document.getElementById("name").value.trim(),
           device: document.getElementById("device").value.trim(),
@@ -1476,28 +2449,36 @@
       }
 
       function validateCustomerForm(data) {
-        if (!data.name || !data.device || !data.issue || !data.phone || !data.totalAmount || !data.delivery) {
+        if (
+          !data.name ||
+          !data.device ||
+          !data.issue ||
+          !data.phone ||
+          !data.totalAmount ||
+          !data.delivery
+        ) {
           alert("Please fill in all fields.");
           return false;
         }
-
         if (data.phone.length < 10) {
           alert("Please enter a valid phone number (at least 10 digits).");
           return false;
         }
-
         if (Number(data.paidAmount) > Number(data.totalAmount)) {
           alert("Paid amount cannot be greater than total amount.");
           return false;
         }
-
         return true;
       }
 
       function setCustomerModalMode(mode) {
         const isEdit = mode === "edit";
-        document.getElementById("modalTitle").textContent = isEdit ? "Update Customer" : "New Customer";
-        form.querySelector(".submit-btn").textContent = isEdit ? "Save Changes" : "Create Order";
+        document.getElementById("modalTitle").textContent = isEdit
+          ? "Update Customer"
+          : "New Customer";
+        form.querySelector(".submit-btn").textContent = isEdit
+          ? "Save Changes"
+          : "Create Order";
       }
 
       function fillCustomerForm(repair) {
@@ -1508,31 +2489,38 @@
         document.getElementById("totalAmount").value = repair.totalAmount || "";
         document.getElementById("paidAmount").value = repair.paidAmount || "";
         document.getElementById("delivery").value = repair.delivery || "";
-        document.getElementById("repairStatus").value = repair.repairStatus || "Pending Work";
-        document.getElementById("urgentFlag").checked = Boolean(repair.extraFlags?.urgent);
-        document.getElementById("warrantyFlag").checked = Boolean(repair.extraFlags?.warrantyClaim);
-        document.getElementById("returnedFlag").checked = Boolean(repair.extraFlags?.returned);
-        document.getElementById("loanerFlag").checked = Boolean(repair.extraFlags?.loanerDeviceGiven);
+        document.getElementById("repairStatus").value =
+          repair.repairStatus || "Pending Work";
+        document.getElementById("urgentFlag").checked = Boolean(
+          repair.extraFlags?.urgent,
+        );
+        document.getElementById("warrantyFlag").checked = Boolean(
+          repair.extraFlags?.warrantyClaim,
+        );
+        document.getElementById("returnedFlag").checked = Boolean(
+          repair.extraFlags?.returned,
+        );
+        document.getElementById("loanerFlag").checked = Boolean(
+          repair.extraFlags?.loanerDeviceGiven,
+        );
       }
 
+      /* ── Load repairs ── */
       async function loadRepairs({ showLoading = true } = {}) {
         try {
-          if (showLoading) renderLoadingState();
-
+          if (showLoading) renderSkeletonCards();
           const repairs = await api.request(buildRepairUrl());
           cardsContainer.innerHTML = "";
           cardsContainer.classList.remove("is-loading");
           currentRepairs = repairs || [];
           repairsById.clear();
-          currentRepairs.forEach((repair) => repairsById.set(repair.id, repair));
+          currentRepairs.forEach((r) => repairsById.set(r.id, r));
           updatePaymentSummary(currentRepairs);
-
           if (!repairs?.length) {
             renderEmptyState();
             return;
           }
-
-          repairs.forEach((repair) => renderRepairCard(repair));
+          repairs.forEach((r) => renderRepairCard(r));
         } catch (err) {
           cardsContainer.classList.remove("is-loading");
           updatePaymentSummary([]);
@@ -1540,11 +2528,14 @@
         }
       }
 
-      /* ── WHATSAPP ── */
+      /* ── WhatsApp ── */
       function sendWhatsApp(button) {
         const card = button.closest(".card");
-        const customerName = card.dataset.customerName || card.querySelector(".customer-name").innerText;
-        const rawAmount = card.dataset.remainingAmount || card.dataset.totalAmount || "0";
+        const customerName =
+          card.dataset.customerName ||
+          card.querySelector(".customer-name").innerText;
+        const rawAmount =
+          card.dataset.remainingAmount || card.dataset.totalAmount || "0";
         const status = card.querySelector(".status-select").value;
         const phone = card.dataset.whatsapp;
         const device = card.dataset.device;
@@ -1581,26 +2572,22 @@
         window.open(`https://wa.me/${phone}?text=${message}`, "_blank");
       }
 
-      /* ── DELETE ── */
+      /* ── Delete ── */
       async function deleteCard(button) {
         const card = button.closest(".card");
         const repairId = card.dataset.id;
-
         if (!repairId) return;
-
         if (confirm("Are you sure you want to delete this customer?")) {
           button.disabled = true;
-
           try {
-            await api.request(`/api/repairs/${repairId}`, {
-              method: "DELETE",
-            });
-
-            card.remove();
-
-            if (!cardsContainer.querySelector(".card")) {
-              renderEmptyState();
-            }
+            await api.request(`/api/repairs/${repairId}`, { method: "DELETE" });
+            card.style.transition = "opacity .25s, transform .25s";
+            card.style.opacity = "0";
+            card.style.transform = "scale(.97)";
+            setTimeout(() => {
+              card.remove();
+              if (!cardsContainer.querySelector(".card")) renderEmptyState();
+            }, 250);
           } catch (err) {
             alert(err.message);
             button.disabled = false;
@@ -1608,27 +2595,35 @@
         }
       }
 
-      /* ── MODAL ── */
-      const overlay   = document.getElementById("modalOverlay");
-      const addBtn    = document.getElementById("addCustomerBtn");
-      const closeBtn  = document.getElementById("closeModalBtn");
-      const form      = document.getElementById("addCustomerForm");
-      const paymentModalOverlay = document.getElementById("paymentModalOverlay");
-      const closePaymentModalBtn = document.getElementById("closePaymentModalBtn");
+      /* ── Modal refs ── */
+      const overlay = document.getElementById("modalOverlay");
+      const addBtn = document.getElementById("addCustomerBtn");
+      const closeBtn = document.getElementById("closeModalBtn");
+      const form = document.getElementById("addCustomerForm");
+      const paymentModalOverlay = document.getElementById(
+        "paymentModalOverlay",
+      );
+      const closePaymentModalBtn = document.getElementById(
+        "closePaymentModalBtn",
+      );
       const paymentForm = document.getElementById("paymentForm");
       const newPaymentAmount = document.getElementById("newPaymentAmount");
       const paymentMethod = document.getElementById("paymentMethod");
       const paymentNote = document.getElementById("paymentNote");
       const savePaymentBtn = document.getElementById("savePaymentBtn");
       const markFullyPaidBtn = document.getElementById("markFullyPaidBtn");
-      const historyModalOverlay = document.getElementById("historyModalOverlay");
-      const closeHistoryModalBtn = document.getElementById("closeHistoryModalBtn");
+      const historyModalOverlay = document.getElementById(
+        "historyModalOverlay",
+      );
+      const closeHistoryModalBtn = document.getElementById(
+        "closeHistoryModalBtn",
+      );
       const paymentHistoryList = document.getElementById("paymentHistoryList");
 
-      statusFilterBar.addEventListener("click", (event) => {
-        const button = event.target.closest(".filter-tab");
+      /* ── Event listeners ── */
+      statusFilterBar.addEventListener("click", (e) => {
+        const button = e.target.closest(".filter-tab");
         if (!button) return;
-
         activeRepairStatus = button.dataset.status;
         renderFilterTabs();
         loadRepairs();
@@ -1640,27 +2635,35 @@
       });
 
       repairSearch.addEventListener("input", () => {
-        window.clearTimeout(searchTimer);
-
-        searchTimer = window.setTimeout(() => {
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(() => {
           activeSearch = repairSearch.value.trim();
           loadRepairs();
         }, 250);
       });
 
+      /* ── Payment modal ── */
       function fillPaymentSnapshot(repair) {
-        document.getElementById("paymentCustomerName").textContent = repair.customerName || "-";
-        document.getElementById("paymentDevice").textContent = repair.device || "-";
-        document.getElementById("paymentTotal").textContent = formatAmount(repair.totalAmount);
-        document.getElementById("paymentPaid").textContent = formatAmount(repair.paidAmount);
-        document.getElementById("paymentRemaining").textContent = formatAmount(repair.remainingAmount);
-        document.getElementById("paymentCurrentStatus").textContent = repair.paymentStatus || "Unpaid";
+        document.getElementById("paymentCustomerName").textContent =
+          repair.customerName || "-";
+        document.getElementById("paymentDevice").textContent =
+          repair.device || "-";
+        document.getElementById("paymentTotal").textContent = formatAmount(
+          repair.totalAmount,
+        );
+        document.getElementById("paymentPaid").textContent = formatAmount(
+          repair.paidAmount,
+        );
+        document.getElementById("paymentRemaining").textContent = formatAmount(
+          repair.remainingAmount,
+        );
+        document.getElementById("paymentCurrentStatus").textContent =
+          repair.paymentStatus || "Unpaid";
       }
 
       function openPaymentModal(repairId) {
         const repair = repairsById.get(repairId);
         if (!repair) return;
-
         activePaymentRepairId = repairId;
         fillPaymentSnapshot(repair);
         paymentForm.reset();
@@ -1681,23 +2684,23 @@
       function openPaymentHistoryModal(repairId) {
         const repair = repairsById.get(repairId);
         if (!repair) return;
-
-        const history = Array.isArray(repair.paymentHistory) ? repair.paymentHistory : [];
-
+        const history = Array.isArray(repair.paymentHistory)
+          ? repair.paymentHistory
+          : [];
         paymentHistoryList.innerHTML = history.length
-          ? history.map((payment) => `
+          ? history
+              .map(
+                (p) => `
               <div class="history-item">
-                <div class="history-main">${formatAmount(payment.amount)} • ${escapeHtml(payment.method || "Cash")} • ${escapeHtml(payment.note || "Payment received")}</div>
-                <div class="history-date">${formatDateTime(payment.createdAt)}</div>
-              </div>
-            `).join("")
-          : `
-              <div class="history-item">
-                <div class="history-main">No recorded payments yet</div>
-                <div class="history-note">Payments added from now on will appear here newest first.</div>
-              </div>
-            `;
-
+                <div class="history-main">${formatAmount(p.amount)} · ${escapeHtml(p.method || "Cash")} · ${escapeHtml(p.note || "Payment received")}</div>
+                <div class="history-date">${formatDateTime(p.createdAt)}</div>
+              </div>`,
+              )
+              .join("")
+          : `<div class="history-item">
+               <div class="history-main" style="color:var(--text-3)">No recorded payments yet</div>
+               <div class="history-note">Payments added from now on will appear here.</div>
+             </div>`;
         historyModalOverlay.classList.add("is-open");
         document.body.classList.add("modal-open");
       }
@@ -1710,34 +2713,34 @@
       async function savePayment(amountOverride) {
         const repair = repairsById.get(activePaymentRepairId);
         if (!repair || savePaymentBtn.disabled) return;
-
-        const amount = String(amountOverride ?? newPaymentAmount.value).replace(/\D/g, "");
+        const amount = String(amountOverride ?? newPaymentAmount.value).replace(
+          /\D/g,
+          "",
+        );
         const remainingAmount = Number(repair.remainingAmount || 0);
-
         if (!amount || Number(amount) <= 0) {
           alert("Payment amount must be greater than 0.");
           return;
         }
-
         if (Number(amount) > remainingAmount) {
           alert("Payment cannot exceed remaining amount.");
           return;
         }
-
         savePaymentBtn.disabled = true;
         markFullyPaidBtn.disabled = true;
-        savePaymentBtn.textContent = "Saving...";
-
+        savePaymentBtn.textContent = "Saving…";
         try {
-          const updatedRepair = await api.request(`/api/repairs/${repair.id}/payment`, {
-            method: "PATCH",
-            body: JSON.stringify({
-              amount,
-              method: paymentMethod.value,
-              note: paymentNote.value.trim(),
-            }),
-          });
-
+          const updatedRepair = await api.request(
+            `/api/repairs/${repair.id}/payment`,
+            {
+              method: "PATCH",
+              body: JSON.stringify({
+                amount,
+                method: paymentMethod.value,
+                note: paymentNote.value.trim(),
+              }),
+            },
+          );
           applyUpdatedRepair(updatedRepair);
           closePaymentModal();
         } catch (err) {
@@ -1748,20 +2751,19 @@
         }
       }
 
+      /* ── Customer modal ── */
       function openModal() {
         editingRepairId = null;
         setCustomerModalMode("create");
         form.reset();
         overlay.classList.add("is-open");
         document.body.classList.add("modal-open");
-        // Focus first field for accessibility / mobile keyboard
         setTimeout(() => document.getElementById("name").focus(), 80);
       }
 
       function openEditModal(repairId) {
         const repair = repairsById.get(repairId);
         if (!repair) return;
-
         editingRepairId = repairId;
         setCustomerModalMode("edit");
         fillCustomerForm(repair);
@@ -1783,7 +2785,6 @@
       closePaymentModalBtn.addEventListener("click", closePaymentModal);
       closeHistoryModalBtn.addEventListener("click", closeHistoryModal);
 
-      // Close on backdrop click (only when clicking the overlay itself)
       overlay.addEventListener("click", (e) => {
         if (e.target === overlay) closeModal();
       });
@@ -1794,12 +2795,13 @@
         if (e.target === historyModalOverlay) closeHistoryModal();
       });
 
-      // Close on Escape
       document.addEventListener("keydown", (e) => {
         if (e.key !== "Escape") return;
         if (overlay.classList.contains("is-open")) closeModal();
-        if (paymentModalOverlay.classList.contains("is-open")) closePaymentModal();
-        if (historyModalOverlay.classList.contains("is-open")) closeHistoryModal();
+        if (paymentModalOverlay.classList.contains("is-open"))
+          closePaymentModal();
+        if (historyModalOverlay.classList.contains("is-open"))
+          closeHistoryModal();
       });
 
       paymentForm.addEventListener("submit", async (e) => {
@@ -1810,40 +2812,43 @@
       markFullyPaidBtn.addEventListener("click", async () => {
         const repair = repairsById.get(activePaymentRepairId);
         if (!repair) return;
-
         newPaymentAmount.value = String(repair.remainingAmount || 0);
-        if (!paymentNote.value.trim()) {
-          paymentNote.value = "Marked fully paid";
-        }
+        if (!paymentNote.value.trim()) paymentNote.value = "Marked fully paid";
         await savePayment(repair.remainingAmount);
       });
 
-      /* ── FORM SUBMIT ── */
       form.addEventListener("submit", async (e) => {
         e.preventDefault();
-
         const formData = getCustomerFormData();
         if (!validateCustomerForm(formData)) return;
-
         try {
           const isEdit = Boolean(editingRepairId);
-          const repair = await api.request(isEdit ? `/api/repairs/${editingRepairId}` : "/api/repairs", {
-            method: isEdit ? "PATCH" : "POST",
-            body: JSON.stringify({
-              customerName: formData.name,
-              device: formData.device,
-              issue: formData.issue,
-              whatsapp: formData.phone,
-              totalAmount: formData.totalAmount,
-              advanceAmount: formData.paidAmount,
-              paidAmount: formData.paidAmount,
-              delivery: formData.delivery,
-              repairStatus: formData.repairStatus,
-              extraFlags: formData.extraFlags,
-            }),
-          });
+          const submitBtn = form.querySelector(".submit-btn");
+          submitBtn.disabled = true;
+          submitBtn.textContent = isEdit ? "Saving…" : "Creating…";
 
-          const emptyCard = cardsContainer.querySelector(".status-select[disabled]")?.closest(".card");
+          const repair = await api.request(
+            isEdit ? `/api/repairs/${editingRepairId}` : "/api/repairs",
+            {
+              method: isEdit ? "PATCH" : "POST",
+              body: JSON.stringify({
+                customerName: formData.name,
+                device: formData.device,
+                issue: formData.issue,
+                whatsapp: formData.phone,
+                totalAmount: formData.totalAmount,
+                advanceAmount: formData.paidAmount,
+                paidAmount: formData.paidAmount,
+                delivery: formData.delivery,
+                repairStatus: formData.repairStatus,
+                extraFlags: formData.extraFlags,
+              }),
+            },
+          );
+
+          const emptyCard = cardsContainer
+            .querySelector(".status-select[disabled]")
+            ?.closest(".card");
           emptyCard?.remove();
 
           if (isEdit) {
@@ -1858,9 +2863,16 @@
           closeModal();
         } catch (err) {
           alert(err.message);
+        } finally {
+          const submitBtn = form.querySelector(".submit-btn");
+          submitBtn.disabled = false;
+          submitBtn.textContent = editingRepairId
+            ? "Save Changes"
+            : "Create Order";
         }
       });
 
+      /* ── Init ── */
       renderFilterTabs();
       loadRepairs();
     </script>

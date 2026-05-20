@@ -1,0 +1,1868 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mobile Shop Customer Manager</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --primary: #10b981;
+        --primary-hover: #059669;
+        --bg: #f8fafc;
+        --text-dark: #1e293b;
+        --text-muted: #64748b;
+        --card-bg: #ffffff;
+        --danger: #ef4444;
+        --danger-hover: #dc2626;
+        --border: #e2e8f0;
+        --input-bg: #f8fafc;
+        --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.07);
+        --shadow-md: 0 4px 12px -2px rgb(0 0 0 / 0.08), 0 2px 6px -2px rgb(0 0 0 / 0.05);
+        --shadow-lg: 0 12px 28px -4px rgb(0 0 0 / 0.1), 0 4px 8px -4px rgb(0 0 0 / 0.06);
+        --radius-sm: 10px;
+        --radius-md: 14px;
+        --radius-lg: 20px;
+      }
+
+      *, *::before, *::after {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+      }
+
+      body {
+        background: var(--bg);
+        color: var(--text-dark);
+        line-height: 1.5;
+        padding: 36px 20px;
+      }
+
+      /* Prevent scroll when modal open */
+      body.modal-open {
+        overflow: hidden;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+
+      /* ── HEADER ── */
+      header {
+        position: relative;
+        text-align: center;
+        margin-bottom: 40px;
+        padding-inline: 112px;
+      }
+
+      header h1 {
+        font-size: 28px;
+        font-weight: 700;
+        color: var(--text-dark);
+        letter-spacing: -0.02em;
+        margin-bottom: 6px;
+      }
+
+      header p {
+        color: var(--text-muted);
+        font-size: 15px;
+      }
+
+      .logout-btn {
+        position: absolute;
+        top: 0;
+        right: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 38px;
+        padding: 0 14px;
+        border-radius: var(--radius-sm);
+        background: white;
+        border: 1px solid var(--border);
+        color: var(--text-muted);
+        font-size: 13px;
+        font-weight: 800;
+        text-decoration: none;
+        box-shadow: var(--shadow-sm);
+        transition: color 0.15s, border-color 0.15s, box-shadow 0.15s, transform 0.15s;
+      }
+
+      .logout-btn:hover {
+        color: var(--danger);
+        border-color: #fecaca;
+        box-shadow: var(--shadow-md);
+        transform: translateY(-1px);
+      }
+
+      .workflow-bar {
+        display: grid;
+        grid-template-columns: minmax(240px, 360px) minmax(180px, 220px) 1fr;
+        gap: 14px;
+        align-items: center;
+        margin-bottom: 24px;
+      }
+
+      .search-control {
+        position: relative;
+      }
+
+      .search-control input {
+        width: 100%;
+        height: 44px;
+        border: 1px solid var(--border);
+        background: white;
+        color: var(--text-dark);
+        border-radius: var(--radius-md);
+        padding: 0 14px 0 42px;
+        font-size: 14px;
+        box-shadow: var(--shadow-sm);
+        transition: border-color 0.15s, box-shadow 0.15s;
+      }
+
+      .search-control input:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.12), var(--shadow-sm);
+      }
+
+      .search-icon {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-muted);
+        font-size: 15px;
+        pointer-events: none;
+      }
+
+      .payment-filter select {
+        width: 100%;
+        height: 44px;
+        background-color: white;
+        box-shadow: var(--shadow-sm);
+      }
+
+      .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 14px;
+        margin-bottom: 22px;
+      }
+
+      .summary-item {
+        background: white;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        padding: 14px 16px;
+        box-shadow: var(--shadow-sm);
+      }
+
+      .summary-label {
+        color: var(--text-muted);
+        font-size: 12px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+
+      .summary-value {
+        color: var(--text-dark);
+        font-size: 20px;
+        font-weight: 800;
+        margin-top: 4px;
+      }
+
+      .filter-tabs {
+        display: flex;
+        gap: 8px;
+        overflow-x: auto;
+        padding: 2px 2px 8px;
+        scrollbar-width: thin;
+        scrollbar-color: #cbd5e1 transparent;
+      }
+
+      .filter-tab {
+        flex: 0 0 auto;
+        min-height: 40px;
+        padding: 0 14px;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: white;
+        color: var(--text-muted);
+        font-size: 13px;
+        font-weight: 700;
+        box-shadow: var(--shadow-sm);
+        white-space: nowrap;
+      }
+
+      .filter-tab:hover {
+        color: var(--primary-hover);
+        border-color: #a7f3d0;
+        transform: translateY(-1px);
+      }
+
+      .filter-tab.active {
+        background: var(--primary);
+        border-color: var(--primary);
+        color: white;
+        box-shadow: 0 8px 18px rgba(16, 185, 129, 0.22);
+      }
+
+      .payment-status {
+        display: inline-flex;
+        align-items: center;
+        width: fit-content;
+        padding: 4px 10px;
+        border-radius: 999px;
+        background: #eff6ff;
+        color: #2563eb;
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      .payment-status.status-unpaid {
+        background: #fee2e2;
+        color: #b91c1c;
+      }
+
+      .payment-status.status-partially-paid {
+        background: #ffedd5;
+        color: #c2410c;
+      }
+
+      .payment-status.status-paid {
+        background: #dcfce7;
+        color: #15803d;
+      }
+
+      .flag-badges {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 12px;
+      }
+
+      .flag-badge {
+        padding: 4px 8px;
+        border-radius: 999px;
+        background: #fef3c7;
+        color: #92400e;
+        font-size: 11px;
+        font-weight: 800;
+      }
+
+      .flag-badge.urgent {
+        background: #fee2e2;
+        color: #b91c1c;
+      }
+
+      /* ── CARDS GRID ── */
+      .cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+        gap: 20px;
+        transition: opacity 0.18s ease;
+      }
+
+      .cards.is-loading {
+        opacity: 0.64;
+      }
+
+      .card {
+        background: var(--card-bg);
+        border-radius: var(--radius-lg);
+        padding: 22px;
+        box-shadow: var(--shadow-md);
+        border: 1px solid #f1f5f9;
+        display: flex;
+        flex-direction: column;
+        transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+      }
+
+      .card:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-lg);
+        border-color: var(--primary);
+      }
+
+      .top {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 18px;
+        gap: 12px;
+      }
+
+      .customer-name {
+        font-size: 19px;
+        font-weight: 700;
+        color: var(--text-dark);
+        line-height: 1.25;
+      }
+
+      .amount {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 5px 11px;
+        border-radius: 100px;
+        white-space: nowrap;
+        flex-shrink: 0;
+      }
+
+      .amount-due {
+        background: #fff7ed;
+        color: #c2410c;
+      }
+
+      .amount-paid {
+        background: #ecfdf5;
+        color: #15803d;
+      }
+
+      .total-crossed {
+        color: var(--text-muted);
+        font-size: 12px;
+        font-weight: 600;
+        text-decoration: line-through;
+        text-decoration-thickness: 1.5px;
+      }
+
+      .remaining-value {
+        font-size: 15px;
+        font-weight: 800;
+        line-height: 1;
+      }
+
+      .info {
+        display: flex;
+        align-items: baseline;
+        gap: 8px;
+        font-size: 14px;
+        color: var(--text-muted);
+        padding: 5px 0;
+        border-bottom: 1px solid #f8fafc;
+      }
+
+      .info:last-of-type {
+        border-bottom: none;
+      }
+
+      .info strong {
+        color: var(--text-dark);
+        font-weight: 600;
+        min-width: 76px;
+        flex-shrink: 0;
+        font-size: 13px;
+      }
+
+      .payment-link {
+        color: var(--primary);
+        text-decoration: none;
+        font-weight: 600;
+        border-bottom: 1px dashed var(--primary);
+        transition: color 0.15s;
+      }
+
+      .payment-link:hover {
+        color: var(--primary-hover);
+        border-bottom-style: solid;
+      }
+
+      .status-box {
+        margin: 16px 0 0;
+      }
+
+      select {
+        width: 100%;
+        padding: 10px 36px 10px 12px;
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--border);
+        background-color: var(--input-bg);
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--text-dark);
+        cursor: pointer;
+        transition: border-color 0.15s, box-shadow 0.15s;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 12px center;
+        background-size: 15px;
+      }
+
+      select:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+      }
+
+      .buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 14px;
+      }
+
+      button {
+        border: none;
+        cursor: pointer;
+        font-family: inherit;
+        transition: background 0.15s, transform 0.15s, box-shadow 0.15s;
+      }
+
+      .whatsapp {
+        flex: 1 1 100%;
+        padding: 12px 16px;
+        border-radius: var(--radius-sm);
+        background: var(--primary);
+        color: white;
+        font-size: 14px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+      }
+
+      .whatsapp:hover {
+        background: var(--primary-hover);
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+      }
+
+      .delete {
+        width: 44px;
+        height: 44px;
+        flex-shrink: 0;
+        border-radius: var(--radius-sm);
+        background: #fee2e2;
+        color: var(--danger);
+        font-size: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .edit {
+        width: 44px;
+        height: 44px;
+        flex-shrink: 0;
+        border-radius: var(--radius-sm);
+        background: #dbeafe;
+        color: #2563eb;
+        font-size: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .edit:hover {
+        background: #2563eb;
+        color: white;
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.22);
+      }
+
+      .delete:hover {
+        background: var(--danger);
+        color: white;
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+      }
+
+      .footer-note {
+        margin-top: 16px;
+        font-size: 12.5px;
+        color: var(--text-muted);
+        text-align: center;
+        padding-top: 14px;
+        border-top: 1px solid #f1f5f9;
+        font-style: italic;
+      }
+
+      /* ── FAB ── */
+      .fab {
+        position: fixed;
+        bottom: 32px;
+        right: 32px;
+        width: 56px;
+        height: 56px;
+        background: var(--primary);
+        color: white;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+        font-weight: 300;
+        line-height: 1;
+        box-shadow: 0 6px 20px rgba(16, 185, 129, 0.38);
+        cursor: pointer;
+        transition: transform 0.3s ease, background 0.2s, box-shadow 0.2s;
+        z-index: 1000;
+        border: none;
+      }
+
+      .fab:hover {
+        transform: scale(1.08) rotate(90deg);
+        background: var(--primary-hover);
+        box-shadow: 0 8px 24px rgba(16, 185, 129, 0.45);
+      }
+
+      /* ── MODAL OVERLAY ── */
+      /*
+        Strategy:
+        - Overlay is fixed, full viewport, scrollable
+        - It holds the modal centered with flex + auto margins
+        - Modal itself has max-height and its own internal scroll
+        - No double scrollbars: body scroll is locked, overlay scrolls
+      */
+      .modal-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.55);
+        backdrop-filter: blur(5px);
+        -webkit-backdrop-filter: blur(5px);
+        z-index: 2000;
+        /* Overlay itself scrolls on very short viewports */
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        /* Flex so modal centers nicely */
+        padding: 24px 16px;
+      }
+
+      .modal-overlay.is-open {
+        display: block;
+      }
+
+      /* ── MODAL BOX ── */
+      .modal-content {
+        background: white;
+        width: 100%;
+        max-width: 480px;
+        /* Center inside scrolling overlay */
+        margin: 0 auto;
+        /* On very short screens the modal can scroll within itself */
+        max-height: calc(100dvh - 48px); /* 48 = 2 × 24px padding */
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        border-radius: 20px;
+        box-shadow: var(--shadow-lg);
+        /* Subtle entrance */
+        animation: modalIn 0.22s ease both;
+        padding: 28px 28px 32px;
+        position: relative;
+      }
+
+      @keyframes modalIn {
+        from { opacity: 0; transform: translateY(12px) scale(0.99); }
+        to   { opacity: 1; transform: translateY(0)   scale(1); }
+      }
+
+      /* ── MODAL HEADER ── */
+      .modal-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 24px;
+        /* Stick header to top inside modal scroll */
+        position: sticky;
+        top: -28px;          /* matches modal padding-top */
+        background: white;
+        z-index: 1;
+        padding: 4px 0 12px;
+        border-bottom: 1px solid var(--border);
+        margin-top: -4px;
+      }
+
+      .modal-header h2 {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--text-dark);
+        letter-spacing: -0.015em;
+      }
+
+      .close-modal {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        border: none;
+        background: #f1f5f9;
+        color: var(--text-muted);
+        font-size: 18px;
+        line-height: 1;
+        cursor: pointer;
+        flex-shrink: 0;
+        transition: background 0.15s, color 0.15s;
+      }
+
+      .close-modal:hover {
+        background: #e2e8f0;
+        color: var(--text-dark);
+      }
+
+      /* ── FORM ── */
+      #addCustomerForm {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      /* Two-column row for narrow fields */
+      .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+
+      .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+
+      .form-group label {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text-dark);
+        letter-spacing: 0.01em;
+      }
+
+      .form-group input,
+      .form-group select {
+        width: 100%;
+        padding: 10px 13px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        font-size: 14px;
+        font-family: inherit;
+        color: var(--text-dark);
+        background: var(--input-bg);
+        transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+      }
+
+      .form-group input::placeholder {
+        color: #a0aec0;
+      }
+
+      .form-group input:focus,
+      .form-group select:focus {
+        background: white;
+        border-color: var(--primary);
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.12);
+      }
+
+      .payment-action,
+      .history-action,
+      .secondary-btn {
+        flex: 1 1 0;
+        min-height: 42px;
+        border-radius: var(--radius-sm);
+        background: #ecfdf5;
+        color: var(--primary-hover);
+        font-size: 13px;
+        font-weight: 800;
+        border: 1px solid #a7f3d0;
+      }
+
+      .history-action,
+      .secondary-btn {
+        background: #f8fafc;
+        color: var(--text-dark);
+        border-color: var(--border);
+      }
+
+      .payment-action:hover,
+      .history-action:hover,
+      .secondary-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: var(--shadow-sm);
+      }
+
+      .flag-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+      }
+
+      .flag-option {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 12px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        background: var(--input-bg);
+        color: var(--text-dark);
+        font-size: 13px;
+        font-weight: 700;
+      }
+
+      .flag-option input {
+        width: 16px;
+        height: 16px;
+        accent-color: var(--primary);
+      }
+
+      .payment-snapshot {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+        margin-bottom: 16px;
+      }
+
+      .snapshot-item {
+        background: #f8fafc;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        padding: 10px 12px;
+      }
+
+      .snapshot-label {
+        color: var(--text-muted);
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      .snapshot-value {
+        color: var(--text-dark);
+        font-size: 14px;
+        font-weight: 800;
+        margin-top: 2px;
+      }
+
+      .modal-actions {
+        display: flex;
+        gap: 10px;
+      }
+
+      .history-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .history-item {
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        padding: 12px;
+        background: #f8fafc;
+      }
+
+      .history-main {
+        color: var(--text-dark);
+        font-size: 14px;
+        font-weight: 800;
+      }
+
+      .history-note,
+      .history-date {
+        color: var(--text-muted);
+        font-size: 13px;
+        margin-top: 4px;
+      }
+
+      /* select inside form resets the card select override */
+      .form-group select {
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 12px center;
+        background-size: 15px;
+        padding-right: 36px;
+        cursor: pointer;
+      }
+
+      .submit-btn {
+        width: 100%;
+        background: var(--primary);
+        color: white;
+        padding: 13px 16px;
+        border-radius: var(--radius-md);
+        font-size: 15px;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+        margin-top: 4px;
+        transition: background 0.15s, box-shadow 0.15s;
+        font-family: inherit;
+      }
+
+      .submit-btn:hover {
+        background: var(--primary-hover);
+        box-shadow: 0 6px 18px rgba(16, 185, 129, 0.28);
+      }
+
+      /* ── RESPONSIVE ── */
+      @media (max-width: 640px) {
+        body {
+          padding: 24px 14px;
+        }
+
+        header {
+          margin-bottom: 28px;
+          padding-inline: 0;
+        }
+
+        header h1 {
+          font-size: 22px;
+        }
+
+        .logout-btn {
+          position: static;
+          margin-top: 14px;
+        }
+
+        .summary-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .workflow-bar {
+          grid-template-columns: 1fr;
+          gap: 12px;
+          margin-bottom: 18px;
+        }
+
+        .filter-tabs {
+          margin-inline: -2px;
+          padding-bottom: 6px;
+        }
+
+        .cards {
+          grid-template-columns: 1fr;
+          gap: 14px;
+        }
+
+        .card {
+          padding: 18px;
+        }
+
+        .fab {
+          bottom: 20px;
+          right: 20px;
+          width: 50px;
+          height: 50px;
+          font-size: 24px;
+          border-radius: 14px;
+        }
+
+        /* On mobile, overlay padding is tighter */
+        .modal-overlay {
+          padding: 12px;
+        }
+
+        .modal-content {
+          max-height: calc(100dvh - 24px);
+          border-radius: 16px;
+          padding: 20px 18px 24px;
+        }
+
+        .modal-header {
+          top: -20px;
+          margin-bottom: 18px;
+        }
+
+        /* Stack two-column rows on mobile */
+        .form-row {
+          grid-template-columns: 1fr;
+          gap: 16px;
+        }
+
+        .payment-snapshot,
+        .flag-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>📱Balaji Mobile Shop Dashboard</h1>
+        <p>Manage repairs, status updates, and customer payments</p>
+        <a class="logout-btn" href="/logout">Logout</a>
+      </header>
+
+      <section class="summary-grid" aria-label="Payment summary">
+        <article class="summary-item">
+          <div class="summary-label">Total Repairs</div>
+          <div class="summary-value" id="summaryRepairs">0</div>
+        </article>
+        <article class="summary-item">
+          <div class="summary-label">Total Revenue</div>
+          <div class="summary-value" id="summaryRevenue">₹0</div>
+        </article>
+        <article class="summary-item">
+          <div class="summary-label">Paid Revenue</div>
+          <div class="summary-value" id="summaryPaid">₹0</div>
+        </article>
+        <article class="summary-item">
+          <div class="summary-label">Pending Revenue</div>
+          <div class="summary-value" id="summaryPending">₹0</div>
+        </article>
+      </section>
+
+      <section class="workflow-bar" aria-label="Repair filters">
+        <div class="search-control">
+          <span class="search-icon">⌕</span>
+          <input id="repairSearch" type="search" placeholder="Search customer, phone, or device" autocomplete="off" />
+        </div>
+
+        <div class="payment-filter">
+          <select id="paymentStatusFilter" aria-label="Filter by payment status">
+            <option value="All">All Payments</option>
+            <option value="Unpaid">Unpaid</option>
+            <option value="Partially Paid">Partially Paid</option>
+            <option value="Paid">Paid</option>
+          </select>
+        </div>
+
+        <div class="filter-tabs" id="statusFilterBar" aria-label="Filter by repair status"></div>
+      </section>
+
+      <div class="cards" id="cardsContainer">
+        <div class="card">
+          <div class="top">
+            <div class="customer-name">Loading repair jobs</div>
+            <div class="amount">₹0</div>
+          </div>
+          <div class="info"><strong>Device</strong> Please wait</div>
+          <div class="info"><strong>Issue</strong> Syncing dashboard</div>
+          <div class="info"><strong>WhatsApp</strong> -</div>
+          <div class="info">
+            <strong>Payment</strong>
+            <a class="payment-link">Pay Now</a>
+          </div>
+          <div class="info"><strong>Date</strong> -</div>
+          <div class="info"><strong>Delivery</strong> -</div>
+          <div class="status-box">
+            <select class="status-select" disabled>
+              <option>Loading</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FAB -->
+    <button class="fab" id="addCustomerBtn" title="Add New Customer">+</button>
+
+    <!-- MODAL -->
+    <div class="modal-overlay" id="modalOverlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 id="modalTitle">New Customer</h2>
+          <button class="close-modal" id="closeModalBtn" aria-label="Close">&times;</button>
+        </div>
+
+        <form id="addCustomerForm" novalidate>
+          <div class="form-group">
+            <label for="name">Customer Name</label>
+            <input type="text" id="name" placeholder="e.g. Omkar Pandule" autocomplete="off" />
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="device">Device</label>
+              <input type="text" id="device" placeholder="e.g. iPhone 13" autocomplete="off" />
+            </div>
+            <div class="form-group">
+              <label for="totalAmount">Total Amount (₹)</label>
+              <input type="text" id="totalAmount" placeholder="e.g. 2500" inputmode="numeric" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="paidAmount">Paid Amount / Advance (₹)</label>
+            <input type="text" id="paidAmount" placeholder="e.g. 500 or 0" inputmode="numeric" />
+          </div>
+
+          <div class="form-group">
+            <label for="issue">Issue</label>
+            <input type="text" id="issue" placeholder="e.g. Screen Replacement" autocomplete="off" />
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="phone">WhatsApp Number</label>
+              <input type="tel" id="phone" placeholder="919876543210" inputmode="numeric" />
+            </div>
+            <div class="form-group">
+              <label for="delivery">Expected Delivery</label>
+              <input type="text" id="delivery" placeholder="e.g. Tomorrow 6 PM" autocomplete="off" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="repairStatus">Repair Status</label>
+            <select id="repairStatus">
+              <option value="Pending Work">Pending Work</option>
+              <option value="In Progress" selected>In Progress</option>
+              <option value="Waiting for Parts">Waiting for Parts</option>
+              <option value="Ready for Pickup">Ready for Pickup</option>
+              <option value="Delivered">Delivered</option>
+              <option value="Cancelled">Cancelled</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Flags</label>
+            <div class="flag-grid">
+              <label class="flag-option"><input type="checkbox" id="urgentFlag" /> Urgent</label>
+              <label class="flag-option"><input type="checkbox" id="warrantyFlag" /> Warranty</label>
+              <label class="flag-option"><input type="checkbox" id="returnedFlag" /> Returned</label>
+              <label class="flag-option"><input type="checkbox" id="loanerFlag" /> Loaner Given</label>
+            </div>
+          </div>
+
+          <button type="submit" class="submit-btn">Create Order</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="modal-overlay" id="paymentModalOverlay" role="dialog" aria-modal="true" aria-labelledby="paymentModalTitle">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 id="paymentModalTitle">Update Payment</h2>
+          <button class="close-modal" id="closePaymentModalBtn" aria-label="Close">&times;</button>
+        </div>
+
+        <div class="payment-snapshot">
+          <div class="snapshot-item">
+            <div class="snapshot-label">Customer</div>
+            <div class="snapshot-value" id="paymentCustomerName">-</div>
+          </div>
+          <div class="snapshot-item">
+            <div class="snapshot-label">Device</div>
+            <div class="snapshot-value" id="paymentDevice">-</div>
+          </div>
+          <div class="snapshot-item">
+            <div class="snapshot-label">Total</div>
+            <div class="snapshot-value" id="paymentTotal">₹0</div>
+          </div>
+          <div class="snapshot-item">
+            <div class="snapshot-label">Already Paid</div>
+            <div class="snapshot-value" id="paymentPaid">₹0</div>
+          </div>
+          <div class="snapshot-item">
+            <div class="snapshot-label">Remaining</div>
+            <div class="snapshot-value" id="paymentRemaining">₹0</div>
+          </div>
+          <div class="snapshot-item">
+            <div class="snapshot-label">Status</div>
+            <div class="snapshot-value" id="paymentCurrentStatus">Unpaid</div>
+          </div>
+        </div>
+
+        <form id="paymentForm" novalidate>
+          <div class="form-group">
+            <label for="newPaymentAmount">New Payment Amount (₹)</label>
+            <input type="text" id="newPaymentAmount" placeholder="e.g. 1000" inputmode="numeric" />
+          </div>
+
+          <div class="form-group">
+            <label for="paymentMethod">Payment Method</label>
+            <select id="paymentMethod">
+              <option value="Cash">Cash</option>
+              <option value="UPI">UPI</option>
+              <option value="Card">Card</option>
+              <option value="Bank Transfer">Bank Transfer</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="paymentNote">Payment Note</label>
+            <input type="text" id="paymentNote" placeholder="e.g. Pickup payment" autocomplete="off" />
+          </div>
+
+          <div class="modal-actions">
+            <button type="button" class="secondary-btn" id="markFullyPaidBtn">Mark Fully Paid</button>
+            <button type="submit" class="submit-btn" id="savePaymentBtn">Save Payment</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="modal-overlay" id="historyModalOverlay" role="dialog" aria-modal="true" aria-labelledby="historyModalTitle">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 id="historyModalTitle">Payment History</h2>
+          <button class="close-modal" id="closeHistoryModalBtn" aria-label="Close">&times;</button>
+        </div>
+
+        <div class="history-list" id="paymentHistoryList"></div>
+      </div>
+    </div>
+
+    <script>
+      const cardsContainer = document.getElementById("cardsContainer");
+      const statusFilterBar = document.getElementById("statusFilterBar");
+      const paymentStatusFilter = document.getElementById("paymentStatusFilter");
+      const repairSearch = document.getElementById("repairSearch");
+      const summaryRepairs = document.getElementById("summaryRepairs");
+      const summaryRevenue = document.getElementById("summaryRevenue");
+      const summaryPaid = document.getElementById("summaryPaid");
+      const summaryPending = document.getElementById("summaryPending");
+
+      const repairStatuses = [
+        "Pending Work",
+        "In Progress",
+        "Waiting for Parts",
+        "Ready for Pickup",
+        "Delivered",
+        "Cancelled",
+      ];
+      const paymentStatuses = ["Unpaid", "Partially Paid", "Paid"];
+      const filterStatuses = ["All", ...repairStatuses];
+      const repairsById = new Map();
+      let currentRepairs = [];
+      let activeRepairStatus = "All";
+      let activePaymentStatus = "All";
+      let activeSearch = "";
+      let searchTimer;
+      let activePaymentRepairId = null;
+      let editingRepairId = null;
+
+      const api = {
+        async request(url, options = {}) {
+          const response = await fetch(url, {
+            headers: {
+              "Content-Type": "application/json",
+              ...(options.headers || {}),
+            },
+            ...options,
+          });
+
+          if (response.status === 401) {
+            window.location.href = "/login";
+            return null;
+          }
+
+          const payload = await response.json().catch(() => ({}));
+
+          if (!response.ok || payload.success === false) {
+            const firstError = payload.details?.[0]?.message;
+            throw new Error(firstError || payload.message || "Request failed.");
+          }
+
+          return payload.data;
+        },
+      };
+
+      function escapeHtml(value = "") {
+        return String(value)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#039;");
+      }
+
+      function formatAmount(amount) {
+        return "₹" + Number(amount || 0).toLocaleString("en-IN");
+      }
+
+      function formatDate(date) {
+        const parsed = date ? new Date(date) : new Date();
+        return parsed.toLocaleDateString("en-IN", { day: "numeric", month: "short" });
+      }
+
+      function formatDateTime(date) {
+        const parsed = date ? new Date(date) : new Date();
+        return parsed.toLocaleString("en-IN", {
+          day: "numeric",
+          month: "short",
+          year: "numeric",
+          hour: "numeric",
+          minute: "2-digit",
+        });
+      }
+
+      function statusClass(status) {
+        return `status-${String(status || "Unpaid").toLowerCase().replace(/\s+/g, "-")}`;
+      }
+
+      function updatePaymentSummary(repairs = currentRepairs) {
+        const totals = repairs.reduce((acc, repair) => {
+          acc.total += Number(repair.totalAmount || 0);
+          acc.paid += Number(repair.paidAmount || 0);
+          acc.pending += Number(repair.remainingAmount || 0);
+          return acc;
+        }, { total: 0, paid: 0, pending: 0 });
+
+        summaryRepairs.textContent = String(repairs.length);
+        summaryRevenue.textContent = formatAmount(totals.total);
+        summaryPaid.textContent = formatAmount(totals.paid);
+        summaryPending.textContent = formatAmount(totals.pending);
+      }
+
+      function buildRepairUrl() {
+        const params = new URLSearchParams();
+
+        if (activeRepairStatus !== "All") params.set("repairStatus", activeRepairStatus);
+        if (activePaymentStatus !== "All") params.set("paymentStatus", activePaymentStatus);
+        if (activeSearch) params.set("search", activeSearch);
+
+        const query = params.toString();
+        return query ? `/api/repairs?${query}` : "/api/repairs";
+      }
+
+      function renderFilterTabs() {
+        statusFilterBar.innerHTML = filterStatuses.map((status) => `
+          <button
+            class="filter-tab ${status === activeRepairStatus ? "active" : ""}"
+            type="button"
+            data-status="${escapeHtml(status)}"
+            aria-pressed="${status === activeRepairStatus}"
+          >
+            ${escapeHtml(status)}
+          </button>
+        `).join("");
+      }
+
+      function renderStatusOptions(currentStatus = "Pending Work") {
+        const options = repairStatuses.includes(currentStatus)
+          ? repairStatuses
+          : [...repairStatuses, currentStatus];
+
+        return options.map((status) => `
+          <option value="${escapeHtml(status)}" ${status === currentStatus ? "selected" : ""}>
+            ${escapeHtml(status)}
+          </option>
+        `).join("");
+      }
+
+      function renderFlagBadges(flags = {}) {
+        const badges = [
+          flags.urgent && ["urgent", "Urgent"],
+          flags.warrantyClaim && ["", "Warranty"],
+          flags.returned && ["", "Returned"],
+          flags.loanerDeviceGiven && ["", "Loaner Given"],
+        ].filter(Boolean);
+
+        if (!badges.length) return "";
+
+        return `
+          <div class="flag-badges">
+            ${badges.map(([className, label]) => `<span class="flag-badge ${className}">${label}</span>`).join("")}
+          </div>
+        `;
+      }
+
+      function renderAmountBadge(repair) {
+        const remainingAmount = Number(repair.remainingAmount || 0);
+        const isPaid = remainingAmount <= 0;
+
+        return `
+          <div class="amount ${isPaid ? "amount-paid" : "amount-due"}">
+            <span class="total-crossed">${formatAmount(repair.totalAmount)}</span>
+            <span class="remaining-value">${isPaid ? "Paid" : `${formatAmount(remainingAmount)} Due`}</span>
+          </div>
+        `;
+      }
+
+      function repairMatchesCurrentView(repair) {
+        const matchesRepairStatus = activeRepairStatus === "All" || repair.repairStatus === activeRepairStatus;
+        const matchesPaymentStatus = activePaymentStatus === "All" || repair.paymentStatus === activePaymentStatus;
+        const haystack = [
+          repair.customerName,
+          repair.whatsapp,
+          repair.device,
+        ].join(" ").toLowerCase();
+        const matchesSearch = !activeSearch || haystack.includes(activeSearch.toLowerCase());
+
+        return matchesRepairStatus && matchesPaymentStatus && matchesSearch;
+      }
+
+      function renderLoadingState() {
+        cardsContainer.classList.add("is-loading");
+        cardsContainer.innerHTML = `
+          <div class="card">
+            <div class="top">
+              <div class="customer-name">Loading repair jobs</div>
+              <div class="amount">₹0</div>
+            </div>
+            <div class="info"><strong>Device</strong> Please wait</div>
+            <div class="info"><strong>Issue</strong> Syncing dashboard</div>
+            <div class="info"><strong>WhatsApp</strong> -</div>
+            <div class="info"><strong>Payment</strong><a class="payment-link">Pay Now</a></div>
+            <div class="info"><strong>Date</strong> ${formatDate()}</div>
+            <div class="info"><strong>Delivery</strong> -</div>
+            <div class="status-box">
+              <select class="status-select" disabled>
+                <option>Loading</option>
+              </select>
+            </div>
+          </div>
+        `;
+      }
+
+      function renderEmptyState() {
+        const repairLabel = activeRepairStatus === "All" ? "repair jobs" : activeRepairStatus.toLowerCase();
+        const paymentLabel = activePaymentStatus === "All" ? "" : ` with ${activePaymentStatus.toLowerCase()} payment`;
+        const searchText = activeSearch ? ` matching "${escapeHtml(activeSearch)}"` : "";
+
+        cardsContainer.innerHTML = `
+          <div class="card">
+            <div class="top">
+              <div class="customer-name">No ${repairLabel}${paymentLabel}${searchText}</div>
+              <div class="amount">₹0</div>
+            </div>
+            <div class="info"><strong>Device</strong> Add your first customer using the + button</div>
+            <div class="info"><strong>Issue</strong> Waiting for work</div>
+            <div class="info"><strong>WhatsApp</strong> -</div>
+            <div class="info"><strong>Payment</strong><a class="payment-link">Pay Now</a></div>
+            <div class="info"><strong>Date</strong> ${formatDate()}</div>
+            <div class="info"><strong>Delivery</strong> -</div>
+            <div class="status-box">
+              <select class="status-select" disabled>
+                <option>No Jobs</option>
+              </select>
+            </div>
+          </div>
+        `;
+        cardsContainer.classList.remove("is-loading");
+      }
+
+      function renderRepairCard(repair, placement = "append") {
+        const card = document.createElement("div");
+        card.className = "card";
+        card.dataset.id = repair.id;
+        card.dataset.customerName = repair.customerName || "";
+        card.dataset.device = repair.device || "";
+        card.dataset.issue = repair.issue || "";
+        card.dataset.whatsapp = repair.whatsapp || "";
+        card.dataset.delivery = repair.delivery || "";
+        card.dataset.totalAmount = repair.totalAmount || 0;
+        card.dataset.remainingAmount = repair.remainingAmount || 0;
+        card.dataset.repairStatus = repair.repairStatus || "Pending Work";
+        card.dataset.paymentStatus = repair.paymentStatus || "Unpaid";
+        card.style.animation = placement === "prepend" ? "none" : "";
+        repairsById.set(repair.id, repair);
+
+        const safeStatus = escapeHtml(repair.repairStatus || "Pending Work");
+
+        card.innerHTML = `
+          <div class="top">
+            <div class="customer-name">${escapeHtml(repair.customerName)}</div>
+            ${renderAmountBadge(repair)}
+          </div>
+          <div class="info"><strong>Device</strong> ${escapeHtml(repair.device)}</div>
+          <div class="info"><strong>Issue</strong> ${escapeHtml(repair.issue)}</div>
+          <div class="info"><strong>WhatsApp</strong> ${escapeHtml(repair.whatsapp)}</div>
+          <div class="info"><strong>Payment</strong><span class="payment-status ${statusClass(repair.paymentStatus)}">${escapeHtml(repair.paymentStatus || "Unpaid")}</span></div>
+          <div class="info"><strong>Paid</strong> ${formatAmount(repair.paidAmount)}</div>
+          <div class="info"><strong>Remaining</strong> ${formatAmount(repair.remainingAmount)}</div>
+          <div class="info"><strong>Date</strong> ${formatDate(repair.createdAt)}</div>
+          <div class="info"><strong>Delivery</strong> ${escapeHtml(repair.delivery)}</div>
+          ${renderFlagBadges(repair.extraFlags)}
+          <div class="status-box">
+            <select class="status-select" data-previous="${safeStatus}">
+              ${renderStatusOptions(repair.repairStatus || "Pending Work")}
+            </select>
+          </div>
+          <div class="buttons">
+            <button class="whatsapp" onclick="sendWhatsApp(this)"><span>WhatsApp</span></button>
+            <button class="payment-action" onclick="openPaymentModal('${repair.id}')">Update Payment</button>
+            <button class="history-action" onclick="openPaymentHistoryModal('${repair.id}')">View Payments</button>
+            <button class="edit" onclick="openEditModal('${repair.id}')" title="Edit Customer">✏️</button>
+            <button class="delete" onclick="deleteCard(this)" title="Delete Card">🗑</button>
+          </div>
+          <div class="footer-note">Thank you for trusting Balaji Mobile Shop 🙏</div>
+        `;
+
+        const statusSelect = card.querySelector(".status-select");
+        statusSelect.addEventListener("change", async () => {
+          const previous = statusSelect.dataset.previous;
+          statusSelect.disabled = true;
+
+          try {
+            const updatedRepair = await api.request(`/api/repairs/${repair.id}`, {
+              method: "PATCH",
+              body: JSON.stringify({ repairStatus: statusSelect.value }),
+            });
+            statusSelect.dataset.previous = statusSelect.value;
+            card.dataset.repairStatus = statusSelect.value;
+
+            if (activeRepairStatus !== "All" && updatedRepair.repairStatus !== activeRepairStatus) {
+              card.remove();
+              if (!cardsContainer.querySelector(".card")) renderEmptyState();
+            }
+          } catch (err) {
+            alert(err.message);
+            statusSelect.value = previous;
+          } finally {
+            statusSelect.disabled = false;
+          }
+        });
+
+        if (placement === "return") {
+          return card;
+        }
+
+        if (placement === "prepend") {
+          cardsContainer.prepend(card);
+        } else {
+          cardsContainer.appendChild(card);
+        }
+
+        return card;
+      }
+
+      function applyUpdatedRepair(updatedRepair) {
+        repairsById.set(updatedRepair.id, updatedRepair);
+        const existingCard = cardsContainer.querySelector(`[data-id="${updatedRepair.id}"]`);
+        const existingIndex = currentRepairs.findIndex((repair) => repair.id === updatedRepair.id);
+        const shouldShow = repairMatchesCurrentView(updatedRepair);
+
+        if (existingIndex >= 0) {
+          currentRepairs.splice(existingIndex, 1);
+        }
+
+        if (!shouldShow) {
+          existingCard?.remove();
+          updatePaymentSummary(currentRepairs);
+          if (!cardsContainer.querySelector(".card")) renderEmptyState();
+          return;
+        }
+
+        if (existingIndex >= 0) {
+          currentRepairs.splice(existingIndex, 0, updatedRepair);
+        } else {
+          currentRepairs.unshift(updatedRepair);
+        }
+
+        const nextCard = renderRepairCard(updatedRepair, "return");
+        if (existingCard) {
+          existingCard.replaceWith(nextCard);
+        } else {
+          cardsContainer.prepend(nextCard);
+        }
+
+        updatePaymentSummary(currentRepairs);
+      }
+
+      function getCustomerFormData() {
+        const totalAmount = document.getElementById("totalAmount").value.replace(/\D/g, "");
+        const paidAmount = document.getElementById("paidAmount").value.replace(/\D/g, "") || "0";
+
+        return {
+          name: document.getElementById("name").value.trim(),
+          device: document.getElementById("device").value.trim(),
+          issue: document.getElementById("issue").value.trim(),
+          phone: document.getElementById("phone").value.replace(/\D/g, ""),
+          totalAmount,
+          paidAmount,
+          delivery: document.getElementById("delivery").value.trim(),
+          repairStatus: document.getElementById("repairStatus").value,
+          extraFlags: {
+            urgent: document.getElementById("urgentFlag").checked,
+            warrantyClaim: document.getElementById("warrantyFlag").checked,
+            returned: document.getElementById("returnedFlag").checked,
+            loanerDeviceGiven: document.getElementById("loanerFlag").checked,
+          },
+        };
+      }
+
+      function validateCustomerForm(data) {
+        if (!data.name || !data.device || !data.issue || !data.phone || !data.totalAmount || !data.delivery) {
+          alert("Please fill in all fields.");
+          return false;
+        }
+
+        if (data.phone.length < 10) {
+          alert("Please enter a valid phone number (at least 10 digits).");
+          return false;
+        }
+
+        if (Number(data.paidAmount) > Number(data.totalAmount)) {
+          alert("Paid amount cannot be greater than total amount.");
+          return false;
+        }
+
+        return true;
+      }
+
+      function setCustomerModalMode(mode) {
+        const isEdit = mode === "edit";
+        document.getElementById("modalTitle").textContent = isEdit ? "Update Customer" : "New Customer";
+        form.querySelector(".submit-btn").textContent = isEdit ? "Save Changes" : "Create Order";
+      }
+
+      function fillCustomerForm(repair) {
+        document.getElementById("name").value = repair.customerName || "";
+        document.getElementById("device").value = repair.device || "";
+        document.getElementById("issue").value = repair.issue || "";
+        document.getElementById("phone").value = repair.whatsapp || "";
+        document.getElementById("totalAmount").value = repair.totalAmount || "";
+        document.getElementById("paidAmount").value = repair.paidAmount || "";
+        document.getElementById("delivery").value = repair.delivery || "";
+        document.getElementById("repairStatus").value = repair.repairStatus || "Pending Work";
+        document.getElementById("urgentFlag").checked = Boolean(repair.extraFlags?.urgent);
+        document.getElementById("warrantyFlag").checked = Boolean(repair.extraFlags?.warrantyClaim);
+        document.getElementById("returnedFlag").checked = Boolean(repair.extraFlags?.returned);
+        document.getElementById("loanerFlag").checked = Boolean(repair.extraFlags?.loanerDeviceGiven);
+      }
+
+      async function loadRepairs({ showLoading = true } = {}) {
+        try {
+          if (showLoading) renderLoadingState();
+
+          const repairs = await api.request(buildRepairUrl());
+          cardsContainer.innerHTML = "";
+          cardsContainer.classList.remove("is-loading");
+          currentRepairs = repairs || [];
+          repairsById.clear();
+          currentRepairs.forEach((repair) => repairsById.set(repair.id, repair));
+          updatePaymentSummary(currentRepairs);
+
+          if (!repairs?.length) {
+            renderEmptyState();
+            return;
+          }
+
+          repairs.forEach((repair) => renderRepairCard(repair));
+        } catch (err) {
+          cardsContainer.classList.remove("is-loading");
+          updatePaymentSummary([]);
+          alert(err.message);
+        }
+      }
+
+      /* ── WHATSAPP ── */
+      function sendWhatsApp(button) {
+        const card = button.closest(".card");
+        const customerName = card.dataset.customerName || card.querySelector(".customer-name").innerText;
+        const rawAmount = card.dataset.remainingAmount || card.dataset.totalAmount || "0";
+        const status = card.querySelector(".status-select").value;
+        const phone = card.dataset.whatsapp;
+        const device = card.dataset.device;
+        const issue = card.dataset.issue;
+        const delivery = card.dataset.delivery;
+        const paymentStatus = card.dataset.paymentStatus;
+
+        const upiId = "8983458781@ybl";
+        const shopName = "Balaji Mobile";
+        const transactionId = "TXN" + Date.now();
+
+        const paymentLink =
+          `upi://pay?pa=${upiId}` +
+          `&pn=${encodeURIComponent(shopName)}` +
+          `&am=${rawAmount}&cu=INR` +
+          `&tn=${encodeURIComponent(issue)}` +
+          `&tr=${transactionId}`;
+
+        const payBtn = card.querySelector(".payment-link");
+        if (payBtn) payBtn.href = paymentLink;
+
+        const message =
+          `*Hello ${customerName}*%0A%0A` +
+          `📱 Device: ${device}%0A` +
+          `🛠 Issue: ${issue}%0A` +
+          `📌 Repair Status: ${status}%0A` +
+          `💳 Payment Status: ${paymentStatus}%0A` +
+          `💰 Amount Due: ₹${rawAmount}%0A%0A` +
+          `💳 Pay Here:%0A${encodeURIComponent(paymentLink)}%0A%0A` +
+          `🚚 Delivery: ${delivery}%0A%0A` +
+          `Thank you for choosing Balaji Mobile Shop 🙏%0A%0A` +
+          `Regards,%0AGovind Sathe 👩🏻‍💻`;
+
+        window.open(`https://wa.me/${phone}?text=${message}`, "_blank");
+      }
+
+      /* ── DELETE ── */
+      async function deleteCard(button) {
+        const card = button.closest(".card");
+        const repairId = card.dataset.id;
+
+        if (!repairId) return;
+
+        if (confirm("Are you sure you want to delete this customer?")) {
+          button.disabled = true;
+
+          try {
+            await api.request(`/api/repairs/${repairId}`, {
+              method: "DELETE",
+            });
+
+            card.remove();
+
+            if (!cardsContainer.querySelector(".card")) {
+              renderEmptyState();
+            }
+          } catch (err) {
+            alert(err.message);
+            button.disabled = false;
+          }
+        }
+      }
+
+      /* ── MODAL ── */
+      const overlay   = document.getElementById("modalOverlay");
+      const addBtn    = document.getElementById("addCustomerBtn");
+      const closeBtn  = document.getElementById("closeModalBtn");
+      const form      = document.getElementById("addCustomerForm");
+      const paymentModalOverlay = document.getElementById("paymentModalOverlay");
+      const closePaymentModalBtn = document.getElementById("closePaymentModalBtn");
+      const paymentForm = document.getElementById("paymentForm");
+      const newPaymentAmount = document.getElementById("newPaymentAmount");
+      const paymentMethod = document.getElementById("paymentMethod");
+      const paymentNote = document.getElementById("paymentNote");
+      const savePaymentBtn = document.getElementById("savePaymentBtn");
+      const markFullyPaidBtn = document.getElementById("markFullyPaidBtn");
+      const historyModalOverlay = document.getElementById("historyModalOverlay");
+      const closeHistoryModalBtn = document.getElementById("closeHistoryModalBtn");
+      const paymentHistoryList = document.getElementById("paymentHistoryList");
+
+      statusFilterBar.addEventListener("click", (event) => {
+        const button = event.target.closest(".filter-tab");
+        if (!button) return;
+
+        activeRepairStatus = button.dataset.status;
+        renderFilterTabs();
+        loadRepairs();
+      });
+
+      paymentStatusFilter.addEventListener("change", () => {
+        activePaymentStatus = paymentStatusFilter.value;
+        loadRepairs();
+      });
+
+      repairSearch.addEventListener("input", () => {
+        window.clearTimeout(searchTimer);
+
+        searchTimer = window.setTimeout(() => {
+          activeSearch = repairSearch.value.trim();
+          loadRepairs();
+        }, 250);
+      });
+
+      function fillPaymentSnapshot(repair) {
+        document.getElementById("paymentCustomerName").textContent = repair.customerName || "-";
+        document.getElementById("paymentDevice").textContent = repair.device || "-";
+        document.getElementById("paymentTotal").textContent = formatAmount(repair.totalAmount);
+        document.getElementById("paymentPaid").textContent = formatAmount(repair.paidAmount);
+        document.getElementById("paymentRemaining").textContent = formatAmount(repair.remainingAmount);
+        document.getElementById("paymentCurrentStatus").textContent = repair.paymentStatus || "Unpaid";
+      }
+
+      function openPaymentModal(repairId) {
+        const repair = repairsById.get(repairId);
+        if (!repair) return;
+
+        activePaymentRepairId = repairId;
+        fillPaymentSnapshot(repair);
+        paymentForm.reset();
+        paymentMethod.value = "Cash";
+        markFullyPaidBtn.disabled = Number(repair.remainingAmount || 0) <= 0;
+        paymentModalOverlay.classList.add("is-open");
+        document.body.classList.add("modal-open");
+        setTimeout(() => newPaymentAmount.focus(), 80);
+      }
+
+      function closePaymentModal() {
+        paymentModalOverlay.classList.remove("is-open");
+        document.body.classList.remove("modal-open");
+        activePaymentRepairId = null;
+        paymentForm.reset();
+      }
+
+      function openPaymentHistoryModal(repairId) {
+        const repair = repairsById.get(repairId);
+        if (!repair) return;
+
+        const history = Array.isArray(repair.paymentHistory) ? repair.paymentHistory : [];
+
+        paymentHistoryList.innerHTML = history.length
+          ? history.map((payment) => `
+              <div class="history-item">
+                <div class="history-main">${formatAmount(payment.amount)} • ${escapeHtml(payment.method || "Cash")} • ${escapeHtml(payment.note || "Payment received")}</div>
+                <div class="history-date">${formatDateTime(payment.createdAt)}</div>
+              </div>
+            `).join("")
+          : `
+              <div class="history-item">
+                <div class="history-main">No recorded payments yet</div>
+                <div class="history-note">Payments added from now on will appear here newest first.</div>
+              </div>
+            `;
+
+        historyModalOverlay.classList.add("is-open");
+        document.body.classList.add("modal-open");
+      }
+
+      function closeHistoryModal() {
+        historyModalOverlay.classList.remove("is-open");
+        document.body.classList.remove("modal-open");
+      }
+
+      async function savePayment(amountOverride) {
+        const repair = repairsById.get(activePaymentRepairId);
+        if (!repair || savePaymentBtn.disabled) return;
+
+        const amount = String(amountOverride ?? newPaymentAmount.value).replace(/\D/g, "");
+        const remainingAmount = Number(repair.remainingAmount || 0);
+
+        if (!amount || Number(amount) <= 0) {
+          alert("Payment amount must be greater than 0.");
+          return;
+        }
+
+        if (Number(amount) > remainingAmount) {
+          alert("Payment cannot exceed remaining amount.");
+          return;
+        }
+
+        savePaymentBtn.disabled = true;
+        markFullyPaidBtn.disabled = true;
+        savePaymentBtn.textContent = "Saving...";
+
+        try {
+          const updatedRepair = await api.request(`/api/repairs/${repair.id}/payment`, {
+            method: "PATCH",
+            body: JSON.stringify({
+              amount,
+              method: paymentMethod.value,
+              note: paymentNote.value.trim(),
+            }),
+          });
+
+          applyUpdatedRepair(updatedRepair);
+          closePaymentModal();
+        } catch (err) {
+          alert(err.message);
+        } finally {
+          savePaymentBtn.disabled = false;
+          savePaymentBtn.textContent = "Save Payment";
+        }
+      }
+
+      function openModal() {
+        editingRepairId = null;
+        setCustomerModalMode("create");
+        form.reset();
+        overlay.classList.add("is-open");
+        document.body.classList.add("modal-open");
+        // Focus first field for accessibility / mobile keyboard
+        setTimeout(() => document.getElementById("name").focus(), 80);
+      }
+
+      function openEditModal(repairId) {
+        const repair = repairsById.get(repairId);
+        if (!repair) return;
+
+        editingRepairId = repairId;
+        setCustomerModalMode("edit");
+        fillCustomerForm(repair);
+        overlay.classList.add("is-open");
+        document.body.classList.add("modal-open");
+        setTimeout(() => document.getElementById("name").focus(), 80);
+      }
+
+      function closeModal() {
+        overlay.classList.remove("is-open");
+        document.body.classList.remove("modal-open");
+        form.reset();
+        editingRepairId = null;
+        setCustomerModalMode("create");
+      }
+
+      addBtn.addEventListener("click", openModal);
+      closeBtn.addEventListener("click", closeModal);
+      closePaymentModalBtn.addEventListener("click", closePaymentModal);
+      closeHistoryModalBtn.addEventListener("click", closeHistoryModal);
+
+      // Close on backdrop click (only when clicking the overlay itself)
+      overlay.addEventListener("click", (e) => {
+        if (e.target === overlay) closeModal();
+      });
+      paymentModalOverlay.addEventListener("click", (e) => {
+        if (e.target === paymentModalOverlay) closePaymentModal();
+      });
+      historyModalOverlay.addEventListener("click", (e) => {
+        if (e.target === historyModalOverlay) closeHistoryModal();
+      });
+
+      // Close on Escape
+      document.addEventListener("keydown", (e) => {
+        if (e.key !== "Escape") return;
+        if (overlay.classList.contains("is-open")) closeModal();
+        if (paymentModalOverlay.classList.contains("is-open")) closePaymentModal();
+        if (historyModalOverlay.classList.contains("is-open")) closeHistoryModal();
+      });
+
+      paymentForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        await savePayment();
+      });
+
+      markFullyPaidBtn.addEventListener("click", async () => {
+        const repair = repairsById.get(activePaymentRepairId);
+        if (!repair) return;
+
+        newPaymentAmount.value = String(repair.remainingAmount || 0);
+        if (!paymentNote.value.trim()) {
+          paymentNote.value = "Marked fully paid";
+        }
+        await savePayment(repair.remainingAmount);
+      });
+
+      /* ── FORM SUBMIT ── */
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const formData = getCustomerFormData();
+        if (!validateCustomerForm(formData)) return;
+
+        try {
+          const isEdit = Boolean(editingRepairId);
+          const repair = await api.request(isEdit ? `/api/repairs/${editingRepairId}` : "/api/repairs", {
+            method: isEdit ? "PATCH" : "POST",
+            body: JSON.stringify({
+              customerName: formData.name,
+              device: formData.device,
+              issue: formData.issue,
+              whatsapp: formData.phone,
+              totalAmount: formData.totalAmount,
+              advanceAmount: formData.paidAmount,
+              paidAmount: formData.paidAmount,
+              delivery: formData.delivery,
+              repairStatus: formData.repairStatus,
+              extraFlags: formData.extraFlags,
+            }),
+          });
+
+          const emptyCard = cardsContainer.querySelector(".status-select[disabled]")?.closest(".card");
+          emptyCard?.remove();
+
+          if (isEdit) {
+            applyUpdatedRepair(repair);
+          } else if (repairMatchesCurrentView(repair)) {
+            currentRepairs.unshift(repair);
+            renderRepairCard(repair, "prepend");
+            updatePaymentSummary(currentRepairs);
+          } else {
+            loadRepairs({ showLoading: false });
+          }
+          closeModal();
+        } catch (err) {
+          alert(err.message);
+        }
+      });
+
+      renderFilterTabs();
+      loadRepairs();
+    </script>
+  </body>
+</html>
