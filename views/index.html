@@ -451,6 +451,25 @@
         justify-content: center;
       }
 
+      .edit {
+        width: 44px;
+        height: 44px;
+        flex-shrink: 0;
+        border-radius: var(--radius-sm);
+        background: #dbeafe;
+        color: #2563eb;
+        font-size: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .edit:hover {
+        background: #2563eb;
+        color: white;
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.22);
+      }
+
       .delete:hover {
         background: var(--danger);
         color: white;
@@ -1113,6 +1132,7 @@
       let activeSearch = "";
       let searchTimer;
       let activePaymentRepairId = null;
+      let editingRepairId = null;
 
       const api = {
         async request(url, options = {}) {
@@ -1344,7 +1364,6 @@
           <div class="info"><strong>Payment</strong><span class="payment-status ${statusClass(repair.paymentStatus)}">${escapeHtml(repair.paymentStatus || "Unpaid")}</span></div>
           <div class="info"><strong>Paid</strong> ${formatAmount(repair.paidAmount)}</div>
           <div class="info"><strong>Remaining</strong> ${formatAmount(repair.remainingAmount)}</div>
-          <div class="info"><strong>Pay Link</strong><a class="payment-link" target="_blank">Pay Now</a></div>
           <div class="info"><strong>Date</strong> ${formatDate(repair.createdAt)}</div>
           <div class="info"><strong>Delivery</strong> ${escapeHtml(repair.delivery)}</div>
           ${renderFlagBadges(repair.extraFlags)}
@@ -1357,6 +1376,7 @@
             <button class="whatsapp" onclick="sendWhatsApp(this)"><span>WhatsApp</span></button>
             <button class="payment-action" onclick="openPaymentModal('${repair.id}')">Update Payment</button>
             <button class="history-action" onclick="openPaymentHistoryModal('${repair.id}')">View Payments</button>
+            <button class="edit" onclick="openEditModal('${repair.id}')" title="Edit Customer">✏️</button>
             <button class="delete" onclick="deleteCard(this)" title="Delete Card">🗑</button>
           </div>
           <div class="footer-note">Thank you for trusting Balaji Mobile Shop 🙏</div>
@@ -1431,6 +1451,68 @@
         }
 
         updatePaymentSummary(currentRepairs);
+      }
+
+      function getCustomerFormData() {
+        const totalAmount = document.getElementById("totalAmount").value.replace(/\D/g, "");
+        const paidAmount = document.getElementById("paidAmount").value.replace(/\D/g, "") || "0";
+
+        return {
+          name: document.getElementById("name").value.trim(),
+          device: document.getElementById("device").value.trim(),
+          issue: document.getElementById("issue").value.trim(),
+          phone: document.getElementById("phone").value.replace(/\D/g, ""),
+          totalAmount,
+          paidAmount,
+          delivery: document.getElementById("delivery").value.trim(),
+          repairStatus: document.getElementById("repairStatus").value,
+          extraFlags: {
+            urgent: document.getElementById("urgentFlag").checked,
+            warrantyClaim: document.getElementById("warrantyFlag").checked,
+            returned: document.getElementById("returnedFlag").checked,
+            loanerDeviceGiven: document.getElementById("loanerFlag").checked,
+          },
+        };
+      }
+
+      function validateCustomerForm(data) {
+        if (!data.name || !data.device || !data.issue || !data.phone || !data.totalAmount || !data.delivery) {
+          alert("Please fill in all fields.");
+          return false;
+        }
+
+        if (data.phone.length < 10) {
+          alert("Please enter a valid phone number (at least 10 digits).");
+          return false;
+        }
+
+        if (Number(data.paidAmount) > Number(data.totalAmount)) {
+          alert("Paid amount cannot be greater than total amount.");
+          return false;
+        }
+
+        return true;
+      }
+
+      function setCustomerModalMode(mode) {
+        const isEdit = mode === "edit";
+        document.getElementById("modalTitle").textContent = isEdit ? "Update Customer" : "New Customer";
+        form.querySelector(".submit-btn").textContent = isEdit ? "Save Changes" : "Create Order";
+      }
+
+      function fillCustomerForm(repair) {
+        document.getElementById("name").value = repair.customerName || "";
+        document.getElementById("device").value = repair.device || "";
+        document.getElementById("issue").value = repair.issue || "";
+        document.getElementById("phone").value = repair.whatsapp || "";
+        document.getElementById("totalAmount").value = repair.totalAmount || "";
+        document.getElementById("paidAmount").value = repair.paidAmount || "";
+        document.getElementById("delivery").value = repair.delivery || "";
+        document.getElementById("repairStatus").value = repair.repairStatus || "Pending Work";
+        document.getElementById("urgentFlag").checked = Boolean(repair.extraFlags?.urgent);
+        document.getElementById("warrantyFlag").checked = Boolean(repair.extraFlags?.warrantyClaim);
+        document.getElementById("returnedFlag").checked = Boolean(repair.extraFlags?.returned);
+        document.getElementById("loanerFlag").checked = Boolean(repair.extraFlags?.loanerDeviceGiven);
       }
 
       async function loadRepairs({ showLoading = true } = {}) {
@@ -1667,9 +1749,24 @@
       }
 
       function openModal() {
+        editingRepairId = null;
+        setCustomerModalMode("create");
+        form.reset();
         overlay.classList.add("is-open");
         document.body.classList.add("modal-open");
         // Focus first field for accessibility / mobile keyboard
+        setTimeout(() => document.getElementById("name").focus(), 80);
+      }
+
+      function openEditModal(repairId) {
+        const repair = repairsById.get(repairId);
+        if (!repair) return;
+
+        editingRepairId = repairId;
+        setCustomerModalMode("edit");
+        fillCustomerForm(repair);
+        overlay.classList.add("is-open");
+        document.body.classList.add("modal-open");
         setTimeout(() => document.getElementById("name").focus(), 80);
       }
 
@@ -1677,6 +1774,8 @@
         overlay.classList.remove("is-open");
         document.body.classList.remove("modal-open");
         form.reset();
+        editingRepairId = null;
+        setCustomerModalMode("create");
       }
 
       addBtn.addEventListener("click", openModal);
@@ -1723,56 +1822,36 @@
       form.addEventListener("submit", async (e) => {
         e.preventDefault();
 
-        const name     = document.getElementById("name").value.trim();
-        const device   = document.getElementById("device").value.trim();
-        const issue    = document.getElementById("issue").value.trim();
-        const phone    = document.getElementById("phone").value.replace(/\D/g, "");
-        const totalAmount = document.getElementById("totalAmount").value.replace(/\D/g, "");
-        const paidAmount = document.getElementById("paidAmount").value.replace(/\D/g, "") || "0";
-        const delivery = document.getElementById("delivery").value.trim();
-        const repairStatus = document.getElementById("repairStatus").value;
-        const extraFlags = {
-          urgent: document.getElementById("urgentFlag").checked,
-          warrantyClaim: document.getElementById("warrantyFlag").checked,
-          returned: document.getElementById("returnedFlag").checked,
-          loanerDeviceGiven: document.getElementById("loanerFlag").checked,
-        };
-
-        if (!name || !device || !issue || !phone || !totalAmount || !delivery) {
-          alert("Please fill in all fields.");
-          return;
-        }
-        if (phone.length < 10) {
-          alert("Please enter a valid phone number (at least 10 digits).");
-          return;
-        }
-        if (Number(paidAmount) > Number(totalAmount)) {
-          alert("Paid amount cannot be greater than total amount.");
-          return;
-        }
+        const formData = getCustomerFormData();
+        if (!validateCustomerForm(formData)) return;
 
         try {
-          const repair = await api.request("/api/repairs", {
-            method: "POST",
+          const isEdit = Boolean(editingRepairId);
+          const repair = await api.request(isEdit ? `/api/repairs/${editingRepairId}` : "/api/repairs", {
+            method: isEdit ? "PATCH" : "POST",
             body: JSON.stringify({
-              customerName: name,
-              device,
-              issue,
-              whatsapp: phone,
-              totalAmount,
-              advanceAmount: paidAmount,
-              paidAmount,
-              delivery,
-              repairStatus,
-              extraFlags,
+              customerName: formData.name,
+              device: formData.device,
+              issue: formData.issue,
+              whatsapp: formData.phone,
+              totalAmount: formData.totalAmount,
+              advanceAmount: formData.paidAmount,
+              paidAmount: formData.paidAmount,
+              delivery: formData.delivery,
+              repairStatus: formData.repairStatus,
+              extraFlags: formData.extraFlags,
             }),
           });
 
           const emptyCard = cardsContainer.querySelector(".status-select[disabled]")?.closest(".card");
           emptyCard?.remove();
 
-          if (repairMatchesCurrentView(repair)) {
+          if (isEdit) {
+            applyUpdatedRepair(repair);
+          } else if (repairMatchesCurrentView(repair)) {
+            currentRepairs.unshift(repair);
             renderRepairCard(repair, "prepend");
+            updatePaymentSummary(currentRepairs);
           } else {
             loadRepairs({ showLoading: false });
           }
