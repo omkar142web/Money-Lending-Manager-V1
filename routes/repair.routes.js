@@ -8,7 +8,9 @@ import {
 import { requireAuth } from "../middleware/requireAuth.js";
 import {
   validate,
+  validateQuery,
   validateRepairCreate,
+  validateRepairListQuery,
   validateRepairUpdate,
 } from "../middleware/validate.js";
 
@@ -16,7 +18,7 @@ const router = express.Router();
 
 router.use(requireAuth);
 
-router.get("/repairs", getRepairs);
+router.get("/repairs", validateQuery(validateRepairListQuery), getRepairs);
 router.post("/repairs", validate(validateRepairCreate), postRepair);
 router.patch("/repairs/:id", validate(validateRepairUpdate), patchRepair);
 router.put("/repairs/:id", validate(validateRepairUpdate), patchRepair);

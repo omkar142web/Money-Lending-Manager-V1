@@ -11,12 +11,69 @@ Balaji Store is an Express + MongoDB repair dashboard for Balaji Mobile Shop. Th
   - `repairJobs`
 - Added API endpoints for repair jobs:
   - `GET /api/repairs`
+  - `GET /api/repairs?repairStatus=Delivered`
+  - `GET /api/repairs?paymentStatus=Paid`
+  - `GET /api/repairs?search=iphone`
   - `POST /api/repairs`
   - `PATCH /api/repairs/:id`
   - `DELETE /api/repairs/:id`
 - Added auth middleware, validation middleware, async error handling, centralized error responses, and response helpers.
+- Added backend-based filtering for repair workflow and payment status.
+- Added dashboard search by customer name, phone, and device.
+- Split repair workflow from payment state.
 - Moved MongoDB configuration to environment variables.
 - Replaced legacy password cookies with an HTTP-only session token cookie.
+
+## Repair Data Shape
+
+New repair records use separate workflow and payment fields:
+
+```js
+{
+  customerName,
+  device,
+  issue,
+  repairStatus,
+  paymentStatus,
+  totalAmount,
+  advanceAmount,
+  paidAmount,
+  remainingAmount,
+  whatsapp,
+  delivery,
+  extraFlags: {
+    warrantyClaim,
+    loanerDeviceGiven,
+    returned,
+    urgent
+  },
+  createdAt,
+  updatedAt
+}
+```
+
+## Repair Workflow
+
+- Pending Work
+- In Progress
+- Waiting for Parts
+- Ready for Pickup
+- Delivered
+- Cancelled
+
+## Payment Statuses
+
+- Unpaid
+- Advance Paid
+- Partially Paid
+- Paid
+
+## Flags
+
+- Warranty Claim
+- Loaner Device Given
+- Returned
+- Urgent
 
 ## Environment
 
@@ -49,6 +106,7 @@ npm start
 config/
   env.js
   mongodb.js
+  repairWorkflow.js
 controllers/
   auth.controller.js
   page.controller.js

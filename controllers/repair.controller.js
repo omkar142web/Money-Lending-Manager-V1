@@ -8,7 +8,7 @@ import {
 import { sendSuccess } from "../utils/response.js";
 
 export const getRepairs = asyncHandler(async (req, res) => {
-  const repairs = await listRepairs();
+  const repairs = await listRepairs(req.validatedQuery);
   return sendSuccess(res, repairs, "Repair jobs loaded.");
 });
 

@@ -73,11 +73,133 @@
         font-size: 15px;
       }
 
+      .workflow-bar {
+        display: grid;
+        grid-template-columns: minmax(240px, 360px) minmax(180px, 220px) 1fr;
+        gap: 14px;
+        align-items: center;
+        margin-bottom: 24px;
+      }
+
+      .search-control {
+        position: relative;
+      }
+
+      .search-control input {
+        width: 100%;
+        height: 44px;
+        border: 1px solid var(--border);
+        background: white;
+        color: var(--text-dark);
+        border-radius: var(--radius-md);
+        padding: 0 14px 0 42px;
+        font-size: 14px;
+        box-shadow: var(--shadow-sm);
+        transition: border-color 0.15s, box-shadow 0.15s;
+      }
+
+      .search-control input:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.12), var(--shadow-sm);
+      }
+
+      .search-icon {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-muted);
+        font-size: 15px;
+        pointer-events: none;
+      }
+
+      .payment-filter select {
+        width: 100%;
+        height: 44px;
+        background-color: white;
+        box-shadow: var(--shadow-sm);
+      }
+
+      .filter-tabs {
+        display: flex;
+        gap: 8px;
+        overflow-x: auto;
+        padding: 2px 2px 8px;
+        scrollbar-width: thin;
+        scrollbar-color: #cbd5e1 transparent;
+      }
+
+      .filter-tab {
+        flex: 0 0 auto;
+        min-height: 40px;
+        padding: 0 14px;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: white;
+        color: var(--text-muted);
+        font-size: 13px;
+        font-weight: 700;
+        box-shadow: var(--shadow-sm);
+        white-space: nowrap;
+      }
+
+      .filter-tab:hover {
+        color: var(--primary-hover);
+        border-color: #a7f3d0;
+        transform: translateY(-1px);
+      }
+
+      .filter-tab.active {
+        background: var(--primary);
+        border-color: var(--primary);
+        color: white;
+        box-shadow: 0 8px 18px rgba(16, 185, 129, 0.22);
+      }
+
+      .payment-status {
+        display: inline-flex;
+        align-items: center;
+        width: fit-content;
+        padding: 4px 10px;
+        border-radius: 999px;
+        background: #eff6ff;
+        color: #2563eb;
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      .flag-badges {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 12px;
+      }
+
+      .flag-badge {
+        padding: 4px 8px;
+        border-radius: 999px;
+        background: #fef3c7;
+        color: #92400e;
+        font-size: 11px;
+        font-weight: 800;
+      }
+
+      .flag-badge.urgent {
+        background: #fee2e2;
+        color: #b91c1c;
+      }
+
       /* ── CARDS GRID ── */
       .cards {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
         gap: 20px;
+        transition: opacity 0.18s ease;
+      }
+
+      .cards.is-loading {
+        opacity: 0.64;
       }
 
       .card {
@@ -424,6 +546,31 @@
         box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.12);
       }
 
+      .flag-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+      }
+
+      .flag-option {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 12px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        background: var(--input-bg);
+        color: var(--text-dark);
+        font-size: 13px;
+        font-weight: 700;
+      }
+
+      .flag-option input {
+        width: 16px;
+        height: 16px;
+        accent-color: var(--primary);
+      }
+
       /* select inside form resets the card select override */
       .form-group select {
         appearance: none;
@@ -467,6 +614,17 @@
 
         header h1 {
           font-size: 22px;
+        }
+
+        .workflow-bar {
+          grid-template-columns: 1fr;
+          gap: 12px;
+          margin-bottom: 18px;
+        }
+
+        .filter-tabs {
+          margin-inline: -2px;
+          padding-bottom: 6px;
         }
 
         .cards {
@@ -518,13 +676,32 @@
         <p>Manage repairs, status updates, and customer payments</p>
       </header>
 
+      <section class="workflow-bar" aria-label="Repair filters">
+        <div class="search-control">
+          <span class="search-icon">⌕</span>
+          <input id="repairSearch" type="search" placeholder="Search customer, phone, or device" autocomplete="off" />
+        </div>
+
+        <div class="payment-filter">
+          <select id="paymentStatusFilter" aria-label="Filter by payment status">
+            <option value="All">All Payments</option>
+            <option value="Unpaid">Unpaid</option>
+            <option value="Advance Paid">Advance Paid</option>
+            <option value="Partially Paid">Partially Paid</option>
+            <option value="Paid">Paid</option>
+          </select>
+        </div>
+
+        <div class="filter-tabs" id="statusFilterBar" aria-label="Filter by repair status"></div>
+      </section>
+
       <div class="cards" id="cardsContainer">
         <div class="card">
           <div class="top">
             <div class="customer-name">Loading repair jobs</div>
             <div class="amount">₹0</div>
           </div>
-          <div class="info"><strong>Phone</strong> Please wait</div>
+          <div class="info"><strong>Device</strong> Please wait</div>
           <div class="info"><strong>Issue</strong> Syncing dashboard</div>
           <div class="info"><strong>WhatsApp</strong> -</div>
           <div class="info">
@@ -565,9 +742,14 @@
               <input type="text" id="device" placeholder="e.g. iPhone 13" autocomplete="off" />
             </div>
             <div class="form-group">
-              <label for="formAmount">Amount (₹)</label>
-              <input type="text" id="formAmount" placeholder="e.g. 2500" inputmode="numeric" />
+              <label for="totalAmount">Total Amount (₹)</label>
+              <input type="text" id="totalAmount" placeholder="e.g. 2500" inputmode="numeric" />
             </div>
+          </div>
+
+          <div class="form-group">
+            <label for="paidAmount">Paid Amount / Advance (₹)</label>
+            <input type="text" id="paidAmount" placeholder="e.g. 500 or 0" inputmode="numeric" />
           </div>
 
           <div class="form-group">
@@ -587,12 +769,25 @@
           </div>
 
           <div class="form-group">
-            <label for="status">Work Status</label>
-            <select id="status">
+            <label for="repairStatus">Repair Status</label>
+            <select id="repairStatus">
               <option value="Pending Work">Pending Work</option>
               <option value="In Progress" selected>In Progress</option>
-              <option value="Done">Done</option>
+              <option value="Waiting for Parts">Waiting for Parts</option>
+              <option value="Ready for Pickup">Ready for Pickup</option>
+              <option value="Delivered">Delivered</option>
+              <option value="Cancelled">Cancelled</option>
             </select>
+          </div>
+
+          <div class="form-group">
+            <label>Flags</label>
+            <div class="flag-grid">
+              <label class="flag-option"><input type="checkbox" id="urgentFlag" /> Urgent</label>
+              <label class="flag-option"><input type="checkbox" id="warrantyFlag" /> Warranty</label>
+              <label class="flag-option"><input type="checkbox" id="returnedFlag" /> Returned</label>
+              <label class="flag-option"><input type="checkbox" id="loanerFlag" /> Loaner Given</label>
+            </div>
           </div>
 
           <button type="submit" class="submit-btn">Create Order</button>
@@ -602,6 +797,24 @@
 
     <script>
       const cardsContainer = document.getElementById("cardsContainer");
+      const statusFilterBar = document.getElementById("statusFilterBar");
+      const paymentStatusFilter = document.getElementById("paymentStatusFilter");
+      const repairSearch = document.getElementById("repairSearch");
+
+      const repairStatuses = [
+        "Pending Work",
+        "In Progress",
+        "Waiting for Parts",
+        "Ready for Pickup",
+        "Delivered",
+        "Cancelled",
+      ];
+      const paymentStatuses = ["Unpaid", "Advance Paid", "Partially Paid", "Paid"];
+      const filterStatuses = ["All", ...repairStatuses];
+      let activeRepairStatus = "All";
+      let activePaymentStatus = "All";
+      let activeSearch = "";
+      let searchTimer;
 
       const api = {
         async request(url, options = {}) {
@@ -647,14 +860,107 @@
         return parsed.toLocaleDateString("en-IN", { day: "numeric", month: "short" });
       }
 
-      function renderEmptyState() {
+      function buildRepairUrl() {
+        const params = new URLSearchParams();
+
+        if (activeRepairStatus !== "All") params.set("repairStatus", activeRepairStatus);
+        if (activePaymentStatus !== "All") params.set("paymentStatus", activePaymentStatus);
+        if (activeSearch) params.set("search", activeSearch);
+
+        const query = params.toString();
+        return query ? `/api/repairs?${query}` : "/api/repairs";
+      }
+
+      function renderFilterTabs() {
+        statusFilterBar.innerHTML = filterStatuses.map((status) => `
+          <button
+            class="filter-tab ${status === activeRepairStatus ? "active" : ""}"
+            type="button"
+            data-status="${escapeHtml(status)}"
+            aria-pressed="${status === activeRepairStatus}"
+          >
+            ${escapeHtml(status)}
+          </button>
+        `).join("");
+      }
+
+      function renderStatusOptions(currentStatus = "Pending Work") {
+        const options = repairStatuses.includes(currentStatus)
+          ? repairStatuses
+          : [...repairStatuses, currentStatus];
+
+        return options.map((status) => `
+          <option value="${escapeHtml(status)}" ${status === currentStatus ? "selected" : ""}>
+            ${escapeHtml(status)}
+          </option>
+        `).join("");
+      }
+
+      function renderFlagBadges(flags = {}) {
+        const badges = [
+          flags.urgent && ["urgent", "Urgent"],
+          flags.warrantyClaim && ["", "Warranty"],
+          flags.returned && ["", "Returned"],
+          flags.loanerDeviceGiven && ["", "Loaner Given"],
+        ].filter(Boolean);
+
+        if (!badges.length) return "";
+
+        return `
+          <div class="flag-badges">
+            ${badges.map(([className, label]) => `<span class="flag-badge ${className}">${label}</span>`).join("")}
+          </div>
+        `;
+      }
+
+      function repairMatchesCurrentView(repair) {
+        const matchesRepairStatus = activeRepairStatus === "All" || repair.repairStatus === activeRepairStatus;
+        const matchesPaymentStatus = activePaymentStatus === "All" || repair.paymentStatus === activePaymentStatus;
+        const haystack = [
+          repair.customerName,
+          repair.whatsapp,
+          repair.device,
+        ].join(" ").toLowerCase();
+        const matchesSearch = !activeSearch || haystack.includes(activeSearch.toLowerCase());
+
+        return matchesRepairStatus && matchesPaymentStatus && matchesSearch;
+      }
+
+      function renderLoadingState() {
+        cardsContainer.classList.add("is-loading");
         cardsContainer.innerHTML = `
           <div class="card">
             <div class="top">
-              <div class="customer-name">No repair jobs yet</div>
+              <div class="customer-name">Loading repair jobs</div>
               <div class="amount">₹0</div>
             </div>
-            <div class="info"><strong>Phone</strong> Add your first customer using the + button</div>
+            <div class="info"><strong>Device</strong> Please wait</div>
+            <div class="info"><strong>Issue</strong> Syncing dashboard</div>
+            <div class="info"><strong>WhatsApp</strong> -</div>
+            <div class="info"><strong>Payment</strong><a class="payment-link">Pay Now</a></div>
+            <div class="info"><strong>Date</strong> ${formatDate()}</div>
+            <div class="info"><strong>Delivery</strong> -</div>
+            <div class="status-box">
+              <select class="status-select" disabled>
+                <option>Loading</option>
+              </select>
+            </div>
+          </div>
+        `;
+      }
+
+      function renderEmptyState() {
+        const repairLabel = activeRepairStatus === "All" ? "repair jobs" : activeRepairStatus.toLowerCase();
+        const paymentLabel = activePaymentStatus === "All" ? "" : ` with ${activePaymentStatus.toLowerCase()} payment`;
+        const searchText = activeSearch ? ` matching "${escapeHtml(activeSearch)}"` : "";
+
+        cardsContainer.innerHTML = `
+          <div class="card">
+            <div class="top">
+              <div class="customer-name">No ${repairLabel}${paymentLabel}${searchText}</div>
+              <div class="amount">₹0</div>
+            </div>
+            <div class="info"><strong>Device</strong> Add your first customer using the + button</div>
             <div class="info"><strong>Issue</strong> Waiting for work</div>
             <div class="info"><strong>WhatsApp</strong> -</div>
             <div class="info"><strong>Payment</strong><a class="payment-link">Pay Now</a></div>
@@ -667,32 +973,44 @@
             </div>
           </div>
         `;
+        cardsContainer.classList.remove("is-loading");
       }
 
       function renderRepairCard(repair, placement = "append") {
         const card = document.createElement("div");
         card.className = "card";
         card.dataset.id = repair.id;
+        card.dataset.customerName = repair.customerName || "";
+        card.dataset.device = repair.device || "";
+        card.dataset.issue = repair.issue || "";
+        card.dataset.whatsapp = repair.whatsapp || "";
+        card.dataset.delivery = repair.delivery || "";
+        card.dataset.totalAmount = repair.totalAmount || 0;
+        card.dataset.remainingAmount = repair.remainingAmount || 0;
+        card.dataset.repairStatus = repair.repairStatus || "Pending Work";
+        card.dataset.paymentStatus = repair.paymentStatus || "Unpaid";
         card.style.animation = placement === "prepend" ? "none" : "";
 
-        const safeStatus = escapeHtml(repair.status || "Pending Work");
+        const safeStatus = escapeHtml(repair.repairStatus || "Pending Work");
 
         card.innerHTML = `
           <div class="top">
             <div class="customer-name">${escapeHtml(repair.customerName)}</div>
-            <div class="amount">${formatAmount(repair.amount)}</div>
+            <div class="amount">${formatAmount(repair.totalAmount)}</div>
           </div>
-          <div class="info"><strong>Phone</strong> ${escapeHtml(repair.device)}</div>
+          <div class="info"><strong>Device</strong> ${escapeHtml(repair.device)}</div>
           <div class="info"><strong>Issue</strong> ${escapeHtml(repair.issue)}</div>
           <div class="info"><strong>WhatsApp</strong> ${escapeHtml(repair.whatsapp)}</div>
-          <div class="info"><strong>Payment</strong><a class="payment-link" target="_blank">Pay Now</a></div>
+          <div class="info"><strong>Payment</strong><span class="payment-status">${escapeHtml(repair.paymentStatus || "Unpaid")}</span></div>
+          <div class="info"><strong>Paid</strong> ${formatAmount(repair.paidAmount)}</div>
+          <div class="info"><strong>Remaining</strong> ${formatAmount(repair.remainingAmount)}</div>
+          <div class="info"><strong>Pay Link</strong><a class="payment-link" target="_blank">Pay Now</a></div>
           <div class="info"><strong>Date</strong> ${formatDate(repair.createdAt)}</div>
           <div class="info"><strong>Delivery</strong> ${escapeHtml(repair.delivery)}</div>
+          ${renderFlagBadges(repair.extraFlags)}
           <div class="status-box">
             <select class="status-select" data-previous="${safeStatus}">
-              <option value="Pending Work" ${repair.status === "Pending Work" ? "selected" : ""}>Pending Work</option>
-              <option value="In Progress" ${repair.status === "In Progress" ? "selected" : ""}>In Progress</option>
-              <option value="Done" ${repair.status === "Done" ? "selected" : ""}>Done</option>
+              ${renderStatusOptions(repair.repairStatus || "Pending Work")}
             </select>
           </div>
           <div class="buttons">
@@ -708,11 +1026,17 @@
           statusSelect.disabled = true;
 
           try {
-            await api.request(`/api/repairs/${repair.id}`, {
+            const updatedRepair = await api.request(`/api/repairs/${repair.id}`, {
               method: "PATCH",
-              body: JSON.stringify({ status: statusSelect.value }),
+              body: JSON.stringify({ repairStatus: statusSelect.value }),
             });
             statusSelect.dataset.previous = statusSelect.value;
+            card.dataset.repairStatus = statusSelect.value;
+
+            if (activeRepairStatus !== "All" && updatedRepair.repairStatus !== activeRepairStatus) {
+              card.remove();
+              if (!cardsContainer.querySelector(".card")) renderEmptyState();
+            }
           } catch (err) {
             alert(err.message);
             statusSelect.value = previous;
@@ -728,10 +1052,13 @@
         }
       }
 
-      async function loadRepairs() {
+      async function loadRepairs({ showLoading = true } = {}) {
         try {
-          const repairs = await api.request("/api/repairs");
+          if (showLoading) renderLoadingState();
+
+          const repairs = await api.request(buildRepairUrl());
           cardsContainer.innerHTML = "";
+          cardsContainer.classList.remove("is-loading");
 
           if (!repairs?.length) {
             renderEmptyState();
@@ -740,6 +1067,7 @@
 
           repairs.forEach((repair) => renderRepairCard(repair));
         } catch (err) {
+          cardsContainer.classList.remove("is-loading");
           alert(err.message);
         }
       }
@@ -747,14 +1075,14 @@
       /* ── WHATSAPP ── */
       function sendWhatsApp(button) {
         const card = button.closest(".card");
-        const customerName = card.querySelector(".customer-name").innerText;
-        const rawAmount = card.querySelector(".amount").innerText.replace(/[^0-9.]/g, "");
-        const infos = card.querySelectorAll(".info");
+        const customerName = card.dataset.customerName || card.querySelector(".customer-name").innerText;
+        const rawAmount = card.dataset.remainingAmount || card.dataset.totalAmount || "0";
         const status = card.querySelector(".status-select").value;
-        const phone    = infos[2].innerText.replace("WhatsApp", "").trim();
-        const device   = infos[0].innerText.replace("Phone", "").trim();
-        const issue    = infos[1].innerText.replace("Issue", "").trim();
-        const delivery = infos[5].innerText.replace("Delivery", "").trim();
+        const phone = card.dataset.whatsapp;
+        const device = card.dataset.device;
+        const issue = card.dataset.issue;
+        const delivery = card.dataset.delivery;
+        const paymentStatus = card.dataset.paymentStatus;
 
         const upiId = "8983458781@ybl";
         const shopName = "Balaji Mobile";
@@ -774,8 +1102,9 @@
           `*Hello ${customerName}*%0A%0A` +
           `📱 Device: ${device}%0A` +
           `🛠 Issue: ${issue}%0A` +
-          `📌 Status: ${status}%0A` +
-          `💰 Amount: ₹${rawAmount}%0A%0A` +
+          `📌 Repair Status: ${status}%0A` +
+          `💳 Payment Status: ${paymentStatus}%0A` +
+          `💰 Amount Due: ₹${rawAmount}%0A%0A` +
           `💳 Pay Here:%0A${encodeURIComponent(paymentLink)}%0A%0A` +
           `🚚 Delivery: ${delivery}%0A%0A` +
           `Thank you for choosing Balaji Mobile Shop 🙏%0A%0A` +
@@ -817,6 +1146,29 @@
       const closeBtn  = document.getElementById("closeModalBtn");
       const form      = document.getElementById("addCustomerForm");
 
+      statusFilterBar.addEventListener("click", (event) => {
+        const button = event.target.closest(".filter-tab");
+        if (!button) return;
+
+        activeRepairStatus = button.dataset.status;
+        renderFilterTabs();
+        loadRepairs();
+      });
+
+      paymentStatusFilter.addEventListener("change", () => {
+        activePaymentStatus = paymentStatusFilter.value;
+        loadRepairs();
+      });
+
+      repairSearch.addEventListener("input", () => {
+        window.clearTimeout(searchTimer);
+
+        searchTimer = window.setTimeout(() => {
+          activeSearch = repairSearch.value.trim();
+          loadRepairs();
+        }, 250);
+      });
+
       function openModal() {
         overlay.classList.add("is-open");
         document.body.classList.add("modal-open");
@@ -851,16 +1203,27 @@
         const device   = document.getElementById("device").value.trim();
         const issue    = document.getElementById("issue").value.trim();
         const phone    = document.getElementById("phone").value.replace(/\D/g, "");
-        const rawAmount = document.getElementById("formAmount").value.replace(/\D/g, "");
+        const totalAmount = document.getElementById("totalAmount").value.replace(/\D/g, "");
+        const paidAmount = document.getElementById("paidAmount").value.replace(/\D/g, "") || "0";
         const delivery = document.getElementById("delivery").value.trim();
-        const status   = document.getElementById("status").value;
+        const repairStatus = document.getElementById("repairStatus").value;
+        const extraFlags = {
+          urgent: document.getElementById("urgentFlag").checked,
+          warrantyClaim: document.getElementById("warrantyFlag").checked,
+          returned: document.getElementById("returnedFlag").checked,
+          loanerDeviceGiven: document.getElementById("loanerFlag").checked,
+        };
 
-        if (!name || !device || !issue || !phone || !rawAmount || !delivery) {
+        if (!name || !device || !issue || !phone || !totalAmount || !delivery) {
           alert("Please fill in all fields.");
           return;
         }
         if (phone.length < 10) {
           alert("Please enter a valid phone number (at least 10 digits).");
+          return;
+        }
+        if (Number(paidAmount) > Number(totalAmount)) {
+          alert("Paid amount cannot be greater than total amount.");
           return;
         }
 
@@ -872,21 +1235,30 @@
               device,
               issue,
               whatsapp: phone,
-              amount: rawAmount,
+              totalAmount,
+              advanceAmount: paidAmount,
+              paidAmount,
               delivery,
-              status,
+              repairStatus,
+              extraFlags,
             }),
           });
 
           const emptyCard = cardsContainer.querySelector(".status-select[disabled]")?.closest(".card");
           emptyCard?.remove();
-          renderRepairCard(repair, "prepend");
+
+          if (repairMatchesCurrentView(repair)) {
+            renderRepairCard(repair, "prepend");
+          } else {
+            loadRepairs({ showLoading: false });
+          }
           closeModal();
         } catch (err) {
           alert(err.message);
         }
       });
 
+      renderFilterTabs();
       loadRepairs();
     </script>
   </body>

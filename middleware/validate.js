@@ -1,4 +1,12 @@
 import { ApiError } from "../utils/ApiError.js";
+import {
+  allowedPaymentStatuses,
+  allowedRepairStatuses,
+  filterablePaymentStatuses,
+  filterableRepairStatuses,
+  repairFlags,
+  repairStatuses,
+} from "../config/repairWorkflow.js";
 
 export const validate = (validator) => (req, res, next) => {
   const result = validator(req.body, req);
@@ -11,8 +19,6 @@ export const validate = (validator) => (req, res, next) => {
   next();
 };
 
-const allowedStatuses = new Set(["Pending Work", "In Progress", "Done"]);
-
 function cleanString(value) {
   return typeof value === "string" ? value.trim() : "";
 }
@@ -20,6 +26,19 @@ function cleanString(value) {
 function cleanMoney(value) {
   const digits = String(value ?? "").replace(/[^\d.]/g, "");
   return Number(digits);
+}
+
+function cleanBoolean(value) {
+  return value === true || value === "true" || value === "on" || value === "1";
+}
+
+function cleanFlags(body) {
+  const source = body.extraFlags || body.flags || body;
+
+  return repairFlags.reduce((flags, flag) => {
+    flags[flag] = cleanBoolean(source[flag]);
+    return flags;
+  }, {});
 }
 
 export function validateLogin(body) {
@@ -53,14 +72,21 @@ export function validateRegister(body) {
 }
 
 export function validateRepairCreate(body) {
+  const totalAmount = cleanMoney(body.totalAmount ?? body.amount);
+  const paidAmount = cleanMoney(body.paidAmount ?? body.advanceAmount ?? 0);
+  const advanceAmount = cleanMoney(body.advanceAmount ?? (paidAmount > 0 ? paidAmount : 0));
+
   const value = {
     customerName: cleanString(body.customerName || body.name),
     device: cleanString(body.device),
     issue: cleanString(body.issue),
     whatsapp: cleanString(body.whatsapp || body.phone).replace(/\D/g, ""),
-    amount: cleanMoney(body.amount),
+    totalAmount,
+    advanceAmount,
+    paidAmount,
     delivery: cleanString(body.delivery),
-    status: cleanString(body.status) || "Pending Work",
+    repairStatus: cleanString(body.repairStatus || body.status) || "Pending Work",
+    extraFlags: cleanFlags(body),
   };
   const errors = [];
 
@@ -68,9 +94,17 @@ export function validateRepairCreate(body) {
   if (!value.device) errors.push({ field: "device", message: "Device is required." });
   if (!value.issue) errors.push({ field: "issue", message: "Issue is required." });
   if (value.whatsapp.length < 10) errors.push({ field: "whatsapp", message: "WhatsApp number must have at least 10 digits." });
-  if (!Number.isFinite(value.amount) || value.amount <= 0) errors.push({ field: "amount", message: "Amount must be greater than 0." });
+  if (!Number.isFinite(value.totalAmount) || value.totalAmount <= 0) errors.push({ field: "totalAmount", message: "Total amount must be greater than 0." });
+  if (!Number.isFinite(value.paidAmount) || value.paidAmount < 0) errors.push({ field: "paidAmount", message: "Paid amount cannot be negative." });
+  if (!Number.isFinite(value.advanceAmount) || value.advanceAmount < 0) errors.push({ field: "advanceAmount", message: "Advance amount cannot be negative." });
+  if (value.paidAmount > value.totalAmount) errors.push({ field: "paidAmount", message: "Paid amount cannot be greater than total amount." });
+  if (value.advanceAmount > value.paidAmount) errors.push({ field: "advanceAmount", message: "Advance amount cannot be greater than paid amount." });
   if (!value.delivery) errors.push({ field: "delivery", message: "Delivery is required." });
-  if (!allowedStatuses.has(value.status)) errors.push({ field: "status", message: "Invalid repair status." });
+  if (body.repairStatus !== undefined && !repairStatuses.includes(value.repairStatus)) {
+    errors.push({ field: "repairStatus", message: "Invalid repair status." });
+  } else if (body.repairStatus === undefined && !allowedRepairStatuses.has(value.repairStatus)) {
+    errors.push({ field: "repairStatus", message: "Invalid repair status." });
+  }
 
   return { value, errors };
 }
@@ -83,14 +117,81 @@ export function validateRepairUpdate(body) {
   if (body.device !== undefined) value.device = cleanString(body.device);
   if (body.issue !== undefined) value.issue = cleanString(body.issue);
   if (body.whatsapp !== undefined || body.phone !== undefined) value.whatsapp = cleanString(body.whatsapp || body.phone).replace(/\D/g, "");
-  if (body.amount !== undefined) value.amount = cleanMoney(body.amount);
+  if (body.totalAmount !== undefined || body.amount !== undefined) value.totalAmount = cleanMoney(body.totalAmount ?? body.amount);
+  if (body.advanceAmount !== undefined) value.advanceAmount = cleanMoney(body.advanceAmount);
+  if (body.paidAmount !== undefined) value.paidAmount = cleanMoney(body.paidAmount);
   if (body.delivery !== undefined) value.delivery = cleanString(body.delivery);
-  if (body.status !== undefined) value.status = cleanString(body.status);
+  if (body.repairStatus !== undefined || body.status !== undefined) value.repairStatus = cleanString(body.repairStatus || body.status);
+  if (body.extraFlags !== undefined || body.flags !== undefined || repairFlags.some((flag) => body[flag] !== undefined)) {
+    value.extraFlags = cleanFlags(body);
+  }
 
   if (!Object.keys(value).length) errors.push({ field: "body", message: "At least one field is required." });
   if (value.whatsapp !== undefined && value.whatsapp.length < 10) errors.push({ field: "whatsapp", message: "WhatsApp number must have at least 10 digits." });
-  if (value.amount !== undefined && (!Number.isFinite(value.amount) || value.amount <= 0)) errors.push({ field: "amount", message: "Amount must be greater than 0." });
-  if (value.status !== undefined && !allowedStatuses.has(value.status)) errors.push({ field: "status", message: "Invalid repair status." });
+  if (value.totalAmount !== undefined && (!Number.isFinite(value.totalAmount) || value.totalAmount <= 0)) errors.push({ field: "totalAmount", message: "Total amount must be greater than 0." });
+  if (value.paidAmount !== undefined && (!Number.isFinite(value.paidAmount) || value.paidAmount < 0)) errors.push({ field: "paidAmount", message: "Paid amount cannot be negative." });
+  if (value.advanceAmount !== undefined && (!Number.isFinite(value.advanceAmount) || value.advanceAmount < 0)) errors.push({ field: "advanceAmount", message: "Advance amount cannot be negative." });
+  if (value.repairStatus !== undefined && body.repairStatus !== undefined && !repairStatuses.includes(value.repairStatus)) {
+    errors.push({ field: "repairStatus", message: "Invalid repair status." });
+  } else if (value.repairStatus !== undefined && body.repairStatus === undefined && !allowedRepairStatuses.has(value.repairStatus)) {
+    errors.push({ field: "repairStatus", message: "Invalid repair status." });
+  }
 
   return { value, errors };
+}
+
+export const validateQuery = (validator) => (req, res, next) => {
+  const result = validator(req.query, req);
+
+  if (result.errors.length) {
+    throw new ApiError(400, "Validation failed.", result.errors);
+  }
+
+  req.validatedQuery = result.value;
+  next();
+};
+
+export function validateRepairListQuery(query) {
+  const legacyStatus = cleanString(query.status);
+  const repairStatus = cleanString(query.repairStatus || (allowedPaymentStatuses.has(legacyStatus) ? "" : legacyStatus));
+  const paymentStatus = cleanString(query.paymentStatus || (allowedPaymentStatuses.has(legacyStatus) ? legacyStatus : ""));
+  const search = cleanString(query.search || query.q);
+  const sort = cleanString(query.sort) || "newest";
+  const page = Number(query.page || 1);
+  const limit = Number(query.limit || 0);
+  const errors = [];
+
+  if (query.repairStatus !== undefined && repairStatus && !filterableRepairStatuses.includes(repairStatus)) {
+    errors.push({ field: "repairStatus", message: "Invalid repair status filter." });
+  } else if (query.repairStatus === undefined && repairStatus && !filterableRepairStatuses.includes(repairStatus) && !allowedRepairStatuses.has(repairStatus)) {
+    errors.push({ field: "repairStatus", message: "Invalid repair status filter." });
+  }
+
+  if (paymentStatus && !filterablePaymentStatuses.includes(paymentStatus) && !allowedPaymentStatuses.has(paymentStatus)) {
+    errors.push({ field: "paymentStatus", message: "Invalid payment status filter." });
+  }
+
+  if (!["newest", "oldest", "delivery"].includes(sort)) {
+    errors.push({ field: "sort", message: "Invalid sort option." });
+  }
+
+  if (!Number.isInteger(page) || page < 1) {
+    errors.push({ field: "page", message: "Page must be a positive number." });
+  }
+
+  if (limit && (!Number.isInteger(limit) || limit < 1 || limit > 100)) {
+    errors.push({ field: "limit", message: "Limit must be between 1 and 100." });
+  }
+
+  return {
+    value: {
+      repairStatus: repairStatus && repairStatus !== "All" ? repairStatus : undefined,
+      paymentStatus: paymentStatus && paymentStatus !== "All" ? paymentStatus : undefined,
+      search,
+      sort,
+      page,
+      limit,
+    },
+    errors,
+  };
 }

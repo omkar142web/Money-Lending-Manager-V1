@@ -35,8 +35,13 @@ async function createIndexes() {
 
   await usersCollection.createIndex({ email: 1 }, { unique: true });
   await repairsCollection.createIndex({ createdAt: -1 });
+  await repairsCollection.createIndex({ repairStatus: 1, createdAt: -1 });
+  await repairsCollection.createIndex({ paymentStatus: 1, createdAt: -1 });
   await repairsCollection.createIndex({ status: 1, createdAt: -1 });
   await repairsCollection.createIndex({ whatsapp: 1 });
+  await repairsCollection.createIndex({ customerName: 1 });
+  await repairsCollection.createIndex({ device: 1 });
+  await repairsCollection.createIndex({ "extraFlags.urgent": 1 });
 }
 
 export function getDB() {
