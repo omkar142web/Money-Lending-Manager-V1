@@ -99,14 +99,23 @@ export async function authenticateUser(email, password) {
 
 export async function createSession(userId) {
   const token = crypto.randomBytes(32).toString("hex");
+  const hash = hashSessionToken(token);
+  const now = new Date();
 
   await usersCollection().updateOne(
     { _id: toObjectId(userId) },
     {
+      $push: {
+        sessions: {
+          $each: [{ hash, createdAt: now }],
+          $slice: -10, // Limit to 10 active devices/sessions
+        },
+      },
       $set: {
-        sessionTokenHash: hashSessionToken(token),
-        sessionCreatedAt: new Date(),
-        updatedAt: new Date(),
+        // Keep these for legacy/backward compatibility during transition
+        sessionTokenHash: hash,
+        sessionCreatedAt: now,
+        updatedAt: now,
       },
     },
   );
@@ -115,28 +124,53 @@ export async function createSession(userId) {
 }
 
 export function verifySessionToken(user, token) {
-  if (!user?.sessionTokenHash || !token) return false;
-
+  if (!token) return false;
   const incomingHash = hashSessionToken(token);
-  return crypto.timingSafeEqual(
-    Buffer.from(user.sessionTokenHash, "hex"),
-    Buffer.from(incomingHash, "hex"),
-  );
+
+  // 1. Check the new sessions array
+  if (Array.isArray(user.sessions)) {
+    const sessionExists = user.sessions.some((s) =>
+      crypto.timingSafeEqual(Buffer.from(s.hash, "hex"), Buffer.from(incomingHash, "hex")),
+    );
+    if (sessionExists) return true;
+  }
+
+  // 2. Fallback to legacy single-session field
+  if (user.sessionTokenHash) {
+    return crypto.timingSafeEqual(
+      Buffer.from(user.sessionTokenHash, "hex"),
+      Buffer.from(incomingHash, "hex"),
+    );
+  }
+
+  return false;
 }
 
-export async function clearSession(userId) {
+export async function clearSession(userId, token = null) {
   if (!userId) return;
 
-  await usersCollection().updateOne(
-    { _id: toObjectId(userId) },
-    {
-      $unset: {
-        sessionTokenHash: "",
-        sessionCreatedAt: "",
-      },
-      $set: {
-        updatedAt: new Date(),
-      },
-    },
-  );
+  const update = {
+    $set: { updatedAt: new Date() },
+  };
+
+  if (token) {
+    const hash = hashSessionToken(token);
+    // Remove specific session from array
+    update.$pull = { sessions: { hash: hash } };
+    
+    // If the legacy field matches this token, clear it too
+    await usersCollection().updateOne(
+      { _id: toObjectId(userId), sessionTokenHash: hash },
+      { $unset: { sessionTokenHash: "", sessionCreatedAt: "" } }
+    );
+  } else {
+    // Global logout: clear everything
+    update.$unset = {
+      sessions: "",
+      sessionTokenHash: "",
+      sessionCreatedAt: "",
+    };
+  }
+
+  await usersCollection().updateOne({ _id: toObjectId(userId) }, update);
 }
