@@ -280,14 +280,37 @@
       }
 
       .amount {
-        color: var(--primary);
-        font-size: 15px;
-        font-weight: 700;
-        background: #ecfdf5;
-        padding: 4px 11px;
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 5px 11px;
         border-radius: 100px;
         white-space: nowrap;
         flex-shrink: 0;
+      }
+
+      .amount-due {
+        background: #fff7ed;
+        color: #c2410c;
+      }
+
+      .amount-paid {
+        background: #ecfdf5;
+        color: #15803d;
+      }
+
+      .total-crossed {
+        color: var(--text-muted);
+        font-size: 12px;
+        font-weight: 600;
+        text-decoration: line-through;
+        text-decoration-thickness: 1.5px;
+      }
+
+      .remaining-value {
+        font-size: 15px;
+        font-weight: 800;
+        line-height: 1;
       }
 
       .info {
@@ -1181,6 +1204,18 @@
         `;
       }
 
+      function renderAmountBadge(repair) {
+        const remainingAmount = Number(repair.remainingAmount || 0);
+        const isPaid = remainingAmount <= 0;
+
+        return `
+          <div class="amount ${isPaid ? "amount-paid" : "amount-due"}">
+            <span class="total-crossed">${formatAmount(repair.totalAmount)}</span>
+            <span class="remaining-value">${isPaid ? "Paid" : `${formatAmount(remainingAmount)} Due`}</span>
+          </div>
+        `;
+      }
+
       function repairMatchesCurrentView(repair) {
         const matchesRepairStatus = activeRepairStatus === "All" || repair.repairStatus === activeRepairStatus;
         const matchesPaymentStatus = activePaymentStatus === "All" || repair.paymentStatus === activePaymentStatus;
@@ -1265,7 +1300,7 @@
         card.innerHTML = `
           <div class="top">
             <div class="customer-name">${escapeHtml(repair.customerName)}</div>
-            <div class="amount">${formatAmount(repair.totalAmount)}</div>
+            ${renderAmountBadge(repair)}
           </div>
           <div class="info"><strong>Device</strong> ${escapeHtml(repair.device)}</div>
           <div class="info"><strong>Issue</strong> ${escapeHtml(repair.issue)}</div>
