@@ -252,13 +252,18 @@ export async function updateRepair(id, updateData) {
   delete updates.status;
   delete updates.amount;
 
-  const result = await repairsCollection().findOneAndUpdate(
+  const result = await repairsCollection().updateOne(
     { _id },
     { $set: updates },
-    { returnDocument: "after" },
+    { upsert: false },
   );
 
-  return serializeRepair(result.value || result);
+  if (!result.matchedCount) {
+    throw new ApiError(404, "Repair job not found.");
+  }
+
+  const updatedRepair = await repairsCollection().findOne({ _id });
+  return serializeRepair(updatedRepair);
 }
 
 export async function addRepairPayment(id, paymentData) {
