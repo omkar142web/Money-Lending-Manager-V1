@@ -10,30 +10,30 @@ export const getAllUsers = async () => {
 };
 
 export const getAllUsersForMaster = async () => {
-  return await getCollection('users').find().sort({ _id: -1 }).toArray();
+  return await getCollection('usersBalaji').find().sort({ _id: -1 }).toArray();
 };
 //
 
 // GET USER BY EMAIL
 export const findUserByEmail = async (email) => {
-  const collection = getCollection('users');
+  const collection = getCollection('usersBalaji');
   return await collection.findOne({ email });
 };
 
 // CREATE USER
 export const createUser = async (userData) => {
-  const collection = getCollection('users');
+  const collection = getCollection('usersBalaji');
   return await collection.insertOne(userData);
 };
 
 // UPDATE USER
 export const updateUser = async (email, updateData) => {
-  const collection = getCollection('users');
+  const collection = getCollection('usersBalaji');
   return await collection.updateOne({ email }, { $set: updateData });
 };
 
 // DELETE USER
 export const deleteUser = async (email) => {
-  const collection = getCollection('users');
+  const collection = getCollection('usersBalaji');
   return await collection.deleteOne({ email });
 };

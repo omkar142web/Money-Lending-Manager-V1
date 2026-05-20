@@ -243,7 +243,7 @@ export const createPost = async (req, res) => {
       return res.redirect("/login");
     }
 
-    const collection = getCollection("anyInformation");
+    const collection = getCollection();
 
     const { name, info } = req.body;
     const addedData = await collection.insertOne({
@@ -285,7 +285,7 @@ export const getAddPage = async (req, res) => {
 export const getUpdatePage = async (req, res) => {
   const id = req.params.id;
 
-  const collection = getCollection("anyInformation");
+  const collection = getCollection();
 
   const data = await collection.findOne({
     _id: new ObjectId(id),
@@ -313,7 +313,7 @@ export const updatePost = async (req, res) => {
       return res.status(401).send("Unauthorized");
     }
 
-    const collection = getCollection("anyInformation");
+    const collection = getCollection();
 
     const { name, info } = req.body;
 
@@ -343,7 +343,7 @@ export const updatePost = async (req, res) => {
 export const deletePost = async (req, res) => {
   const id = req.params.id;
 
-  const collection = getCollection("anyInformation");
+  const collection = getCollection();
 
   const deleteData = await collection.deleteOne({
     _id: new ObjectId(id),
@@ -356,7 +356,7 @@ export const deleteMasterUser = async (req, res) => {
   try {
     const id = req.params.id;
 
-    const collection = getCollection("users");
+    const collection = getCollection();
 
     const deletedUser = await collection.deleteOne({
       _id: new ObjectId(id),

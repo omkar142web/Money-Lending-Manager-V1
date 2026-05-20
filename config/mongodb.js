@@ -1,6 +1,6 @@
 import { MongoClient } from "mongodb";
 
-const dbname = "contacts-api";
+const dbname = "balajiStore";
 const URI = "mongodb+srv://userNameOP:17102006om@cluster0.05uptec.mongodb.net/";
 
 if (!URI) {
@@ -41,7 +41,7 @@ export async function connectDB() {
 //   console.log("✅ User indexes created");
 // }
 
-export function getCollection(collectionName = "anyInformation") {
+export function getCollection(collectionName = "usersBalaji") {
   if (!actuallDB) {
     throw new Error("Database not connected. Please call connectDB() first.");
   }
