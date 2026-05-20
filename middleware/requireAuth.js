@@ -62,3 +62,28 @@ export async function requireAuth(req, res, next) {
     next(err);
   }
 }
+
+export async function redirectIfAuthenticated(req, res, next) {
+  try {
+    const userId = req.cookies[env.userCookieName];
+    const token = req.cookies[env.sessionCookieName];
+
+    if (!userId || !token) {
+      return next();
+    }
+
+    const user = await findUserById(userId);
+
+    if (!user || !verifySessionToken(user, token)) {
+      clearAuthCookies(res);
+      return next();
+    }
+
+    setAuthCookies(res, userId, token);
+    req.user = user;
+    return res.redirect("/");
+  } catch (err) {
+    clearAuthCookies(res);
+    return next();
+  }
+}

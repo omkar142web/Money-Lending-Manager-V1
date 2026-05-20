@@ -56,8 +56,10 @@
 
       /* ── HEADER ── */
       header {
+        position: relative;
         text-align: center;
         margin-bottom: 40px;
+        padding-inline: 112px;
       }
 
       header h1 {
@@ -71,6 +73,33 @@
       header p {
         color: var(--text-muted);
         font-size: 15px;
+      }
+
+      .logout-btn {
+        position: absolute;
+        top: 0;
+        right: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 38px;
+        padding: 0 14px;
+        border-radius: var(--radius-sm);
+        background: white;
+        border: 1px solid var(--border);
+        color: var(--text-muted);
+        font-size: 13px;
+        font-weight: 800;
+        text-decoration: none;
+        box-shadow: var(--shadow-sm);
+        transition: color 0.15s, border-color 0.15s, box-shadow 0.15s, transform 0.15s;
+      }
+
+      .logout-btn:hover {
+        color: var(--danger);
+        border-color: #fecaca;
+        box-shadow: var(--shadow-md);
+        transform: translateY(-1px);
       }
 
       .workflow-bar {
@@ -764,10 +793,16 @@
 
         header {
           margin-bottom: 28px;
+          padding-inline: 0;
         }
 
         header h1 {
           font-size: 22px;
+        }
+
+        .logout-btn {
+          position: static;
+          margin-top: 14px;
         }
 
         .summary-grid {
@@ -837,6 +872,7 @@
       <header>
         <h1>📱Balaji Mobile Shop Dashboard</h1>
         <p>Manage repairs, status updates, and customer payments</p>
+        <a class="logout-btn" href="/logout">Logout</a>
       </header>
 
       <section class="summary-grid" aria-label="Payment summary">
