@@ -13,8 +13,8 @@ const router = express.Router();
 
 router.get("/login", redirectIfAuthenticated, getLogin);
 router.post("/login", validate(validateLogin), postLogin);
-router.get("/register", redirectIfAuthenticated, getRegister);
-router.post("/register", validate(validateRegister), postRegister);
+// router.get("/register", redirectIfAuthenticated, getRegister);
+// router.post("/register", validate(validateRegister), postRegister);
 router.get("/logout", logoutUser);
 
 export default router;
