@@ -378,7 +378,7 @@
       ═══════════════════════════════════════════════════ */
       .workflow-bar {
         display: grid;
-        grid-template-columns: 1fr 188px;
+        grid-template-columns: 1fr 188px 220px;
         gap: 10px;
         align-items: center;
         margin-bottom: 12px;
@@ -425,7 +425,8 @@
       }
 
       /* ── Payment filter select ── */
-      .payment-filter select {
+      .payment-filter select,
+      .sort-filter select {
         width: 100%;
         height: 38px;
         background: var(--surf-1);
@@ -447,10 +448,12 @@
         background-size: 13px;
         background-color: var(--surf-1);
       }
-      .payment-filter select option {
+      .payment-filter select option,
+      .sort-filter select option {
         background: var(--surf-3);
       }
-      .payment-filter select:focus {
+      .payment-filter select:focus,
+      .sort-filter select:focus {
         outline: none;
         border-color: var(--accent);
         box-shadow: 0 0 0 3px var(--accent-dim);
@@ -1505,8 +1508,11 @@
           padding: 12px 14px;
         }
         .workflow-bar {
-          grid-template-columns: 1fr;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
           gap: 8px;
+        }
+        .search-control {
+          grid-column: 1 / -1;
         }
         .cards {
           grid-template-columns: 1fr;
@@ -1659,6 +1665,9 @@
             <option value="Partially Paid">Partially Paid</option>
             <option value="Paid">Paid</option>
           </select>
+        </div>
+        <div class="sort-filter">
+          <select id="sortSelect" aria-label="Sort repairs"></select>
         </div>
       </section>
 
@@ -1961,6 +1970,7 @@
       const paymentStatusFilter = document.getElementById(
         "paymentStatusFilter",
       );
+      const sortSelect = document.getElementById("sortSelect");
       const repairSearch = document.getElementById("repairSearch");
       const summaryRepairs = document.getElementById("summaryRepairs");
       const summaryRevenue = document.getElementById("summaryRevenue");
@@ -1981,6 +1991,7 @@
       let activeRepairStatus = "All";
       let activePaymentStatus = "All";
       let activeSearch = "";
+      let currentSort = "newest";
       let searchTimer;
       let activePaymentRepairId = null;
       let editingRepairId = null;
@@ -2043,6 +2054,105 @@
           .replace(/\s+/g, "-")}`;
       }
 
+      function safeNumber(value) {
+        const number = Number(value || 0);
+        return Number.isFinite(number) ? number : 0;
+      }
+
+      function safeTimestamp(value) {
+        const timestamp = value ? new Date(value).getTime() : 0;
+        return Number.isFinite(timestamp) ? timestamp : 0;
+      }
+
+      function repairTimestamp(repair, primaryKey, fallbackKey = "createdAt") {
+        return (
+          safeTimestamp(repair?.[primaryKey]) ||
+          safeTimestamp(repair?.[fallbackKey])
+        );
+      }
+
+      function compareTrueFirst(a, b, getValue) {
+        return Number(Boolean(getValue(b))) - Number(Boolean(getValue(a)));
+      }
+
+      const customerNameCollator = new Intl.Collator("en-IN", {
+        sensitivity: "base",
+        numeric: true,
+      });
+
+      const SORT_OPTIONS = {
+        newest: {
+          label: "Newest First",
+          compare: (a, b) =>
+            repairTimestamp(b, "createdAt") - repairTimestamp(a, "createdAt"),
+        },
+        oldest: {
+          label: "Oldest First",
+          compare: (a, b) =>
+            repairTimestamp(a, "createdAt") - repairTimestamp(b, "createdAt"),
+        },
+        pendingHigh: {
+          label: "Pending Amount High \u2192 Low",
+          compare: (a, b) =>
+            safeNumber(b?.remainingAmount) - safeNumber(a?.remainingAmount),
+        },
+        pendingLow: {
+          label: "Pending Amount Low \u2192 High",
+          compare: (a, b) =>
+            safeNumber(a?.remainingAmount) - safeNumber(b?.remainingAmount),
+        },
+        recentlyUpdated: {
+          label: "Recently Updated",
+          compare: (a, b) =>
+            repairTimestamp(b, "updatedAt") - repairTimestamp(a, "updatedAt"),
+        },
+        urgentFirst: {
+          label: "Urgent Repairs First",
+          compare: (a, b) =>
+            compareTrueFirst(a, b, (repair) => repair?.extraFlags?.urgent),
+        },
+        readyFirst: {
+          label: "Ready for Pickup First",
+          compare: (a, b) =>
+            compareTrueFirst(
+              a,
+              b,
+              (repair) => repair?.repairStatus === "Ready for Pickup",
+            ),
+        },
+        totalHigh: {
+          label: "Total Amount High \u2192 Low",
+          compare: (a, b) =>
+            safeNumber(b?.totalAmount) - safeNumber(a?.totalAmount),
+        },
+        totalLow: {
+          label: "Total Amount Low \u2192 High",
+          compare: (a, b) =>
+            safeNumber(a?.totalAmount) - safeNumber(b?.totalAmount),
+        },
+        paidHigh: {
+          label: "Paid Amount High \u2192 Low",
+          compare: (a, b) =>
+            safeNumber(b?.paidAmount) - safeNumber(a?.paidAmount),
+        },
+        customerAsc: {
+          label: "Customer Name A \u2192 Z",
+          compare: (a, b) =>
+            customerNameCollator.compare(
+              String(a?.customerName || ""),
+              String(b?.customerName || ""),
+            ),
+        },
+        customerDesc: {
+          label: "Customer Name Z \u2192 A",
+          compare: (a, b) =>
+            customerNameCollator.compare(
+              String(b?.customerName || ""),
+              String(a?.customerName || ""),
+            ),
+        },
+      };
+
       /* ── Animated counter ── */
       function animateSummaryValue(el, newText) {
         if (el.textContent === newText) return;
@@ -2088,6 +2198,41 @@
         `,
           )
           .join("");
+      }
+
+      function renderSortOptions() {
+        sortSelect.innerHTML = Object.entries(SORT_OPTIONS)
+          .map(
+            ([value, option]) =>
+              `<option value="${escapeHtml(value)}">Sort by: ${escapeHtml(option.label)}</option>`,
+          )
+          .join("");
+        sortSelect.value = SORT_OPTIONS[currentSort] ? currentSort : "newest";
+      }
+
+      function getSortedRepairs(repairs = currentRepairs) {
+        const sortOption = SORT_OPTIONS[currentSort] || SORT_OPTIONS.newest;
+        return [...repairs]
+          .map((repair, index) => ({ repair, index }))
+          .sort((a, b) => {
+            const result = sortOption.compare(a.repair, b.repair);
+            return result || a.index - b.index;
+          })
+          .map(({ repair }) => repair);
+      }
+
+      function applySorting(repairs = currentRepairs) {
+        return getSortedRepairs(repairs);
+      }
+
+      function renderRepairList(repairs = currentRepairs) {
+        cardsContainer.innerHTML = "";
+        const sortedRepairs = applySorting(repairs);
+        if (!sortedRepairs.length) {
+          renderEmptyState();
+          return;
+        }
+        sortedRepairs.forEach((repair) => renderRepairCard(repair));
       }
 
       function renderStatusOptions(currentStatus = "Pending Work") {
@@ -2241,15 +2386,11 @@
                 body: JSON.stringify({ repairStatus: statusSelect.value }),
               },
             );
-            statusSelect.dataset.previous = statusSelect.value;
-            card.dataset.repairStatus = statusSelect.value;
-            if (
-              activeRepairStatus !== "All" &&
-              updatedRepair.repairStatus !== activeRepairStatus
-            ) {
-              card.remove();
-              if (!cardsContainer.querySelector(".card")) renderEmptyState();
-            }
+            statusSelect.dataset.previous =
+              updatedRepair.repairStatus || statusSelect.value;
+            card.dataset.repairStatus =
+              updatedRepair.repairStatus || statusSelect.value;
+            applyUpdatedRepair(updatedRepair);
           } catch (err) {
             alert(err.message);
             statusSelect.value = previous;
@@ -2294,9 +2435,17 @@
         if (existingIndex >= 0)
           currentRepairs.splice(existingIndex, 0, updatedRepair);
         else currentRepairs.unshift(updatedRepair);
-        const nextCard = renderRepairCard(updatedRepair, "return");
-        if (existingCard) existingCard.replaceWith(nextCard);
-        else cardsContainer.prepend(nextCard);
+        const currentOrder = Array.from(
+          cardsContainer.querySelectorAll(".card[data-id]"),
+          (card) => card.dataset.id,
+        );
+        const sortedOrder = applySorting(currentRepairs).map((r) => r.id);
+        const shouldRerender =
+          !existingCard ||
+          currentOrder.length !== sortedOrder.length ||
+          currentOrder.some((id, index) => id !== sortedOrder[index]);
+        if (shouldRerender) renderRepairList(currentRepairs);
+        else existingCard.replaceWith(renderRepairCard(updatedRepair, "return"));
         updatePaymentSummary(currentRepairs);
       }
 
@@ -2397,7 +2546,7 @@
             renderEmptyState();
             return;
           }
-          repairs.forEach((r) => renderRepairCard(r));
+          renderRepairList(currentRepairs);
         } catch (err) {
           cardsContainer.classList.remove("is-loading");
           updatePaymentSummary([]);
@@ -2514,6 +2663,12 @@
       paymentStatusFilter.addEventListener("change", () => {
         activePaymentStatus = paymentStatusFilter.value;
         loadRepairs();
+      });
+      sortSelect.addEventListener("change", () => {
+        currentSort = SORT_OPTIONS[sortSelect.value]
+          ? sortSelect.value
+          : "newest";
+        renderRepairList(currentRepairs);
       });
       repairSearch.addEventListener("input", () => {
         clearTimeout(searchTimer);
@@ -2728,9 +2883,7 @@
           if (isEdit) {
             applyUpdatedRepair(repair);
           } else if (repairMatchesCurrentView(repair)) {
-            currentRepairs.unshift(repair);
-            renderRepairCard(repair, "prepend");
-            updatePaymentSummary(currentRepairs);
+            applyUpdatedRepair(repair);
           } else {
             loadRepairs({ showLoading: false });
           }
@@ -2748,6 +2901,7 @@
 
       /* ── Init ── */
       renderFilterTabs();
+      renderSortOptions();
       loadRepairs();
     </script>
   </body>
