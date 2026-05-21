@@ -2406,6 +2406,28 @@
       }
 
       /* ── WhatsApp ── */
+      function formatWhatsAppNumber(number) {
+        let digits = String(number || "").replace(/[+\s\-()]/g, "").replace(/\D/g, "");
+
+        while (digits.startsWith("9191") && digits.length > 12) {
+          digits = digits.slice(2);
+        }
+
+        if (digits.length === 10 && /^[6-9]\d{9}$/.test(digits)) {
+          return `91${digits}`;
+        }
+
+        if (
+          digits.length === 12 &&
+          digits.startsWith("91") &&
+          /^[6-9]\d{9}$/.test(digits.slice(2))
+        ) {
+          return digits;
+        }
+
+        return "";
+      }
+
       function sendWhatsApp(button) {
         const card = button.closest(".card");
         const customerName =
@@ -2414,7 +2436,7 @@
         const rawAmount =
           card.dataset.remainingAmount || card.dataset.totalAmount || "0";
         const status = card.querySelector(".status-select").value;
-        const phone = card.dataset.whatsapp;
+        const phone = formatWhatsAppNumber(card.dataset.whatsapp);
         const device = card.dataset.device;
         const issue = card.dataset.issue;
         const delivery = card.dataset.delivery;
@@ -2425,6 +2447,10 @@
         const paymentLink = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(shopName)}&am=${rawAmount}&cu=INR&tn=${encodeURIComponent(issue)}&tr=${transactionId}`;
         const payBtn = card.querySelector(".payment-link");
         if (payBtn) payBtn.href = paymentLink;
+        if (!phone) {
+          alert("Please enter a valid Indian WhatsApp number.");
+          return;
+        }
         const message = `*Hello ${customerName}*%0A%0A📱 Device: ${device}%0A🛠 Issue: ${issue}%0A📌 Repair Status: ${status}%0A💳 Payment Status: ${paymentStatus}%0A💰 Amount Due: ₹${rawAmount}%0A%0A💳 Pay Here:%0A${encodeURIComponent(paymentLink)}%0A%0A🚚 Delivery: ${delivery}%0A%0AThank you for choosing Balaji Mobile Shop 🙏%0A%0ARegards,%0AGovind Sathe 👩🏻‍💻`;
         window.open(`https://wa.me/${phone}?text=${message}`, "_blank");
       }
