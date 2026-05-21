@@ -1,150 +1,122 @@
-# Balaji Store
+# 🛠️ Balaji Store - Repair Management Dashboard
 
-Balaji Store is an Express + MongoDB repair dashboard for Balaji Mobile Shop. The current frontend UI in `views/index.html` is preserved, but its customer cards are now backed by MongoDB repair jobs instead of temporary client-side DOM changes.
+[![Node.js Version](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen)](https://nodejs.org/)
+[![Framework](https://img.shields.io/badge/framework-Express.js-blue)](https://expressjs.com/)
+[![Database](https://img.shields.io/badge/database-MongoDB-green)](https://www.mongodb.com/)
 
-## What This Migration Changed
+Balaji Store is a robust, full-stack repair management dashboard designed for **Balaji Mobile Shop**. It simplifies the process of tracking customer repair jobs, managing workflows, and handling payments with a streamlined, real-time interface.
 
-- Replaced ShareInfo `name/info` entries with Balaji repair jobs.
-- Split backend code into route, controller, service, middleware, config, and utility layers.
-- Added separate MongoDB collections:
-  - `usersBalaji`
-  - `repairJobs`
-- Added API endpoints for repair jobs:
-  - `GET /api/repairs`
-  - `GET /api/repairs?repairStatus=Delivered`
-  - `GET /api/repairs?paymentStatus=Paid`
-  - `GET /api/repairs?search=iphone`
-  - `POST /api/repairs`
-  - `PATCH /api/repairs/:id/payment`
-  - `PATCH /api/repairs/:id`
-  - `DELETE /api/repairs/:id`
-- Added auth middleware, validation middleware, async error handling, centralized error responses, and response helpers.
-- Added backend-based filtering for repair workflow and payment status.
-- Added dashboard search by customer name, phone, and device.
-- Split repair workflow from payment state.
-- Added payment history tracking with partial-payment updates.
-- Moved MongoDB configuration to environment variables.
-- Replaced legacy password cookies with an HTTP-only session token cookie.
+---
 
-## Repair Data Shape
+## 🚀 Key Features
 
-New repair records use separate workflow and payment fields:
+- **Repair Tracking**: Manage repair jobs from "Pending" to "Delivered" or "Cancelled".
+- **Dynamic Dashboard**: Search repairs by customer name, phone number, or device.
+- **Workflow Management**: Separate states for repair progress and payment status.
+- **Payment History**: Record partial payments, track remaining balances, and maintain a detailed payment log.
+- **Secure Authentication**: HTTP-only session tokens for secure, cookie-based authentication.
+- **Clean Architecture**: Modular codebase following Controller-Service-Repository patterns.
+- **Automated Validation**: Rigorous schema validation for all incoming API requests.
 
-```js
-{
-  customerName,
-  device,
-  issue,
-  repairStatus,
-  paymentStatus,
-  totalAmount,
-  paidAmount,
-  remainingAmount,
-  paymentHistory: [
-    {
-      amount,
-      method,
-      note,
-      createdAt
-    }
-  ],
-  whatsapp,
-  delivery,
-  extraFlags: {
-    warrantyClaim,
-    loanerDeviceGiven,
-    returned,
-    urgent
-  },
-  createdAt,
-  updatedAt
-}
+---
+
+## 🛠️ Tech Stack
+
+- **Backend**: [Node.js](https://nodejs.org/) & [Express.js](https://expressjs.com/)
+- **Database**: [MongoDB](https://www.mongodb.com/) (using native driver)
+- **Frontend**: HTML/CSS/JS (Dashboard) & [EJS](https://ejs.co/) (Auth Pages)
+- **Security**: Cookie-parser for session management, hashed passwords (implied by service), and validated inputs.
+
+---
+
+## 📂 Project Structure
+
+```text
+balaji/
+├── config/             # Configuration files (DB, Env, Workflows)
+├── controllers/        # Request handlers (logic orchestration)
+├── middleware/         # Custom Express middlewares (Auth, Validation, Errors)
+├── public/             # Static assets (CSS, client-side JS)
+├── routes/             # API and Page route definitions
+├── services/           # Business logic and database interactions
+├── utils/              # Helper functions and custom error classes
+├── views/              # UI templates (EJS and HTML)
+└── server.js           # Application entry point
 ```
 
-## Repair Workflow
+---
 
-- Pending Work
-- In Progress
-- Waiting for Parts
-- Ready for Pickup
-- Delivered
-- Cancelled
+## ⚙️ Installation & Setup
 
-## Payment Statuses
+### 1. Prerequisites
+- Node.js (v18+)
+- MongoDB Atlas account or local MongoDB instance.
 
-- Unpaid
-- Partially Paid
-- Paid
+### 2. Clone the Repository
+```bash
+git clone <repository-url>
+cd balaji
+```
 
-## Flags
+### 3. Install Dependencies
+```bash
+npm install
+```
 
-- Warranty Claim
-- Loaner Device Given
-- Returned
-- Urgent
-
-## Environment
-
-Create a local `.env` file:
+### 4. Configure Environment Variables
+Create a `.env` file in the root directory and add the following:
 
 ```env
-MONGO_URI=mongodb+srv://username:password@cluster0.example.mongodb.net/
-MONGO_DB_NAME=balajiStore
 PORT=3000
+MONGO_URI=your_mongodb_connection_string
+MONGO_DB_NAME=balajiStore
 NODE_ENV=development
 COOKIE_MAX_AGE_DAYS=30
 ```
 
-## Run
-
+### 5. Start the Application
+**Development Mode:**
 ```bash
-npm install
 npm run dev
 ```
 
-For production:
-
+**Production Mode:**
 ```bash
 npm start
 ```
 
-## Current Folder Shape
+---
 
-```txt
-config/
-  env.js
-  mongodb.js
-  repairWorkflow.js
-controllers/
-  auth.controller.js
-  page.controller.js
-  repair.controller.js
-middleware/
-  asyncHandler.js
-  errorHandler.js
-  requireAuth.js
-  validate.js
-routes/
-  auth.routes.js
-  page.routes.js
-  repair.routes.js
-services/
-  auth.service.js
-  repair.service.js
-utils/
-  ApiError.js
-  objectId.js
-  response.js
-views/
-  index.html
-  login.ejs
-  register.ejs
-```
+## 🔌 API Documentation
 
-## Future Improvements
+All API endpoints are prefixed with `/api` and require authentication.
 
-- Add edit customer/repair flow in the dashboard UI.
-- Add role-based permissions for owner, admin, and staff users.
-- Add request logging and rate limiting.
-- Add tests for auth, validation, and repair APIs.
-- Add CSRF protection if form posts expand beyond JSON API calls.
+### Repairs
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| `GET` | `/api/repairs` | List all repair jobs (supports filtering/search) |
+| `POST` | `/api/repairs` | Create a new repair job |
+| `PATCH` | `/api/repairs/:id` | Update repair details or status |
+| `PATCH` | `/api/repairs/:id/payment` | Add a payment record to a job |
+| `DELETE` | `/api/repairs/:id` | Remove a repair job |
+
+### Filtering & Search
+- `search`: Search by customer name, phone, or device.
+- `repairStatus`: Filter by `Pending Work`, `In Progress`, `Waiting for Parts`, `Ready for Pickup`, `Delivered`, `Cancelled`.
+- `paymentStatus`: Filter by `Unpaid`, `Partially Paid`, `Paid`.
+
+---
+
+## 🔐 Authentication
+
+- **Login**: `GET /login` & `POST /login`
+- **Logout**: `GET /logout`
+- **Registration**: Currently restricted (internal use only).
+
+---
+
+## 📜 License
+
+This project is licensed under the **ISC License**.
+
+Developed with ❤️ by [Omkar P](https://github.com/omkar-p)
