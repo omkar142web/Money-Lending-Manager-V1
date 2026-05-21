@@ -1806,10 +1806,8 @@
             <div class="form-group">
               <label for="delivery">Expected Delivery</label>
               <input
-                type="text"
+                type="datetime-local"
                 id="delivery"
-                placeholder="e.g. Tomorrow 6 PM"
-                autocomplete="off"
               />
             </div>
           </div>
@@ -2081,6 +2079,29 @@
           hour: "numeric",
           minute: "2-digit",
         });
+      }
+      function parseDeliveryDate(value) {
+        if (!value || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(value)) {
+          return null;
+        }
+        const parsed = new Date(value);
+        return Number.isNaN(parsed.getTime()) ? null : parsed;
+      }
+      function formatDeliveryDate(value) {
+        const parsed = parseDeliveryDate(value);
+        if (!parsed) return value ? String(value) : "Not set";
+        return parsed
+          .toLocaleString("en-IN", {
+            day: "2-digit",
+            month: "short",
+            hour: "numeric",
+            minute: "2-digit",
+            hour12: true,
+          })
+          .replace(/\b(am|pm)\b/i, (period) => period.toUpperCase());
+      }
+      function getDeliveryInputValue(value) {
+        return parseDeliveryDate(value) ? String(value).slice(0, 16) : "";
       }
       function statusClass(status) {
         return `status-${String(status || "Unpaid")
@@ -2400,7 +2421,7 @@
             <div class="info"><strong>Payment</strong><span class="payment-status ${statusClass(repair.paymentStatus)}">${escapeHtml(repair.paymentStatus || "Unpaid")}</span></div>
             <div class="info"><strong>Paid</strong><span class="info-value mono">${formatAmount(repair.paidAmount)}</span></div>
             <div class="info"><strong>Remaining</strong><span class="info-value mono">${formatAmount(repair.remainingAmount)}</span></div>
-            <div class="info"><strong>Delivery</strong><span class="info-value">${escapeHtml(repair.delivery)}</span></div>
+            <div class="info"><strong>Delivery</strong><span class="info-value">${escapeHtml(formatDeliveryDate(repair.delivery))}</span></div>
             ${renderFlagBadges(repair.extraFlags)}
           </div>
           <div class="status-box">
@@ -2532,8 +2553,7 @@
           !data.device ||
           !data.issue ||
           !data.phone ||
-          !data.totalAmount ||
-          !data.delivery
+          !data.totalAmount
         ) {
           alert("Please fill in all fields.");
           return false;
@@ -2566,7 +2586,9 @@
         document.getElementById("phone").value = repair.whatsapp || "";
         document.getElementById("totalAmount").value = repair.totalAmount || "";
         document.getElementById("paidAmount").value = repair.paidAmount || "";
-        document.getElementById("delivery").value = repair.delivery || "";
+        document.getElementById("delivery").value = getDeliveryInputValue(
+          repair.delivery,
+        );
         document.getElementById("repairStatus").value =
           repair.repairStatus || "Pending Work";
         document.getElementById("urgentFlag").checked = Boolean(
@@ -2642,7 +2664,7 @@
         const phone = formatWhatsAppNumber(card.dataset.whatsapp);
         const device = card.dataset.device;
         const issue = card.dataset.issue;
-        const delivery = card.dataset.delivery;
+        const delivery = formatDeliveryDate(card.dataset.delivery);
         const paymentStatus = card.dataset.paymentStatus;
         const upiId = "8983458781@ybl";
         const shopName = "Balaji Mobile";

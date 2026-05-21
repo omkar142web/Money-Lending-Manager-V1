@@ -103,7 +103,6 @@ export function validateRepairCreate(body) {
   if (value.paidAmount > value.totalAmount) errors.push({ field: "paidAmount", message: "Paid amount cannot be greater than total amount." });
   if (value.advanceAmount > value.paidAmount) errors.push({ field: "advanceAmount", message: "Advance amount cannot be greater than paid amount." });
   if (value.paidAmount > 0 && !paymentMethods.includes(value.initialPaymentMethod)) errors.push({ field: "initialPaymentMethod", message: "Invalid payment method." });
-  if (!value.delivery) errors.push({ field: "delivery", message: "Delivery is required." });
   if (body.repairStatus !== undefined && !repairStatuses.includes(value.repairStatus)) {
     errors.push({ field: "repairStatus", message: "Invalid repair status." });
   } else if (body.repairStatus === undefined && !allowedRepairStatuses.has(value.repairStatus)) {
