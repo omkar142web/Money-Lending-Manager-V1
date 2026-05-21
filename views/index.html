@@ -1066,7 +1066,8 @@
           var(--accent) 0%,
           var(--accent-hover) 100%
         );
-        color: #fff;
+        /* color: #fff; */
+        color: #0b1120;
         border-radius: 14px;
         display: flex;
         align-items: center;
@@ -1113,6 +1114,7 @@
       }
       .modal-overlay.is-open {
         display: flex;
+        align-items: center;
       }
 
       /* ═══════════════════════════════════════════════════
@@ -2026,6 +2028,7 @@
       let currentSort = "newest";
       let searchTimer;
       let activePaymentRepairId = null;
+      let activeHistoryRepairId = null;
       let editingRepairId = null;
 
       /* ── API ── */
@@ -2726,6 +2729,107 @@
         "closeHistoryModalBtn",
       );
       const paymentHistoryList = document.getElementById("paymentHistoryList");
+      const modalRegistry = [];
+      const MODAL_HISTORY_KEY = "__balajiModal";
+      let modalHistoryActive = false;
+
+      function registerModal(entry) {
+        modalRegistry.push(entry);
+      }
+
+      function isModalOpen(element) {
+        return Boolean(element?.classList.contains("is-open"));
+      }
+
+      function hasOpenModal() {
+        return modalRegistry.some(({ element }) => isModalOpen(element));
+      }
+
+      function getTopOpenModal() {
+        return [...modalRegistry]
+          .reverse()
+          .find(({ element }) => isModalOpen(element));
+      }
+
+      function updateModalBodyState() {
+        document.body.classList.toggle("modal-open", hasOpenModal());
+      }
+
+      function getModalHistoryPayload(state = history.state) {
+        return state && typeof state === "object"
+          ? state[MODAL_HISTORY_KEY]
+          : null;
+      }
+
+      function pushModalHistoryState(payload) {
+        if (modalHistoryActive || !payload) return;
+        const currentState =
+          history.state && typeof history.state === "object"
+            ? history.state
+            : {};
+        history.pushState(
+          { ...currentState, [MODAL_HISTORY_KEY]: payload },
+          "",
+          window.location.href,
+        );
+        modalHistoryActive = true;
+      }
+
+      function syncModalHistoryAfterClose() {
+        if (hasOpenModal() || !modalHistoryActive) return;
+        modalHistoryActive = false;
+        history.back();
+      }
+
+      function openTrackedModal(element, payload, options = {}) {
+        const syncHistory = options?.syncHistory !== false;
+        element.classList.add("is-open");
+        updateModalBodyState();
+        if (syncHistory) pushModalHistoryState(payload);
+      }
+
+      function closeTrackedModal(element, options = {}) {
+        const syncHistory = options?.syncHistory !== false;
+        element.classList.remove("is-open");
+        updateModalBodyState();
+        if (syncHistory) syncModalHistoryAfterClose();
+      }
+
+      function restoreModalFromHistory(payload) {
+        if (!payload?.id) return;
+        if (payload.id === "customer") {
+          if (payload.mode === "edit" && payload.repairId) {
+            openEditModal(payload.repairId, { syncHistory: false });
+          } else {
+            openModal({ syncHistory: false });
+          }
+        } else if (payload.id === "payment") {
+          openPaymentModal(payload.repairId, { syncHistory: false });
+        } else if (payload.id === "history") {
+          openPaymentHistoryModal(payload.repairId, { syncHistory: false });
+        }
+        modalHistoryActive = hasOpenModal();
+      }
+
+      function handleModalBackNavigation(event) {
+        const payload = getModalHistoryPayload(event.state);
+        if (payload && !hasOpenModal()) {
+          restoreModalFromHistory(payload);
+          return;
+        }
+
+        const openModalEntry = getTopOpenModal();
+        if (!openModalEntry) {
+          modalHistoryActive = Boolean(payload);
+          return;
+        }
+
+        openModalEntry.close({ syncHistory: false });
+        modalHistoryActive = false;
+
+        const remainingModal = getTopOpenModal();
+        if (remainingModal) pushModalHistoryState(remainingModal.getPayload());
+      }
 
       /* ── Event listeners ── */
       statusFilterBar.addEventListener("click", (e) => {
@@ -2772,7 +2876,7 @@
           repair.paymentStatus || "Unpaid";
       }
 
-      function openPaymentModal(repairId) {
+      function openPaymentModal(repairId, options = {}) {
         const repair = repairsById.get(repairId);
         if (!repair) return;
         activePaymentRepairId = repairId;
@@ -2780,21 +2884,24 @@
         paymentForm.reset();
         paymentMethod.value = "Cash";
         markFullyPaidBtn.disabled = Number(repair.remainingAmount || 0) <= 0;
-        paymentModalOverlay.classList.add("is-open");
-        document.body.classList.add("modal-open");
+        openTrackedModal(
+          paymentModalOverlay,
+          { id: "payment", repairId },
+          options,
+        );
         setTimeout(() => newPaymentAmount.focus(), 80);
       }
 
-      function closePaymentModal() {
-        paymentModalOverlay.classList.remove("is-open");
-        document.body.classList.remove("modal-open");
+      function closePaymentModal(options = {}) {
+        closeTrackedModal(paymentModalOverlay, options);
         activePaymentRepairId = null;
         paymentForm.reset();
       }
 
-      function openPaymentHistoryModal(repairId) {
+      function openPaymentHistoryModal(repairId, options = {}) {
         const repair = repairsById.get(repairId);
         if (!repair) return;
+        activeHistoryRepairId = repairId;
         const history = Array.isArray(repair.paymentHistory)
           ? repair.paymentHistory
           : [];
@@ -2809,13 +2916,16 @@
               )
               .join("")
           : `<div class="history-item"><div class="history-main" style="color:var(--text-3)">No recorded payments yet</div><div class="history-note">Payments added from now on will appear here.</div></div>`;
-        historyModalOverlay.classList.add("is-open");
-        document.body.classList.add("modal-open");
+        openTrackedModal(
+          historyModalOverlay,
+          { id: "history", repairId },
+          options,
+        );
       }
 
-      function closeHistoryModal() {
-        historyModalOverlay.classList.remove("is-open");
-        document.body.classList.remove("modal-open");
+      function closeHistoryModal(options = {}) {
+        closeTrackedModal(historyModalOverlay, options);
+        activeHistoryRepairId = null;
       }
 
       async function savePayment(amountOverride) {
@@ -2860,33 +2970,59 @@
       }
 
       /* ── Customer modal ── */
-      function openModal() {
+      function openModal(options = {}) {
         editingRepairId = null;
         setCustomerModalMode("create");
         form.reset();
-        overlay.classList.add("is-open");
-        document.body.classList.add("modal-open");
+        openTrackedModal(
+          overlay,
+          { id: "customer", mode: "create" },
+          options,
+        );
         setTimeout(() => document.getElementById("name").focus(), 80);
       }
 
-      function openEditModal(repairId) {
+      function openEditModal(repairId, options = {}) {
         const repair = repairsById.get(repairId);
         if (!repair) return;
         editingRepairId = repairId;
         setCustomerModalMode("edit");
         fillCustomerForm(repair);
-        overlay.classList.add("is-open");
-        document.body.classList.add("modal-open");
+        openTrackedModal(
+          overlay,
+          { id: "customer", mode: "edit", repairId },
+          options,
+        );
         setTimeout(() => document.getElementById("name").focus(), 80);
       }
 
-      function closeModal() {
-        overlay.classList.remove("is-open");
-        document.body.classList.remove("modal-open");
+      function closeModal(options = {}) {
+        closeTrackedModal(overlay, options);
         form.reset();
         editingRepairId = null;
         setCustomerModalMode("create");
       }
+
+      registerModal({
+        element: overlay,
+        close: closeModal,
+        getPayload: () => ({
+          id: "customer",
+          mode: editingRepairId ? "edit" : "create",
+          repairId: editingRepairId,
+        }),
+      });
+      registerModal({
+        element: paymentModalOverlay,
+        close: closePaymentModal,
+        getPayload: () => ({ id: "payment", repairId: activePaymentRepairId }),
+      });
+      registerModal({
+        element: historyModalOverlay,
+        close: closeHistoryModal,
+        getPayload: () => ({ id: "history", repairId: activeHistoryRepairId }),
+      });
+      window.addEventListener("popstate", handleModalBackNavigation);
 
       addBtn.addEventListener("click", openModal);
       closeBtn.addEventListener("click", closeModal);
