@@ -149,8 +149,10 @@
         background: rgba(255, 255, 255, 0.1);
         border-radius: 99px;
       }
-      ::-webkit-scrollbar-thumb:hover {
-        background: rgba(255, 255, 255, 0.18);
+      @media (hover: hover) {
+        ::-webkit-scrollbar-thumb:hover {
+          background: rgba(255, 255, 255, 0.18);
+        }
       }
 
       /* ═══════════════════════════════════════════════════
@@ -234,11 +236,13 @@
         white-space: nowrap;
         letter-spacing: 0.01em;
       }
-      .logout-btn:hover {
-        background: var(--red-dim);
-        border-color: rgba(251, 113, 133, 0.25);
-        color: var(--red);
-        transform: translateY(-1px);
+      @media (hover: hover) {
+        .logout-btn:hover {
+          background: var(--red-dim);
+          border-color: rgba(251, 113, 133, 0.25);
+          color: var(--red);
+          transform: translateY(-1px);
+        }
       }
 
       /* ═══════════════════════════════════════════════════
@@ -307,9 +311,11 @@
         pointer-events: none;
       }
 
-      .summary-item:hover {
-        border-color: var(--border-md);
-        transform: translateY(-2px);
+      @media (hover: hover) {
+        .summary-item:hover {
+          border-color: var(--border-md);
+          transform: translateY(-2px);
+        }
       }
 
       .summary-item:nth-child(1) {
@@ -493,10 +499,12 @@
         transition: all 0.15s ease;
         letter-spacing: 0.01em;
       }
-      .filter-tab:hover {
-        color: var(--text-2);
-        border-color: var(--border-md);
-        background: var(--surf-2);
+      @media (hover: hover) {
+        .filter-tab:hover {
+          color: var(--text-2);
+          border-color: var(--border-md);
+          background: var(--surf-2);
+        }
       }
       .filter-tab.active {
         background: var(--accent-dim);
@@ -552,13 +560,15 @@
         transition: opacity 0.22s;
       }
 
-      .card:hover {
-        transform: translateY(-2px);
-        box-shadow: var(--shadow-md);
-        border-color: var(--border-md);
-      }
-      .card:hover::before {
-        opacity: 1;
+      @media (hover: hover) {
+        .card:hover {
+          transform: translateY(-2px);
+          box-shadow: var(--shadow-md);
+          border-color: var(--border-md);
+        }
+        .card:hover::before {
+          opacity: 1;
+        }
       }
 
       .card[data-repair-status="Pending Work"] {
@@ -685,8 +695,10 @@
         font-size: 12.5px;
         transition: opacity 0.15s;
       }
-      .payment-link:hover {
-        opacity: 0.7;
+      @media (hover: hover) {
+        .payment-link:hover {
+          opacity: 0.7;
+        }
       }
 
       /* Payment status */
@@ -839,12 +851,14 @@
         opacity: 0;
         transition: opacity 0.16s;
       }
-      .whatsapp:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 5px 18px var(--accent-glow);
-      }
-      .whatsapp:hover::after {
-        opacity: 1;
+      @media (hover: hover) {
+        .whatsapp:hover {
+          transform: translateY(-1px);
+          box-shadow: 0 5px 18px var(--accent-glow);
+        }
+        .whatsapp:hover::after {
+          opacity: 1;
+        }
       }
       .whatsapp:active {
         transform: translateY(0);
@@ -866,20 +880,24 @@
         color: var(--blue);
         border: 1px solid rgba(129, 140, 248, 0.18);
       }
-      .edit:hover {
-        background: var(--blue);
-        color: #fff;
-        border-color: var(--blue);
+      @media (hover: hover) {
+        .edit:hover {
+          background: var(--blue);
+          color: #fff;
+          border-color: var(--blue);
+        }
       }
       .delete {
         background: var(--red-dim);
         color: var(--red);
         border: 1px solid rgba(251, 113, 133, 0.18);
       }
-      .delete:hover {
-        background: var(--red);
-        color: #fff;
-        border-color: var(--red);
+      @media (hover: hover) {
+        .delete:hover {
+          background: var(--red);
+          color: #fff;
+          border-color: var(--red);
+        }
       }
 
       .payment-action {
@@ -893,10 +911,12 @@
         font-weight: 600;
         letter-spacing: 0.01em;
       }
-      .payment-action:hover {
-        background: var(--accent-dim);
-        border-color: rgba(56, 189, 248, 0.3);
-        color: var(--accent);
+      @media (hover: hover) {
+        .payment-action:hover {
+          background: var(--accent-dim);
+          border-color: rgba(56, 189, 248, 0.3);
+          color: var(--accent);
+        }
       }
 
       .history-action {
@@ -910,10 +930,12 @@
         font-weight: 600;
         letter-spacing: 0.01em;
       }
-      .history-action:hover {
-        background: var(--surf-3);
-        border-color: var(--border-bright);
-        color: var(--text-1);
+      @media (hover: hover) {
+        .history-action:hover {
+          background: var(--surf-3);
+          border-color: var(--border-bright);
+          color: var(--text-1);
+        }
       }
 
       .footer-note {
@@ -1062,9 +1084,11 @@
           transform 0.22s var(--ease-spring),
           box-shadow 0.18s;
       }
-      .fab:hover {
-        transform: scale(1.09) rotate(90deg);
-        box-shadow: 0 10px 28px rgba(56, 189, 248, 0.4);
+      @media (hover: hover) {
+        .fab:hover {
+          transform: scale(1.09) rotate(90deg);
+          box-shadow: 0 10px 28px rgba(56, 189, 248, 0.4);
+        }
       }
       .fab:active {
         transform: scale(0.97) rotate(45deg);
@@ -1154,10 +1178,12 @@
         cursor: pointer;
         transition: all 0.14s;
       }
-      .close-modal:hover {
-        background: var(--surf-3);
-        color: var(--text-1);
-        border-color: var(--border-md);
+      @media (hover: hover) {
+        .close-modal:hover {
+          background: var(--surf-3);
+          color: var(--text-1);
+          border-color: var(--border-md);
+        }
       }
 
       /* ═══════════════════════════════════════════════════
@@ -1260,10 +1286,12 @@
         transition: all 0.13s;
         user-select: none;
       }
-      .flag-option:hover {
-        border-color: var(--border-md);
-        background: var(--surf-3);
-        color: var(--text-1);
+      @media (hover: hover) {
+        .flag-option:hover {
+          border-color: var(--border-md);
+          background: var(--surf-3);
+          color: var(--text-1);
+        }
       }
       .flag-option input {
         width: 14px !important;
@@ -1313,12 +1341,14 @@
         opacity: 0;
         transition: opacity 0.16s;
       }
-      .submit-btn:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 6px 20px var(--accent-glow);
-      }
-      .submit-btn:hover::after {
-        opacity: 1;
+      @media (hover: hover) {
+        .submit-btn:hover {
+          transform: translateY(-1px);
+          box-shadow: 0 6px 20px var(--accent-glow);
+        }
+        .submit-btn:hover::after {
+          opacity: 1;
+        }
       }
       .submit-btn:active {
         transform: translateY(0);
@@ -1380,10 +1410,12 @@
         transition: all 0.15s ease;
         letter-spacing: 0.01em;
       }
-      .secondary-btn:hover {
-        background: var(--surf-4);
-        border-color: var(--border-bright);
-        color: var(--text-1);
+      @media (hover: hover) {
+        .secondary-btn:hover {
+          background: var(--surf-4);
+          border-color: var(--border-bright);
+          color: var(--text-1);
+        }
       }
 
       /* ═══════════════════════════════════════════════════
@@ -1414,8 +1446,10 @@
         background: var(--accent);
         border-radius: 0 3px 3px 0;
       }
-      .history-item:hover {
-        border-color: var(--border-md);
+      @media (hover: hover) {
+        .history-item:hover {
+          border-color: var(--border-md);
+        }
       }
       .history-main {
         color: var(--text-1);
@@ -2462,7 +2496,8 @@
           currentOrder.length !== sortedOrder.length ||
           currentOrder.some((id, index) => id !== sortedOrder[index]);
         if (shouldRerender) renderRepairList(currentRepairs);
-        else existingCard.replaceWith(renderRepairCard(updatedRepair, "return"));
+        else
+          existingCard.replaceWith(renderRepairCard(updatedRepair, "return"));
         updatePaymentSummary(currentRepairs);
       }
 
@@ -2573,7 +2608,9 @@
 
       /* ── WhatsApp ── */
       function formatWhatsAppNumber(number) {
-        let digits = String(number || "").replace(/[+\s\-()]/g, "").replace(/\D/g, "");
+        let digits = String(number || "")
+          .replace(/[+\s\-()]/g, "")
+          .replace(/\D/g, "");
 
         while (digits.startsWith("9191") && digits.length > 12) {
           digits = digits.slice(2);
