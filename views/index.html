@@ -2054,6 +2054,17 @@
           .replace(/\s+/g, "-")}`;
       }
 
+      function confirmStatusChange(oldStatus, newStatus) {
+        return confirm(`Change status from "${oldStatus}" to "${newStatus}"?`);
+      }
+
+      function confirmDelete(customerName) {
+        const name = String(customerName || "").trim();
+        return confirm(
+          name ? `Delete repair for "${name}"?` : "Delete this repair?",
+        );
+      }
+
       function safeNumber(value) {
         const number = Number(value || 0);
         return Number.isFinite(number) ? number : 0;
@@ -2377,19 +2388,25 @@
         const statusSelect = card.querySelector(".status-select");
         statusSelect.addEventListener("change", async () => {
           const previous = statusSelect.dataset.previous;
+          const nextStatus = statusSelect.value;
+          if (previous === nextStatus) return;
+          if (!confirmStatusChange(previous, nextStatus)) {
+            statusSelect.value = previous;
+            return;
+          }
           statusSelect.disabled = true;
           try {
             const updatedRepair = await api.request(
               `/api/repairs/${repair.id}`,
               {
                 method: "PATCH",
-                body: JSON.stringify({ repairStatus: statusSelect.value }),
+                body: JSON.stringify({ repairStatus: nextStatus }),
               },
             );
             statusSelect.dataset.previous =
-              updatedRepair.repairStatus || statusSelect.value;
+              updatedRepair.repairStatus || nextStatus;
             card.dataset.repairStatus =
-              updatedRepair.repairStatus || statusSelect.value;
+              updatedRepair.repairStatus || nextStatus;
             applyUpdatedRepair(updatedRepair);
           } catch (err) {
             alert(err.message);
@@ -2609,21 +2626,20 @@
         const card = button.closest(".card");
         const repairId = card.dataset.id;
         if (!repairId) return;
-        if (confirm("Are you sure you want to delete this customer?")) {
-          button.disabled = true;
-          try {
-            await api.request(`/api/repairs/${repairId}`, { method: "DELETE" });
-            card.style.transition = "opacity .22s, transform .22s";
-            card.style.opacity = "0";
-            card.style.transform = "scale(.97)";
-            setTimeout(() => {
-              card.remove();
-              if (!cardsContainer.querySelector(".card")) renderEmptyState();
-            }, 220);
-          } catch (err) {
-            alert(err.message);
-            button.disabled = false;
-          }
+        if (!confirmDelete(card.dataset.customerName)) return;
+        button.disabled = true;
+        try {
+          await api.request(`/api/repairs/${repairId}`, { method: "DELETE" });
+          card.style.transition = "opacity .22s, transform .22s";
+          card.style.opacity = "0";
+          card.style.transform = "scale(.97)";
+          setTimeout(() => {
+            card.remove();
+            if (!cardsContainer.querySelector(".card")) renderEmptyState();
+          }, 220);
+        } catch (err) {
+          alert(err.message);
+          button.disabled = false;
         }
       }
 
