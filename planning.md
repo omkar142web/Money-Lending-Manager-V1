@@ -1,6 +1,6 @@
 # Money Lending Manager — Project Roadmap
 
-> **Version 2.1** | June 2026  
+> **Version 2.2** | June 2026  
 > **Base project:** Balaji Store (repair management dashboard)  
 > **Target:** Money Lending Management System for a private lender  
 > **Strategy:** Reuse existing architecture, UI shell, auth, middleware, and error pages — adapt domain logic instead of rebuilding from scratch.
@@ -21,7 +21,7 @@
 | :--- | :--- |
 | MVP first | Ship core lending loop before collection automation |
 | Reuse Balaji | Extend `validate.js`, `response.js`, repair payment patterns — don't introduce parallel systems |
-| One lender, one user | Phase 1 assumes a single operator; multi-user waits for Phase 3 |
+| One lender, one user | Phase 1 assumes single operator; multi-user = Phase 3 |
 | Money math is sacred | Isolate in `utils/interestCalc.js` and unit-test it |
 | No premature infra | No JWT, cron, encryption, or PDF pipelines until the phase that needs them |
 
@@ -70,12 +70,12 @@
 | Existing piece | Lending equivalent | Reuse level |
 | :--- | :--- | :--- |
 | `server.js` | App entry | Update route imports only |
-| `services/auth.service.js` | Login, sessions, password hash (scrypt) | ~95% reuse |
+| `services/auth.service.js` | Login, sessions, scrypt passwords | ~95% reuse |
 | `middleware/requireAuth.js` | Protect API routes | 100% reuse |
-| `middleware/validate.js` | Request validation | Extend with loan/customer validators |
+| `middleware/validate.js` | Request validation | Extend with new schemas |
 | `middleware/errorHandler.js` | 404/500 handling | 100% reuse |
 | `middleware/asyncHandler.js` | Async wrapper | 100% reuse |
-| `utils/response.js` | `{ success, message, data }` envelope | 100% reuse |
+| `utils/response.js` | `{ success, message, data }` | 100% reuse — do not change format |
 | `views/404.html`, `500.html`, `fserr.html` | Error pages | Rebrand text only |
 | `views/login.ejs`, `register.ejs` | Auth UI | Rebrand + minor copy |
 | `views/index.html` | Main dashboard | Heavy edit (domain + labels) |
@@ -116,7 +116,7 @@ Money_Lending_Manager/
 ├── controllers/
 │   ├── auth.controller.js
 │   ├── customer.controller.js
-│   ├── loan.controller.js          # includes payment handlers in MVP
+│   ├── loan.controller.js          # payment handlers live here in MVP
 │   ├── settings.controller.js
 │   └── page.controller.js
 ├── middleware/
@@ -162,12 +162,12 @@ Money_Lending_Manager/
 | Runtime | Node.js 18+ | Already configured |
 | Framework | Express 5 | Already configured |
 | Database | MongoDB (native driver) | Already configured |
-| Frontend | HTML/CSS/JS dashboard + EJS auth | Reuse `index.html` design system |
-| Validation | Extend `middleware/validate.js` | **Do not** add zod/joi for MVP |
-| Auth (MVP) | HTTP-only cookie sessions (scrypt passwords) | Already works — keep it |
-| Auth (Phase 3) | JWT + refresh tokens, 2FA | Only when multi-user scaling is needed |
-| Testing (Phase 1) | Jest — unit tests for `interestCalc.js` only | Integration tests in Phase 2 |
-| Logging (Phase 0) | Optional `morgan` dev logger | Structured logging (pino) deferred to Phase 3 |
+| Frontend | HTML/CSS/JS + EJS auth | Reuse `index.html` design system |
+| Validation | Extend `middleware/validate.js` | Do **not** add zod/joi for MVP |
+| Auth (MVP) | HTTP-only cookie sessions | scrypt passwords — keep as-is |
+| Auth (Phase 3) | JWT + refresh tokens, 2FA | Only when multi-user needed |
+| Testing (Phase 1) | Jest — unit tests for `interestCalc.js` | Integration tests in Phase 2 |
+| Logging (Phase 0) | Optional `morgan` dev logger | Structured logging deferred to Phase 3 |
 
 ---
 
@@ -178,17 +178,17 @@ Money_Lending_Manager/
 
 | # | Task | Details |
 | :-: | :--- | :--- |
-| 0.1 | Rename project metadata | `package.json`, server log, page titles |
-| 0.2 | Update environment | `MONGO_DB_NAME=moneyLendingManager`, `BUSINESS_NAME`, `UPI_ID` in `.env.example` |
+| 0.1 | Rename metadata | `package.json`, server log, page titles |
+| 0.2 | Update `.env.example` | `MONGO_DB_NAME=moneyLendingManager`, `BUSINESS_NAME`, `UPI_ID` |
 | 0.3 | Register collections | `customers`, `loans`, `payments`, `settings` in `mongodb.js` |
-| 0.4 | Create `loanWorkflow.js` | Statuses, interest types, payment methods, status transition rules |
+| 0.4 | Create `loanWorkflow.js` | Statuses, interest types, payment methods, transition rules (Section 17) |
 | 0.5 | Scaffold loan module | Copy repair → loan; strip device/warranty fields |
 | 0.6 | Rebrand dashboard | `index.html`: title, nav, empty states — keep CSS/layout |
 | 0.7 | Rebrand auth pages | `login.ejs`, `register.ejs` |
-| 0.8 | Wire routes | Replace `repairRoutes` with `loanRoutes`; placeholder customer/settings routes |
-| 0.9 | Settings upsert | On startup, create `app_settings` doc with defaults if missing |
+| 0.8 | Wire routes | Replace `repairRoutes` with `loanRoutes`; placeholder routes |
+| 0.9 | Settings upsert | On startup, create `app_settings` with defaults if missing |
 | 0.10 | DB indexes | Create all indexes from Section 10 |
-| 0.11 | Login rate limit | `express-rate-limit` on `POST /login` — 10 attempts/min per IP |
+| 0.11 | Login rate limit | `express-rate-limit` on `POST /login` — 10/min per IP |
 | 0.12 | Smoke test | Login, dashboard, 404/500, empty loan list API |
 
 ### Acceptance criteria
@@ -198,6 +198,7 @@ Money_Lending_Manager/
 - [ ] No "repair" or "Balaji" in user-facing UI
 - [ ] `app_settings` doc exists after first run
 - [ ] All DB indexes created
+- [ ] Login rate-limited (verify with 11 rapid attempts → blocked)
 
 ---
 
@@ -222,12 +223,23 @@ Settings  Customers  Loans   Payments  Status   Dashboard Timeline WhatsApp Repo
 | Business profile | Name, owner, phone, address |
 | Payment settings | Default UPI ID |
 | Loan defaults | Interest rate %, tenure months, late penalty % |
-| Grace period | Days after `dueDate` before status becomes `Overdue` (default: 3) |
-| Counters | `loanCounter`, `receiptCounter` for atomic numbering |
+| Grace period | Days after `dueDate` before status → `Overdue` (default: 3) |
+| Counters | `loanCounter`, `receiptCounter` — incremented atomically only |
 
 **API:** `GET /api/settings` | `PATCH /api/settings`
 
-**Implementation:** Singleton `_id: "app_settings"`. Upsert on app start (Phase 0). Loan/receipt numbers via `$inc` on counter fields.
+**Atomic numbering** (only safe pattern for unique sequential IDs):
+
+```js
+const settings = await settingsCol.findOneAndUpdate(
+  { _id: "app_settings" },
+  { $inc: { loanCounter: 1 } },
+  { returnDocument: "after" }
+);
+// Format: `${loanNumberPrefix}-${year}-${String(settings.loanCounter).padStart(3, "0")}`
+```
+
+Never set counters directly via PATCH — only `$inc` inside loan/payment creation.
 
 ---
 
@@ -237,21 +249,21 @@ Settings  Customers  Loans   Payments  Status   Dashboard Timeline WhatsApp Repo
 | :--- | :--- |
 | Create | Name + phone required; rest optional |
 | Profile | Address, city, state, pincode, occupation, income |
-| KYC | Aadhaar, PAN — **optional**; masked in UI; never return full values in list API |
-| Reference | Reference person name + phone (not a separate guarantor entity) |
+| KYC | Aadhaar + PAN optional; **masked everywhere in list API**; detail view returns masked form only (`XXXX-XXXX-1234`, `AAAAA****F`) |
+| Reference | Reference person name + phone (not a guarantor entity) |
 | Risk level | Manual: Low / Medium / High |
 | List | Paginated; search by name or phone |
 | Summary card | Active loan count + total outstanding per customer |
-| Soft delete | `isActive: false`, set `deletedAt` |
+| Soft delete | `isActive: false`, set `deletedAt` — never hard-delete |
 
 **Validation (extend `validate.js`):**
 
-```
-phone:    /^[6-9]\d{9}$/
-aadhaar:  /^\d{12}$/          (optional field)
-pan:      /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/  (optional field)
-pincode:  /^\d{6}$/
-```
+| Field | Rule | Required |
+| :--- | :--- | :---: |
+| phone | `/^[6-9]\d{9}$/` | Yes |
+| aadhaar | `/^\d{12}$/` | No |
+| pan | `/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/` | No |
+| pincode | `/^\d{6}$/` | No |
 
 **API:**
 - `GET /api/customers` — `?search=&page=&limit=&riskLevel=`
@@ -269,26 +281,25 @@ pincode:  /^\d{6}$/
 | :--- | :--- |
 | Create | Link to customer; principal required |
 | Loan number | `LN-2026-001` via atomic `$inc` on `settings.loanCounter` |
-| Interest | Simple monthly only (MVP) |
-| Dates | Tenure in months → auto-calc `dueDate`; `lentDate` set on activation |
+| Interest | Simple monthly only (MVP); see Section 16 |
+| Dates | Tenure → auto-calc `dueDate`; `lentDate` set on **activation**, not creation |
 | Purpose | Business, Medical, Education, Personal, Other |
-| Fees | Processing fee (optional); late penalty % copied from settings at creation |
-| EMI preview | Use `interestCalc.js` before save |
+| Fees | Processing fee optional; `latePenaltyPercent` and `gracePeriodDays` **copied from settings at creation** (frozen on loan — future settings changes don't affect existing loans) |
+| EMI preview | `POST /api/loans/preview` — runs `interestCalc.js`, **no DB write**; frontend shows preview before confirm |
 | Draft → Active | `POST /api/loans/:id/activate` sets `lentDate`, status `Active` |
-| Write-off / Close | Manual endpoints with required reason/note |
-| Soft delete | Only when `status === "Draft"` |
-
-**Interest (MVP)** — see Section 16 for edge cases.
+| Write-off / Close | Manual; body must include reason/note; **reject if status = Draft** |
+| Soft delete | `DELETE` only when `status === "Draft"`; return `400` otherwise |
 
 **API:**
+- `POST /api/loans/preview` — calculate EMI fields, no save
 - `GET /api/loans` — `?status=&customerId=&search=&page=&limit=`
 - `POST /api/loans`
 - `GET /api/loans/:id`
 - `PATCH /api/loans/:id`
 - `DELETE /api/loans/:id` — Draft only
 - `POST /api/loans/:id/activate`
-- `POST /api/loans/:id/write-off` — body: `{ reason }`
-- `POST /api/loans/:id/close` — body: `{ settlementNote }`
+- `POST /api/loans/:id/write-off` — body: `{ reason }`; rejects Draft → `LOAN_ACTION_NOT_ALLOWED`
+- `POST /api/loans/:id/close` — body: `{ settlementNote }`; rejects Draft → `LOAN_ACTION_NOT_ALLOWED`
 
 ---
 
@@ -296,14 +307,19 @@ pincode:  /^\d{6}$/
 
 | Feature | Details |
 | :--- | :--- |
-| Record payment | Amount, date, method, optional transaction ID |
-| Allocation | Interest first, then principal (auto); manual override allowed if sum matches |
-| Receipt number | `RCP-2026-00001` via atomic counter |
+| Record payment | Amount, date, method, optional `transactionId` (max 50 chars) |
+| Allocation | Interest first, then principal (auto) |
+| Manual override | Allowed only if `principalPaid + interestPaid === amount` exactly — validate in `validate.js` |
+| Receipt number | `RCP-2026-00001` via atomic `$inc` on `settings.receiptCounter` |
 | History | Chronological per loan |
 | Edit / delete | Allowed with confirmation; always call `recalculateLoan()` after |
-| Excess payment | If amount > `remainingAmount`, accept payment but set `excessAmount` flag for review |
+| Excess payment | If `amount > remainingAmount`: accept payment, set `excessAmount = amount - remainingAmount`; flag in UI — **never reject, never silently discard** |
+| `createdBy` | Always set from `req.session.userId` in service layer — **never accept from request body** |
 
-**Data integrity (MVP):** Insert payment → run `recalculateLoan()` → if recalculate fails, delete the payment and throw. See Section 17.
+**Data integrity (MVP):**
+1. Insert payment
+2. `recalculateLoan(loanId)` in try/catch
+3. On failure → delete inserted payment → throw `ApiError`
 
 **API:**
 - `GET /api/loans/:id/payments`
@@ -321,16 +337,15 @@ pincode:  /^\d{6}$/
 | `Active` | Disbursed, no payments yet |
 | `Partially Paid` | Payment received; `remainingAmount > 0` |
 | `Paid` | `remainingAmount === 0` |
-| `Overdue` | `today > dueDate + gracePeriodDays` and not terminal status |
+| `Overdue` | `today > dueDate + gracePeriodDays` AND not terminal status |
 | `Written Off` | Manual; requires reason |
 | `Closed` | Manual; after settlement |
 
-**Overdue detection (Phase 1):** Run inside `recalculateLoan()` and on loan list/detail queries — **no cron yet**.  
-**Phase 2:** Add `node-cron` midnight job when loan volume makes on-read checks costly.
+**Overdue (Phase 1):** Check inside `recalculateLoan()` and on list/detail handlers. No cron yet.  
+**On first flip to Overdue:** set `overdueDate` (needed for Phase 2 "X days overdue").  
+**Phase 2:** `node-cron` midnight job when loan count > ~500.
 
-**Store `overdueDate`** when status first flips to `Overdue` (needed for "X days overdue" in Phase 2).
-
-**Valid transitions:** See Section 17.
+Valid transitions: Section 17.
 
 ---
 
@@ -340,37 +355,40 @@ pincode:  /^\d{6}$/
 | :--- | :--- |
 | Total Lent | Sum `principalAmount` for Active + Partially Paid + Overdue |
 | Total Collected | Sum all payment amounts |
-| Interest Earned | Sum `interestPaid` across payments |
+| Interest Earned | Sum `interestPaid` |
 | Outstanding | Sum `remainingAmount` for open loans |
 | Overdue Amount | Sum `remainingAmount` where status = Overdue |
 | Active / Overdue counts | Count by status |
 | Today's Collection | Payments where `paymentDate = today` |
 | Profit Today | `interestPaid` where `paymentDate = today` |
-| Recent activity | Last 10 payments + loans created |
+| Recent Activity | Last 10 payments + loans created, sorted by date |
 
-**Performance:** Multiple aggregation queries are fine for MVP (< 500 loans). Optimize with `$facet` in Phase 2 if slow.
+**Performance:** Separate aggregation queries fine for MVP (< 500 loans). Single `$facet` pipeline in Phase 2 if slow.
 
 ---
 
 ### Step 7 — Transaction Timeline
 
-Embedded array on loan document. Include `createdBy` (userId) from day one.
+Embedded array on loan document (~200 events max per loan). Include `createdBy` from session on every entry.
 
 | Event | Example |
 | :--- | :--- |
 | `LOAN_CREATED` | LN-2026-003 created for ₹50,000 |
 | `LOAN_ACTIVATED` | Disbursed on [date] |
 | `PAYMENT_RECEIVED` | ₹5,000 via UPI (RCP-2026-00012) |
+| `PAYMENT_EDITED` | Payment amount updated ₹4,000 → ₹5,000 |
 | `PAYMENT_DELETED` | Payment removed; balance recalculated |
-| `STATUS_CHANGED` | Active → Overdue |
+| `STATUS_CHANGED` | Active → Overdue (grace period expired) |
 | `LOAN_WRITTEN_OFF` | Bad debt: [reason] |
 | `LOAN_CLOSED` | Fully settled |
+
+**Phase 3:** Move to separate collection if document size or cross-loan audit queries become a concern.
 
 ---
 
 ### Step 8 — WhatsApp Quick-Share + UPI
 
-Client-side only. Pull `upiId` + `businessName` from settings once (cache in JS). See Section 13.
+Client-side only. Cache `upiId` + `businessName` from `GET /api/settings` on page load. See Section 13.
 
 ---
 
@@ -382,7 +400,7 @@ Client-side only. Pull `upiId` + `businessName` from settings once (cache in JS)
 | Collections (date range) | Table + total collected |
 | Outstanding by customer | Summary table |
 
-Print-friendly HTML in MVP. CSV export in Phase 2.
+Print-friendly HTML in Phase 1. CSV export in Phase 2.
 
 ---
 
@@ -392,15 +410,15 @@ Print-friendly HTML in MVP. CSV export in Phase 2.
 | :-: | :--- | :---: |
 | 1 | Settings + grace period + atomic counters | P0 |
 | 2 | Customer CRUD + validation + pagination | P0 |
-| 3 | Loan CRUD + activate + EMI preview | P0 |
-| 4 | Payments + principal/interest split + excess flag | P0 |
-| 5 | Auto status + on-read overdue check | P0 |
+| 3 | Loan CRUD + preview endpoint + activate | P0 |
+| 4 | Payments + interest-first split + excess flag | P0 |
+| 5 | Auto status + on-read overdue + `overdueDate` | P0 |
 | 6 | Dashboard widgets | P0 |
 | 7 | `interestCalc.js` unit tests | P0 |
 | 8 | Timeline with `createdBy` | P1 |
 | 9 | WhatsApp + UPI share | P1 |
 | 10 | Basic reports (screen + print) | P1 |
-| 11 | KYC masking in UI/API | P1 |
+| 11 | KYC masking (UI + list API) | P1 |
 | 12 | Login rate limit | P0 (Phase 0) |
 | 13 | Auth + error pages | Done |
 
@@ -414,24 +432,24 @@ Print-friendly HTML in MVP. CSV export in Phase 2.
 | :-: | :--- | :--- |
 | 1 | Installment schedule | Auto-generate EMI rows; Pending/Paid/Overdue/Partial |
 | 2 | Advanced search/filters | Date range, risk level, due this week |
-| 3 | Follow-up module | Calls/visits; outcome; next date |
+| 3 | Follow-up module | Log calls/visits; outcome; next date |
 | 4 | Today's work queue | Overdue + due today + follow-ups due |
-| 5 | Overdue days counter | Display "45 days overdue" using `overdueDate` |
+| 5 | Overdue days counter | "45 days overdue" using `overdueDate` |
 | 6 | Daily overdue cron | `node-cron` midnight check |
 | 7 | PDF receipts | `pdfkit` per payment |
-| 8 | CSV export | Customers, loans, payments |
-| 9 | Manual backup | JSON dump (admin) |
+| 8 | CSV export | Customers, loans, payments (separate endpoints) |
+| 9 | Manual backup | JSON dump (admin only) |
 | 10 | Bulk WhatsApp reminders | Select overdue → batch open |
 | 11 | Defaulter report | By days overdue + outstanding |
 | 12 | Document upload | `multer` → local `uploads/` |
-| 13 | Bounce tracking | Mark payment bounced; record fee |
+| 13 | Bounce tracking | Uses `isBounced`, `bounceReason`, `bounceCharge` fields (schema ready in Phase 1) |
 | 14 | Part-prepayment | Reduce tenure or reduce EMI (lender chooses) |
 | 15 | Collateral tracking | Type, description, estimated value |
 | 16 | Loan renewal / top-up | Close old → new loan with carried balance |
 | 17 | Reducing balance interest | Second interest type |
-| 18 | KYC encryption at rest | AES-256-GCM for Aadhaar/PAN |
-| 19 | Split `payment.service.js` | Extract when loan.service.js grows |
-| 20 | Dashboard `$facet` | Single-query stats if performance needs it |
+| 18 | KYC encryption at rest | AES-256-GCM; `ENCRYPTION_KEY` in `.env` |
+| 19 | Split `payment.service.js` | Extract when `loan.service.js` grows large |
+| 20 | Dashboard `$facet` | Single-query stats if dashboard gets slow |
 | 21 | Integration tests | supertest for core API flows |
 
 **Build order:** Installments → Search → Follow-ups → Work queue → Overdue cron → PDF → Export → Documents → Bounce → Collateral → Renewal
@@ -447,11 +465,11 @@ Print-friendly HTML in MVP. CSV export in Phase 2.
 | 1 | Roles & permissions | Admin / Manager / Staff / Collection Agent |
 | 2 | User management | Create, disable, assign roles |
 | 3 | Agent assignment | Assign loans to field staff |
-| 4 | Audit logs | All changes with before/after |
+| 4 | Audit logs | All changes with before/after snapshot |
 | 5 | Advanced reports | Collection, interest revenue, loan aging, agent performance |
 | 6 | Guarantor entity | Separate from reference person |
-| 7 | Risk auto-scoring | Based on repayment history + income ratio |
-| 8 | Optimistic locking | `version` field on loans for concurrent edits |
+| 7 | Risk auto-scoring | Repayment history + income ratio |
+| 8 | Optimistic locking | `version` field on loans |
 | 9 | JWT + refresh tokens | Multi-device auth |
 | 10 | 2FA, session mgmt, password reset, lockout | Security hardening |
 | 11 | Timeline collection | Move embedded timeline to separate collection |
@@ -466,7 +484,7 @@ Print-friendly HTML in MVP. CSV export in Phase 2.
 | 2 | SMS reminders |
 | 3 | QR payment collection |
 | 4 | Customer portal (read-only borrower view) |
-| 5 | PWA for field agents |
+| 5 | PWA for field collection agents |
 | 6 | Multi-language (Hindi, Marathi) |
 | 7 | Bulk customer CSV import |
 | 8 | Tally / ledger export |
@@ -477,12 +495,12 @@ Print-friendly HTML in MVP. CSV export in Phase 2.
 
 ## 10. Database Design
 
-### Collections
+### Collections by phase
 
 ```
-users, settings, customers, loans, payments     → Phase 1
-installments, followups                         → Phase 2
-guarantors, auditlogs                           → Phase 3
+Phase 1:  users, settings, customers, loans, payments
+Phase 2:  installments, followups
+Phase 3:  guarantors, auditlogs
 ```
 
 ### `settings`
@@ -501,7 +519,7 @@ guarantors, auditlogs                           → Phase 3
   gracePeriodDays: 3,
   loanNumberPrefix: "LN",
   receiptNumberPrefix: "RCP",
-  loanCounter: 0,
+  loanCounter: 0,        // $inc only — never PATCH directly
   receiptCounter: 0,
   updatedAt
 }
@@ -516,12 +534,12 @@ guarantors, auditlogs                           → Phase 3
   phone,                   // required, unique
   alternatePhone,
   address, city, state, pincode,
-  aadhaar, pan,             // optional; masked in API responses
+  aadhaar, pan,             // optional; plain text MVP; encrypted Phase 2
   occupation, monthlyIncome,
   referencePerson, referencePhone,
   riskLevel: "Low" | "Medium" | "High",
   notes,
-  documents: [],           // populated Phase 2
+  documents: [],            // Phase 2
   isActive: true,
   deletedAt,
   createdAt, updatedAt
@@ -540,11 +558,11 @@ guarantors, auditlogs                           → Phase 3
   interestRatePeriod: "monthly",
   interestType: "simple",
   processingFee: 0,
-  latePenaltyPercent,
-  gracePeriodDays,          // copied from settings at creation
+  latePenaltyPercent,       // frozen at creation
+  gracePeriodDays,          // frozen at creation
   tenureMonths,
-  installmentAmount,
-  lastInstallmentAmount,    // absorbs EMI rounding
+  installmentAmount,        // regular EMI (rounded up)
+  lastInstallmentAmount,    // final EMI (absorbs rounding; may be < installmentAmount)
   totalInstallments,
   totalInterest,
   totalAmountToRepay,
@@ -552,9 +570,9 @@ guarantors, auditlogs                           → Phase 3
   principalPaid: 0,
   interestPaid: 0,
   remainingAmount,
-  lentDate,
+  lentDate,                 // set on activation
   dueDate,
-  overdueDate,
+  overdueDate,              // set when status first becomes Overdue
   purposeOfLoan,
   status: "Draft" | "Active" | "Partially Paid" | "Paid" | "Overdue" | "Written Off" | "Closed",
   writeOffReason, writeOffDate,
@@ -577,18 +595,57 @@ guarantors, auditlogs                           → Phase 3
   amount,
   principalPaid,
   interestPaid,
-  excessAmount: 0,
+  excessAmount: 0,          // amount beyond remainingAmount; flag for review
   paymentMethod: "Cash" | "UPI" | "Card" | "Bank Transfer",
   transactionId,
   receiptNumber,
   paymentDate,
   note,
-  isBounced: false,          // Phase 2
-  createdAt, createdBy
+  isBounced: false,         // Phase 2 feature; field present now for schema stability
+  bounceReason: "",         // Phase 2
+  bounceCharge: 0,          // Phase 2
+  createdAt,
+  createdBy                  // always from session
 }
 ```
 
-### Indexes (create in Phase 0)
+### `installments` (Phase 2)
+
+```js
+{
+  _id, loanId, installmentNo, dueDate, amount,
+  principalComponent, interestComponent,
+  paidAmount: 0, paidDate,
+  status: "Pending" | "Partially Paid" | "Paid" | "Overdue"
+}
+```
+
+### `followups` (Phase 2)
+
+```js
+{
+  _id, customerId, loanId,
+  type: "Call" | "Visit" | "WhatsApp",
+  followUpDate, remarks,
+  outcome: "Promised" | "Not Reachable" | "Paid" | "Dispute",
+  nextFollowUpDate, createdBy, createdAt
+}
+```
+
+### `auditlogs` (Phase 3)
+
+```js
+{
+  _id, userId,
+  action: "CREATE" | "UPDATE" | "DELETE",
+  module: "loan" | "payment" | "customer" | "settings",
+  recordId,
+  changes: { before, after },
+  timestamp
+}
+```
+
+### Indexes (create in Phase 0, task 0.10)
 
 ```js
 customers.createIndex({ phone: 1 }, { unique: true })
@@ -608,16 +665,16 @@ payments.createIndex({ receiptNumber: 1 }, { unique: true })
 
 ## 11. API Endpoints (Planned)
 
-### Response envelope (matches existing `utils/response.js`)
+### Response envelope (matches `utils/response.js` — do not change)
 
 ```js
 // Success
 { success: true, message: "...", data: { ... } }
 
-// List endpoints also include:
+// List
 { success: true, data: [...], pagination: { page, limit, total } }
 
-// Error (via ApiError)
+// Error (ApiError)
 { success: false, message: "...", errors: [{ field, message }] }
 ```
 
@@ -631,15 +688,32 @@ payments.createIndex({ receiptNumber: 1 }, { unique: true })
 
 ### Customers — Phase 1 Step 2
 
-`GET /api/customers` | `POST /api/customers` | `GET /api/customers/:id` | `GET /api/customers/:id/loans` | `PATCH /api/customers/:id` | `DELETE /api/customers/:id`
+| Method | Endpoint | Notes |
+| :--- | :--- | :--- |
+| GET | `/api/customers` | `?search=&page=&limit=&riskLevel=` |
+| POST | `/api/customers` | |
+| GET | `/api/customers/:id` | KYC masked |
+| GET | `/api/customers/:id/loans` | All loans for customer |
+| PATCH | `/api/customers/:id` | |
+| DELETE | `/api/customers/:id` | Soft delete |
 
 ### Loans — Phase 1 Step 3
 
-`GET /api/loans` | `POST /api/loans` | `GET /api/loans/:id` | `PATCH /api/loans/:id` | `DELETE /api/loans/:id` | `POST /api/loans/:id/activate` | `POST /api/loans/:id/write-off` | `POST /api/loans/:id/close`
+| Method | Endpoint | Notes |
+| :--- | :--- | :--- |
+| POST | `/api/loans/preview` | EMI calc only — no DB write |
+| GET | `/api/loans` | `?status=&customerId=&search=&page=&limit=` |
+| POST | `/api/loans` | Creates Draft loan |
+| GET | `/api/loans/:id` | |
+| PATCH | `/api/loans/:id` | |
+| DELETE | `/api/loans/:id` | Draft only → else `LOAN_DELETE_NOT_ALLOWED` |
+| POST | `/api/loans/:id/activate` | Draft → Active |
+| POST | `/api/loans/:id/write-off` | `{ reason }`; rejects Draft |
+| POST | `/api/loans/:id/close` | `{ settlementNote }`; rejects Draft |
 
 ### Payments — Phase 1 Step 4
 
-`GET /api/loans/:id/payments` | `POST /api/loans/:id/payments` | `PATCH /api/loans/:id/payments/:paymentId` | `DELETE /api/loans/:id/payments/:paymentId`
+`GET/POST /api/loans/:id/payments` | `PATCH/DELETE /api/loans/:id/payments/:paymentId`
 
 ### Dashboard — Phase 1 Step 6
 
@@ -647,7 +721,18 @@ payments.createIndex({ receiptNumber: 1 }, { unique: true })
 
 ### Phase 2+
 
-`GET /api/loans/:id/installments` | `GET/POST /api/followups` | `GET /api/reports/defaulters` | `GET /api/reports/collections` | `GET /api/export/:type` | `POST /api/loans/:id/payments/:paymentId/bounce`
+| Method | Endpoint |
+| :--- | :--- |
+| GET | `/api/loans/:id/installments` |
+| GET | `/api/followups` — `?date=today&status=` |
+| POST | `/api/followups` |
+| PATCH | `/api/followups/:id` |
+| GET | `/api/reports/defaulters` |
+| GET | `/api/reports/collections` — `?from=&to=` |
+| GET | `/api/export/customers` |
+| GET | `/api/export/loans` |
+| GET | `/api/export/payments` |
+| POST | `/api/loans/:id/payments/:paymentId/bounce` — `{ reason, charge }` |
 
 ---
 
@@ -657,20 +742,23 @@ payments.createIndex({ receiptNumber: 1 }, { unique: true })
 | :--- | :--- | :---: |
 | Settings singleton + upsert | Prevents first-run crash | 0 |
 | Grace period | Standard in Indian lending | 1 |
-| Atomic loan/receipt counters | No duplicate numbers | 1 |
+| Atomic loan/receipt counters | No duplicates under concurrency | 1 |
+| `POST /api/loans/preview` | Server-side EMI before save | 1 |
 | Draft → activate flow | Review before disbursing | 1 |
-| `interestCalc.js` | Money bugs cost real rupees | 1 |
-| Excess payment flag | Don't lose overpayments silently | 1 |
-| KYC masking | Privacy without encryption complexity | 1 |
-| On-read overdue check | Good enough for single-user MVP | 1 |
-| `overdueDate` field | Enables days-overdue reporting later | 1 |
-| Pagination | Performance as data grows | 1 |
-| Empty state onboarding | Guide first-time setup | 1 |
-| Document upload | Needs multer + storage — not core lending | 2 |
-| Bounce tracking | Edge case; most early payments are cash/UPI | 2 |
-| KYC encryption | Worth it once real production data exists | 2 |
-| Daily overdue cron | Needed when loan count grows | 2 |
-| Collateral, renewal, part-prepay | Operational maturity features | 2 |
+| Frozen penalty/grace on loan | Settings changes don't rewrite history | 1 |
+| `interestCalc.js` isolated | Money bugs cost real rupees | 1 |
+| Excess payment flag | Don't silently discard overpayments | 1 |
+| `createdBy` on payments/timeline | Cheap now; painful in Phase 3 | 1 |
+| Write-off/close guard on Draft | Draft was never disbursed | 1 |
+| KYC masking (not encryption) | Privacy without MVP complexity | 1 |
+| On-read overdue check | Enough for single-user MVP | 1 |
+| `overdueDate` + `lastInstallmentAmount` | Reporting + rounding correctness | 1 |
+| Pagination + empty states | UX as data grows | 1 |
+| Document upload | Not core lending math | 2 |
+| Bounce tracking | Edge case for early cash/UPI ops | 2 |
+| Daily overdue cron | When loan count grows | 2 |
+| KYC encryption | Before real production KYC data | 2 |
+| Collateral, renewal, prepay | Operational maturity | 2 |
 | Roles, audit, JWT | Multi-user accountability | 3 |
 
 ---
@@ -683,63 +771,70 @@ Client-side only for MVP.
 function formatWhatsAppNumber(number) {
   let digits = String(number || "").replace(/[+\s\-()]/g, "").replace(/\D/g, "");
   while (digits.startsWith("9191") && digits.length > 12) digits = digits.slice(2);
-  if (digits.length === 10 && /^[6-9]\d{9}$/.test(digits)) return `91${digits}`;
+  if (digits.length === 10 && /^[6-9]\d{9}$/.test(digits)) return "91" + digits;
   if (digits.length === 12 && digits.startsWith("91") && /^[6-9]\d{9}$/.test(digits.slice(2))) return digits;
   return "";
 }
 
 function sendWhatsAppReminder(customerName, amountDue, phone, loanId, upiId, businessName) {
   const txnId = "TXN" + Date.now();
-  const paymentLink = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(businessName)}&am=${amountDue}&cu=INR&tn=${encodeURIComponent("Loan " + loanId)}&tr=${txnId}`;
+  const paymentLink =
+    "upi://pay?pa=" + upiId +
+    "&pn=" + encodeURIComponent(businessName) +
+    "&am=" + amountDue + "&cu=INR" +
+    "&tn=" + encodeURIComponent("Loan " + loanId) + "&tr=" + txnId;
   const formattedPhone = formatWhatsAppNumber(phone);
   if (!formattedPhone) { alert("Invalid WhatsApp number."); return; }
-
   const message =
-    `*Hello ${customerName}*%0A%0A` +
-    `💰 *Payment Reminder*%0A` +
-    `📌 Loan: ${loanId}%0A` +
-    `💵 Amount Due: ₹${amountDue}%0A%0A` +
-    `💳 *Pay via UPI:*%0A${encodeURIComponent(paymentLink)}%0A%0A` +
-    `Thank you! 🙏`;
-
-  window.open(`https://wa.me/${formattedPhone}?text=${message}`, "_blank");
+    "*Hello " + customerName + "*%0A%0A💰 *Payment Reminder*%0A" +
+    "📌 Loan: " + loanId + "%0A💵 Amount Due: ₹" + amountDue + "%0A%0A" +
+    "💳 *Pay via UPI:*%0A" + encodeURIComponent(paymentLink) + "%0A%0AThank you! 🙏";
+  window.open("https://wa.me/" + formattedPhone + "?text=" + message, "_blank");
 }
 ```
 
-Cache settings after first `GET /api/settings` — don't fetch on every click.
+Fetch settings once on page load — do not call `/api/settings` per click.
 
 ---
 
 ## 14. Definition of Done (Per Phase)
 
 ### Phase 0
-- [ ] App runs as Money Lending Manager
+- [ ] App runs as Money Lending Manager (no Balaji/repair in UI)
 - [ ] Loan API returns empty arrays
 - [ ] Auth + error pages work
-- [ ] `app_settings` upserted; indexes created
-- [ ] Login rate-limited
+- [ ] `app_settings` upserted on start
+- [ ] All DB indexes created
+- [ ] Login rate-limited (11 rapid attempts → blocked)
 
 ### Phase 1
 - [ ] Full loop: customer → loan → activate → payment → dashboard updates
-- [ ] Loan numbers never duplicate (atomic counter)
-- [ ] Overdue flips after grace period (on-read)
-- [ ] Excess payments flagged, not silently dropped
-- [ ] `interestCalc.js` tests pass
-- [ ] WhatsApp reminder uses settings UPI ID
-- [ ] KYC masked in UI; full values not in list API
+- [ ] Loan numbers never duplicate (atomic counter verified)
+- [ ] `POST /api/loans/preview` returns correct EMI without DB write
+- [ ] `lastInstallmentAmount` differs from `installmentAmount` when rounding applies
+- [ ] Overdue flips after grace period (on-read); `overdueDate` stored on first flip
+- [ ] Excess payments accepted and flagged (`excessAmount > 0`)
+- [ ] Write-off/close reject Draft loans (`LOAN_ACTION_NOT_ALLOWED`)
+- [ ] `createdBy` populated on payments and timeline from session
+- [ ] `interestCalc.js` unit tests pass
+- [ ] WhatsApp reminder uses UPI ID from settings
+- [ ] KYC masked in UI; full Aadhaar/PAN absent from list API
+- [ ] Basic reports show correct totals
 - [ ] Responsive on mobile viewport
 
 ### Phase 2
 - [ ] Installment schedule correct for new loans
-- [ ] Follow-ups appear in today's queue
-- [ ] PDF receipt downloads
-- [ ] CSV export works
-- [ ] Documents upload locally
+- [ ] Follow-ups appear in today's work queue
+- [ ] PDF receipt downloads per payment
+- [ ] CSV export works for customers, loans, payments
+- [ ] Documents upload and list locally
+- [ ] Bounce recordable with reason and charge
 
 ### Phase 3
-- [ ] Role-based access enforced
-- [ ] Audit log captures before/after on edits
-- [ ] Reports match manual calculations
+- [ ] Role-based access enforced on all routes
+- [ ] Audit log captures before/after on all mutations
+- [ ] Advanced reports match manual calculations
+- [ ] JWT refresh flow works across browser tabs
 
 ### Phase 4
 - [ ] Scheduled reminders run without manual trigger
@@ -749,123 +844,151 @@ Cache settings after first `GET /api/settings` — don't fetch on every click.
 
 ## 15. Security Checklist (Pragmatic)
 
-**Phase 0–1 (do now):**
-- [ ] Sessions: HTTP-only cookies (already in auth flow)
-- [ ] Passwords: scrypt hashing (already implemented — do not migrate to bcrypt)
+**Phase 0–1:**
+- [ ] HTTP-only session cookies (already in auth — do not change)
+- [ ] scrypt password hashing (already implemented — do not migrate to bcrypt)
 - [ ] Login rate limit: 10/min per IP
 - [ ] `.env` in `.gitignore`; never commit `MONGO_URI`
-- [ ] Validate all POST/PATCH bodies in `validate.js`
+- [ ] Validate all POST/PATCH in `validate.js`
 - [ ] Validate ObjectId params before DB queries
-- [ ] KYC: mask in UI; omit from list API responses
-- [ ] Never log passwords or full KYC values
+- [ ] KYC masked in UI; full values omitted from list API
+- [ ] `createdBy` from session only — never from request body
+- [ ] Never log passwords or KYC values
+- [ ] Counter fields (`loanCounter`, `receiptCounter`) not writable via PATCH settings
 
-**Phase 2 (before production with real data):**
-- [ ] Encrypt Aadhaar/PAN at rest (AES-256-GCM, key in `.env`)
-- [ ] File upload: MIME check, 5MB max
+**Phase 2 (real KYC data):**
+- [ ] Encrypt Aadhaar/PAN at rest (AES-256-GCM; `ENCRYPTION_KEY` in `.env`)
+- [ ] File uploads: MIME check + 5MB max
 
 **Phase 3 (multi-user):**
-- [ ] Account lockout after 5 failed logins
-- [ ] 2FA for admin accounts
+- [ ] Account lockout after 5 failed logins; 30-min auto-unlock
+- [ ] 2FA (TOTP) for admin accounts
 - [ ] Audit logs on all mutations
 
 ---
 
 ## 16. Interest Calculation Edge Cases
 
-All math lives in `utils/interestCalc.js`.
+All math in `utils/interestCalc.js` — no inline calculations in services.
 
 ### Simple monthly (MVP)
 
 ```
 totalInterest       = principal × (rate / 100) × months
 totalRepay          = principal + totalInterest + processingFee
-regularEMI          = Math.ceil(totalRepay / months)     // round UP
-lastInstallment     = totalRepay - (regularEMI × (months - 1))
+regularEMI          = Math.ceil(totalRepay / months)           // round UP
+lastInstallment     = totalRepay - (regularEMI × (months - 1))  // may be < regularEMI
 ```
 
-**Example:** ₹50,000 @ 2%/month × 12, ₹500 fee → total ₹62,500 → EMI ₹5,209 × 11 + ₹5,201 last.
+**Example:** ₹50,000 @ 2%/month × 12, ₹500 fee  
+→ totalInterest ₹12,000 → totalRepay ₹62,500 → regularEMI ₹5,209 → lastEMI ₹5,201
 
 ### Edge cases
 
 | Case | MVP handling |
 | :--- | :--- |
-| Zero interest | `rate = 0` → EMI = principal / months |
-| Single month | `tenure = 1` → one payment = totalRepay |
-| Rounding | Absorb into **last** installment, not first |
-| Partial month | Ignore in MVP; lending date is reference only |
+| Zero interest | `rate = 0`; EMI = principal / months |
+| Single month | `tenure = 1`; one payment = totalRepay |
+| Rounding | Absorb into **last** installment only |
+| Partial month | Ignore; `lentDate` is reference only |
 | Prepayment | Phase 2: reduce tenure or EMI |
-| Late penalty | Show as separate "penalty due" line; don't auto-add to `paidAmount` |
+| Late penalty | Display-only "penalty due" line; lender records manually — **no auto-calc in MVP** |
 | Reducing balance | Phase 2 |
 
-### Payment allocation (MVP)
+### Payment allocation (interest-first)
 
 1. Outstanding interest first  
-2. Then principal  
-3. If amount > remaining → set `excessAmount`
+2. Remainder to principal  
+3. If `amount > remainingAmount` → `excessAmount = amount - remainingAmount`
 
 ---
 
 ## 17. Error Handling & Data Integrity
 
-### Payment + loan update
+### Payment + loan update (two-write problem)
 
-**MVP (no transactions):**
+**MVP:**
 1. Insert payment
-2. Run `recalculateLoan(loanId)` in try/catch
-3. On failure → delete inserted payment → throw `ApiError`
+2. `recalculateLoan(loanId)` in try/catch
+3. On failure → delete payment → throw `ApiError`
 
-**Phase 2+ (Atlas replica set):** Wrap in MongoDB `withTransaction` when available.
+**Phase 2+:** MongoDB `withTransaction()` on Atlas replica set.
+
+### Excess payment resolution (Phase 1)
+
+No automated resolution. Surface `excessAmount > 0` in UI. Lender manually:
+- Notes a refund in loan notes, or
+- Applies credit via a new payment on another loan
 
 ### Standard error codes
 
 ```
 CUSTOMER_NOT_FOUND | CUSTOMER_PHONE_DUPLICATE
 LOAN_NOT_FOUND | LOAN_INVALID_STATUS_TRANSITION | LOAN_ALREADY_PAID
+LOAN_DELETE_NOT_ALLOWED        (delete non-Draft loan)
+LOAN_ACTION_NOT_ALLOWED        (write-off/close on Draft)
 PAYMENT_NOT_FOUND
 VALIDATION_ERROR | INVALID_OBJECT_ID
 ```
 
 ### Status transitions (enforce in `loanWorkflow.js`)
 
-```
-Draft          → Active           (activate only)
-Active         → Partially Paid   (auto: partial payment)
-Active         → Paid             (auto: full payment)
-Active         → Overdue          (auto: past grace)
-Partially Paid → Paid | Overdue   (auto)
-Overdue        → Partially Paid | Paid  (auto: payment)
-Any open       → Written Off | Closed  (manual)
-Paid/Closed/Written Off → *       NEVER
-Draft          → * except Active   NEVER (can't un-disburse)
-```
+| From | To | How |
+| :--- | :--- | :--- |
+| Draft | Active | `POST /activate` only |
+| Active | Partially Paid | Auto: partial payment |
+| Active | Paid | Auto: payment clears balance |
+| Active | Overdue | Auto: past grace period |
+| Partially Paid | Paid | Auto: `remainingAmount = 0` |
+| Partially Paid | Overdue | Auto: date check |
+| Overdue | Partially Paid | Auto: payment recorded |
+| Overdue | Paid | Auto: payment clears balance |
+| Any open | Written Off | Manual; reason required |
+| Any open | Closed | Manual; settlementNote required |
+
+**Never allowed:**
+- Draft → anything except Active (delete Draft instead)
+- Write-off or close on Draft → `LOAN_ACTION_NOT_ALLOWED`
+- Paid / Closed / Written Off → any other status
 
 ---
 
 ## 18. Testing Strategy (Lean)
 
-**Phase 1 — unit tests only (`utils/interestCalc.js`):**
-- Standard simple interest
+### Phase 1 — unit tests (`utils/interestCalc.js` only)
+
+- Standard simple interest (all output fields)
 - Zero interest rate
 - Single-month loan
-- EMI rounding (last installment absorbs difference)
-- Payment allocation: interest-first
-- Payment allocation: exact remaining
-- Payment allocation: excess amount
+- EMI rounding: `lastInstallment` absorbs difference
+- `lastInstallment <= regularEMI`
+- Payment allocation: interest-first partial
+- Payment allocation: exact remaining (`excessAmount = 0`)
+- Payment allocation: overpayment (`excessAmount` correct)
 
 ```bash
 npm install --save-dev jest
-# package.json: "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
 ```
 
-Use `moneyLendingManager_test` DB for any future integration tests.
+```json
+"scripts": {
+  "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+  "test:watch": "node --experimental-vm-modules node_modules/jest/bin/jest.js --watch"
+}
+```
 
-**Phase 2 — add supertest integration tests:**
-- Customer duplicate phone → 409
-- Loan number auto-increments
-- Payment recalculates loan balance
-- Payment delete reverses balance
+Use `MONGO_DB_NAME=moneyLendingManager_test` for integration tests. Never test against production DB.
 
-**Do not block MVP launch on integration test coverage.**
+### Phase 2 — integration tests (supertest)
+
+- Duplicate phone → `409 CUSTOMER_PHONE_DUPLICATE`
+- Sequential loans → `loanNumber` increments
+- Activate → status `Active`
+- Payment → balance recalculated
+- Delete payment → balance reversed
+- Write-off on Draft → `LOAN_ACTION_NOT_ALLOWED`
+
+**Do not block Phase 1 launch on integration test coverage.**
 
 ---
 
@@ -875,11 +998,11 @@ Use `moneyLendingManager_test` DB for any future integration tests.
 NOW     → Phase 0 (rename, scaffold, indexes, rate limit, settings upsert)
 NEXT    → Phase 1 Steps 1–6 (settings → customers → loans → payments → status → dashboard)
 THEN    → Phase 1 Steps 7–9 (timeline, WhatsApp, reports)
-AFTER   → Phase 2 (installments, follow-ups, documents, exports, cron, encryption)
+AFTER   → Phase 2 (installments, follow-ups, documents, exports, cron, encryption, bounce)
 SCALE   → Phase 3 (roles, audit, JWT, advanced reports)
 LATER   → Phase 4 (automation, portal, PWA, multi-language)
 ```
 
 ---
 
-*Last updated: June 2026 | Version 2.1*
+*Last updated: June 2026 | Version 2.2*
